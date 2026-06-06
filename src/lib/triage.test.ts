@@ -51,6 +51,23 @@ describe('detectFlood', () => {
 
     expect(detectFlood(prs, 1)).toEqual([]);
   });
+
+  it('detects floods for any namespace prefix, not only greyzxc', () => {
+    const prs = Array.from({ length: 10 }, (_, i) =>
+      makePR({
+        number: i + 1,
+        title: `Auto #${200 + i}`,
+        headRefName: `cursor-agent/regression-shield-${(i + 1).toString(16).padStart(4, '0')}`,
+        authorType: 'bot',
+      })
+    );
+
+    const floods = detectFlood(prs, 10);
+
+    expect(floods).toHaveLength(1);
+    expect(floods[0].pattern).toBe('regression-shield');
+    expect(floods[0].count).toBe(10);
+  });
 });
 
 describe('categorizePRs', () => {
