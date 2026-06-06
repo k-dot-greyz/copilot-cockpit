@@ -1,0 +1,36 @@
+---
+// Copilot Cockpit — PR Triage Dashboard
+// dex_id: 0x7D:0x10 | GlitchWorks · dev-master · zenOS
+import '../styles/global.css';
+import PRDashboard from '../components/PRDashboard';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Copilot Cockpit — PR Dashboard</title>
+    <meta
+      name="description"
+      content="Interactive PR triage dashboard for dev-master. Categorize, bulk-close, and nuke bot floods."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      html { background: #0a0a0f; color-scheme: dark; }
+    </style>
+  </head>
+  <body>
+    <PRDashboard client:only="react" />
+    <noscript>
+      <div style="padding: 2rem; text-align: center; color: #e8e6f0; font-family: monospace;">
+        <h1>Copilot Cockpit requires JavaScript</h1>
+        <p>Enable JavaScript to use the PR triage dashboard.</p>
+      </div>
+    </noscript>
+  </body>
+</html>
