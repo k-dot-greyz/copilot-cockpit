@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { PR } from '../lib/github';
 import { fetchOpenPRs, bulkClosePRs, validateToken } from '../lib/github';
+import PRDetailDrawer from './PRDetailDrawer';
 import {
   categorizePRs,
   computeStats,
   detectFlood,
-  findDuplicates,
   timeAgo,
   type CategorizedPRs,
   type FloodPattern,
@@ -19,17 +19,7 @@ const TOKEN_KEY = 'cockpit-gh-token';
 
 /* ------------------------------------------------------------------ */
 /*  Sub-components                                                     */
-/**
- * Renders a modal prompting the user to enter a GitHub Personal Access Token.
- *
- * The modal displays an optional error message, an auto-focused password input,
- * and a Connect button (disabled when the input is empty). Pressing Enter while
- * the input has content or clicking Connect invokes `onSubmit` with the token.
- *
- * @param onSubmit - Callback invoked with the entered token when the user submits.
- * @param error - Optional error message to show in the modal.
- * @returns The token-entry modal JSX element.
- */
+/* ------------------------------------------------------------------ */
 
 function TokenModal({
   onSubmit,
@@ -46,7 +36,7 @@ function TokenModal({
         <p>
           Enter a Personal Access Token with <code>repo</code> scope.
           <br />
-          Stored in <code>sessionStorage</code> only — never sent anywhere except
+          Stored in <code>localStorage</code> only — never sent anywhere except
           the GitHub API.
         </p>
         {error && (
@@ -77,12 +67,6 @@ function TokenModal({
   );
 }
 
-/**
- * Render a compact stat bar showing triage metrics for the current PR set.
- *
- * @param stats - Triage metrics including `total`, `ready`, `drafts`, `byAuthorType` (`human`/`bot`), and `floodCount`.
- * @returns The stat bar element displaying Open PRs, Ready, Drafts, Human, Bot counts, and a highlighted "🚨 Flood" stat when `floodCount > 0`.
- */
 function StatBar({ stats }: { stats: TriageStats }) {
   return (
     <div className="stat-bar">
@@ -126,15 +110,6 @@ function StatBar({ stats }: { stats: TriageStats }) {
   );
 }
 
-/**
- * Render alert cards for each detected bot flood pattern and provide a per-flood "Nuke" action.
- *
- * @param floods - List of detected flood patterns to display; an empty array results in no output.
- * @param onNuke - Callback invoked with the array of PRs for a flood when the flood's "Nuke" button is clicked.
- * @param isNuking - When `true`, disables the "Nuke" buttons and updates their label to indicate an ongoing nuke operation.
- * @param nukeProgress - Optional progress object; when provided a progress bar and "Closing X / Y..." text are shown. `done` is the number completed and `total` is the total to process.
- * @returns The alert elements for the provided floods, or `null` if `floods` is empty.
- */
 function FloodAlert({
   floods,
   onNuke,
@@ -206,22 +181,16 @@ function FloodAlert({
   );
 }
 
-/**
- * Renders a pull request row with selection control, metadata, and a view link.
- *
- * @param pr - The pull request to display (number, title, url, author, authorType, isDraft, createdAt, headRefName).
- * @param selected - Whether the PR is currently selected.
- * @param onToggle - Callback invoked with the PR number when the selection checkbox is toggled.
- * @returns The JSX element for the PR card row
- */
 function PRCard({
   pr,
   selected,
   onToggle,
+  onClick,
 }: {
   pr: PR;
   selected: boolean;
   onToggle: (n: number) => void;
+  onClick: () => void;
 }) {
   const authorBadgeClass =
     pr.authorType === 'human'
@@ -239,12 +208,22 @@ function PRCard({
           onChange={() => onToggle(pr.number)}
         />
       </label>
-      <div>
-        <div className="pr-card__title">
+      <div onClick={onClick} style={{ cursor: 'pointer', flex: 1, minWidth: 0 }}>
+        <div className="pr-card__title" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
           <span className="pr-card__number">#{pr.number}</span>{' '}
-          <a href={pr.url} target="_blank" rel="noopener noreferrer">
+          <span className="pr-card__title-clickable" style={{ fontWeight: 600 }}>
             {pr.title}
-          </a>
+          </span>
+          {pr.commentCount > 0 && (
+            <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '2px' }} title="Comments">
+              💬 {pr.commentCount}
+            </span>
+          )}
+          {pr.mergeable === 'CONFLICTING' && (
+            <span className="badge badge--conflict" style={{ fontSize: '0.6rem', padding: '0.1rem 0.4rem' }}>
+              Conflict
+            </span>
+          )}
         </div>
         <div className="pr-card__meta">
           <span className={`badge ${authorBadgeClass}`}>{pr.author}</span>
@@ -255,34 +234,25 @@ function PRCard({
           <code style={{ fontSize: '0.7rem', opacity: 0.6 }}>{pr.headRefName}</code>
         </div>
       </div>
-      <div className="pr-card__actions">
+      <div className="pr-card__actions" style={{ marginLeft: '1rem' }}>
+        <button className="btn btn--sm" onClick={onClick}>
+          Inspect
+        </button>
         <a
           className="btn btn--sm"
           href={pr.url}
           target="_blank"
           rel="noopener noreferrer"
+          title="Open on GitHub ↗"
+          style={{ padding: '0.3rem 0.45rem' }}
         >
-          View
+          ↗
         </a>
       </div>
     </div>
   );
 }
 
-/**
- * Render a collapsible PR section with selection controls, metadata, and PR cards.
- *
- * Renders a header showing the section title, emoji, PR count badge, select/deselect all button, and a contextual "Close N selected" button. When the PR list is long the section starts collapsed and shows only the first 10 items with a "Show X more" button to expand. If `prs` is empty, renders `null`.
- *
- * @param category - Identifier for the PR category shown in this section.
- * @param prs - The list of pull requests to display in this section.
- * @param selectedPRs - Set of selected PR numbers used to compute per-section selection counts and card selection state.
- * @param onToggle - Called with a PR number to toggle its selection state.
- * @param onSelectAll - Toggles selection for all PRs in this section (selects or deselects the group).
- * @param onCloseSelected - Closes the currently selected PRs in this section when invoked; receives the array of selected PR numbers from this section.
- * @param isClosing - When `true`, disables action buttons to indicate a close operation is in progress.
- * @returns A React element for the PR section, or `null` when `prs` is empty.
- */
 function PRSection({
   title,
   emoji,
@@ -294,6 +264,7 @@ function PRSection({
   onSelectAll,
   onCloseSelected,
   isClosing,
+  onCardClick,
 }: {
   title: string;
   emoji: string;
@@ -303,12 +274,12 @@ function PRSection({
   selectedPRs: Set<number>;
   onToggle: (n: number) => void;
   onSelectAll: (category: PRCategory) => void;
-  onCloseSelected: (numbers: number[]) => void;
+  onCloseSelected: () => void;
   isClosing: boolean;
+  onCardClick: (pr: PR) => void;
 }) {
   const [collapsed, setCollapsed] = useState(prs.length > 20);
-  const selectedInSection = prs.filter((p) => selectedPRs.has(p.number));
-  const selectedInGroup = selectedInSection.length;
+  const selectedInGroup = prs.filter((p) => selectedPRs.has(p.number)).length;
   const displayPRs = collapsed ? prs.slice(0, 10) : prs;
 
   if (prs.length === 0) return null;
@@ -324,7 +295,7 @@ function PRSection({
           {selectedInGroup > 0 && (
             <button
               className="btn btn--danger btn--sm"
-              onClick={() => onCloseSelected(selectedInSection.map(p => p.number))}
+              onClick={onCloseSelected}
               disabled={isClosing}
             >
               Close {selectedInGroup} selected
@@ -346,6 +317,7 @@ function PRSection({
             pr={pr}
             selected={selectedPRs.has(pr.number)}
             onToggle={onToggle}
+            onClick={() => onCardClick(pr)}
           />
         ))}
       </div>
@@ -364,15 +336,7 @@ function PRSection({
 
 /* ------------------------------------------------------------------ */
 /*  Main Dashboard                                                     */
-/**
- * Dashboard UI for triaging GitHub pull requests and performing bulk actions.
- *
- * Manages authentication via a stored GitHub token, fetches and categorizes open PRs,
- * displays triage stats and flood alerts, and provides controls for selecting and
- * bulk-closing PRs (including destructive "nuke" actions for flood patterns).
- *
- * @returns The rendered PR dashboard element
- */
+/* ------------------------------------------------------------------ */
 
 export default function PRDashboard() {
   // Auth state
@@ -403,9 +367,13 @@ export default function PRDashboard() {
     total: number;
   } | null>(null);
 
+  // Upgraded States
+  const [activePR, setActivePR] = useState<PR | null>(null);
+  const [deleteBranchOnClose, setDeleteBranchOnClose] = useState(false);
+
   // Check for stored token on mount
   useEffect(() => {
-    const stored = sessionStorage.getItem(TOKEN_KEY);
+    const stored = localStorage.getItem(TOKEN_KEY);
     if (stored) {
       setToken(stored);
     } else {
@@ -422,7 +390,7 @@ export default function PRDashboard() {
       if (!username) {
         setTokenError('Invalid token — check scopes and expiry.');
         setShowTokenModal(true);
-        sessionStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(TOKEN_KEY);
         setToken(null);
         return;
       }
@@ -447,15 +415,23 @@ export default function PRDashboard() {
       setStats(computeStats(data));
       setFloods(detectFlood(data));
       setLastFetched(new Date().toLocaleTimeString());
+      
+      // Update activePR ref if it is currently open in drawer
+      if (activePR) {
+        const updated = data.find(p => p.number === activePR.number);
+        if (updated) {
+          setActivePR(updated);
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch PRs');
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [token, activePR]);
 
   const handleTokenSubmit = (t: string) => {
-    sessionStorage.setItem(TOKEN_KEY, t);
+    localStorage.setItem(TOKEN_KEY, t);
     setTokenError(undefined);
     setToken(t);
   };
@@ -483,100 +459,84 @@ export default function PRDashboard() {
     });
   };
 
-  const handleCloseSelected = async (numbers?: number[]) => {
-    const numbersToClose = numbers || [...selectedPRs];
-    if (!token || numbersToClose.length === 0) return;
+  const handleCloseSelected = async () => {
+    if (!token || selectedPRs.size === 0) return;
     const confirmed = window.confirm(
-      `Close ${numbersToClose.length} PRs and delete their branches? This cannot be undone.`
+      `Close ${selectedPRs.size} PRs${deleteBranchOnClose ? ' and delete their branches' : ''}? This cannot be undone.`
     );
     if (!confirmed) return;
 
     setIsClosing(true);
-    try {
-      const result = await bulkClosePRs(
-        OWNER,
-        REPO,
-        numbersToClose,
-        token,
-        true,
-        (done, total) => setNukeProgress({ done, total })
-      );
+    const numbers = [...selectedPRs];
+    const result = await bulkClosePRs(
+      OWNER,
+      REPO,
+      numbers,
+      token,
+      deleteBranchOnClose,
+      (done, total) => setNukeProgress({ done, total })
+    );
 
-      // Remove closed PRs from state
-      setPrs((prev) => {
-        const remaining = prev.filter((p) => !result.closed.includes(p.number));
-        setCategories(categorizePRs(remaining));
-        setStats(computeStats(remaining));
-        setFloods(detectFlood(remaining));
-        return remaining;
-      });
-      setSelectedPRs(new Set());
+    // Remove closed PRs from state
+    setPrs((prev) => prev.filter((p) => !result.closed.includes(p.number)));
+    setSelectedPRs(new Set());
+    setIsClosing(false);
+    setNukeProgress(null);
 
-      if (result.failed.length > 0) {
-        setError(`Failed to close ${result.failed.length} PRs`);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to close PRs');
-    } finally {
-      setIsClosing(false);
-      setNukeProgress(null);
+    if (result.failed.length > 0) {
+      setError(`Failed to close ${result.failed.length} PRs`);
     }
+
+    // Re-categorize
+    const remaining = prs.filter((p) => !result.closed.includes(p.number));
+    setCategories(categorizePRs(remaining));
+    setStats(computeStats(remaining));
+    setFloods(detectFlood(remaining));
   };
 
   const handleNukeFlood = async (floodPRs: PR[]) => {
     if (!token) return;
     const confirmed = window.confirm(
-      `☢ NUKE ${floodPRs.length} flood PRs and delete their branches?\n\nThis will close all duplicate bot PRs. The underlying issues remain open.\n\nThis cannot be undone.`
+      `☢ NUKE ${floodPRs.length} flood PRs${deleteBranchOnClose ? ' and delete their branches' : ''}?\n\nThis will close all duplicate bot PRs. The underlying issues remain open.\n\nThis cannot be undone.`
     );
     if (!confirmed) return;
 
     setIsClosing(true);
-    try {
-      const numbers = floodPRs.map((p) => p.number);
-      const result = await bulkClosePRs(
-        OWNER,
-        REPO,
-        numbers,
-        token,
-        true,
-        (done, total) => setNukeProgress({ done, total })
+    const numbers = floodPRs.map((p) => p.number);
+    const result = await bulkClosePRs(
+      OWNER,
+      REPO,
+      numbers,
+      token,
+      deleteBranchOnClose,
+      (done, total) => setNukeProgress({ done, total })
+    );
+
+    // Remove closed from state
+    const closedSet = new Set(result.closed);
+    const remaining = prs.filter((p) => !closedSet.has(p.number));
+    setPrs(remaining);
+    setCategories(categorizePRs(remaining));
+    setStats(computeStats(remaining));
+    setFloods(detectFlood(remaining));
+    setSelectedPRs(new Set());
+    setIsClosing(false);
+    setNukeProgress(null);
+
+    if (result.failed.length > 0) {
+      setError(
+        `Nuked ${result.closed.length} PRs. ${result.failed.length} failed.`
       );
-
-      // Remove closed from state
-      setPrs((prev) => {
-        const closedSet = new Set(result.closed);
-        const remaining = prev.filter((p) => !closedSet.has(p.number));
-        setCategories(categorizePRs(remaining));
-        setStats(computeStats(remaining));
-        setFloods(detectFlood(remaining));
-        return remaining;
-      });
-      setSelectedPRs(new Set());
-
-      if (result.failed.length > 0) {
-        setError(
-          `Nuked ${result.closed.length} PRs. ${result.failed.length} failed.`
-        );
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to nuke flood PRs');
-    } finally {
-      setIsClosing(false);
-      setNukeProgress(null);
     }
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(TOKEN_KEY);
     setToken(null);
-    setUser('');
     setPrs([]);
     setCategories(null);
     setStats(null);
     setFloods([]);
-    setSelectedPRs(new Set());
-    setError(null);
-    setLastFetched(null);
     setShowTokenModal(true);
   };
 
@@ -700,11 +660,23 @@ export default function PRDashboard() {
                 position: 'sticky',
                 top: '1rem',
                 zIndex: 10,
+                flexWrap: 'wrap',
+                gap: '1rem',
               }}
             >
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
-                {selectedPRs.size} selected
-              </span>
+              <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
+                  {selectedPRs.size} selected
+                </span>
+                <label className="checkbox-wrapper" style={{ fontSize: '0.8rem' }}>
+                  <input
+                    type="checkbox"
+                    checked={deleteBranchOnClose}
+                    onChange={(e) => setDeleteBranchOnClose(e.target.checked)}
+                  />
+                  <span>Delete associated branches on close</span>
+                </label>
+              </div>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <button
                   className="btn btn--danger"
@@ -713,7 +685,7 @@ export default function PRDashboard() {
                 >
                   {isClosing
                     ? `Closing ${nukeProgress?.done || 0}/${nukeProgress?.total || selectedPRs.size}...`
-                    : `☢ Close ${selectedPRs.size} PRs + delete branches`}
+                    : `Close Selected`}
                 </button>
                 <button
                   className="btn btn--sm"
@@ -736,6 +708,7 @@ export default function PRDashboard() {
             onSelectAll={handleSelectAll}
             onCloseSelected={handleCloseSelected}
             isClosing={isClosing}
+            onCardClick={setActivePR}
           />
 
           <PRSection
@@ -749,6 +722,7 @@ export default function PRDashboard() {
             onSelectAll={handleSelectAll}
             onCloseSelected={handleCloseSelected}
             isClosing={isClosing}
+            onCardClick={setActivePR}
           />
 
           <PRSection
@@ -762,6 +736,7 @@ export default function PRDashboard() {
             onSelectAll={handleSelectAll}
             onCloseSelected={handleCloseSelected}
             isClosing={isClosing}
+            onCardClick={setActivePR}
           />
 
           <PRSection
@@ -775,6 +750,7 @@ export default function PRDashboard() {
             onSelectAll={handleSelectAll}
             onCloseSelected={handleCloseSelected}
             isClosing={isClosing}
+            onCardClick={setActivePR}
           />
 
           <PRSection
@@ -788,6 +764,7 @@ export default function PRDashboard() {
             onSelectAll={handleSelectAll}
             onCloseSelected={handleCloseSelected}
             isClosing={isClosing}
+            onCardClick={setActivePR}
           />
 
           <PRSection
@@ -801,6 +778,7 @@ export default function PRDashboard() {
             onSelectAll={handleSelectAll}
             onCloseSelected={handleCloseSelected}
             isClosing={isClosing}
+            onCardClick={setActivePR}
           />
         </>
       )}
@@ -813,6 +791,18 @@ export default function PRDashboard() {
             Refresh
           </button>
         </div>
+      )}
+
+      {/* Detail Drawer */}
+      {activePR && (
+        <PRDetailDrawer
+          pr={activePR}
+          token={token}
+          owner={OWNER}
+          repo={REPO}
+          onClose={() => setActivePR(null)}
+          onUpdate={loadPRs}
+        />
       )}
 
       {/* Footer */}

@@ -606,3 +606,177 @@ code {
   .pr-card__actions { grid-column: 1 / -1; }
   .header { flex-direction: column; gap: var(--space-md); align-items: flex-start; }
 }
+
+/* -- PR Detail Drawer & Timeline Upgrades -- */
+
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 90;
+  animation: fadeIn 200ms var(--ease-out);
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 650px;
+  max-width: 90vw;
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border-subtle);
+  box-shadow: -8px 0 40px rgba(0, 0, 0, 0.6);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  animation: slideInRight 300ms var(--ease-out);
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.drawer-header {
+  padding: var(--space-lg);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+}
+
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.drawer-footer {
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* State Badges */
+.badge--conflict {
+  background: var(--accent-red-dim);
+  color: var(--accent-red);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+}
+
+.badge--mergeable {
+  background: var(--accent-green-dim);
+  color: var(--accent-green);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+}
+
+/* Bot Actions Panel */
+.bot-actions-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  background: var(--bg-glass);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+}
+
+.bot-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}
+
+.comment-input-area {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+}
+
+/* Timeline Comments */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.timeline-item {
+  display: flex;
+  gap: var(--space-md);
+  align-items: flex-start;
+}
+
+.timeline-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border-subtle);
+}
+
+.timeline-content-wrapper {
+  flex: 1;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  font-size: 0.85rem;
+}
+
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-xs);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.timeline-author {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.timeline-body {
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text-primary);
+}
+
+/* Review States on timeline */
+.timeline-item--review .timeline-content-wrapper {
+  border-left: 3px solid var(--accent-purple);
+  background: rgba(167, 139, 250, 0.04);
+}
+
+.timeline-item--review-comment .timeline-content-wrapper {
+  border-left: 3px solid var(--accent-cyan);
+  background: rgba(34, 211, 238, 0.04);
+}
+
+.timeline-filepath {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--accent-cyan);
+  margin-bottom: var(--space-xs);
+  background: rgba(34, 211, 238, 0.08);
+  padding: 0.2rem 0.4rem;
+  border-radius: var(--radius-sm);
+}
+
+.pr-card__title-clickable {
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.pr-card__title-clickable:hover {
+  color: var(--accent-purple);
+}
+

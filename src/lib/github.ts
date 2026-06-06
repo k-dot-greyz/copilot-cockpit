@@ -13,30 +13,25 @@ export interface PR {
   reviewDecision: string | null;
   labels: string[];
   url: string;
+  mergeable: 'MERGEABLE' | 'CONFLICTING' | 'UNKNOWN';
+  commentCount: number;
 }
 
-export interface PRApiResponse {
-  number: number;
-  title: string;
-  user: { login: string; type: string };
-  created_at: string;
-  updated_at: string;
-  head: { ref: string };
-  draft: boolean;
-  requested_reviewers: unknown[];
-  labels: { name: string }[];
-  html_url: string;
+export interface TimelineItem {
+  id: string;
+  type: 'comment' | 'review' | 'review-comment';
+  author: string;
+  authorAvatarUrl: string;
+  body: string;
+  createdAt: string;
+  reviewState?: string; // e.g. APPROVED, CHANGES_REQUESTED
+  filePath?: string;    // for line review comments
+  lineNumber?: number;  // for line review comments
 }
 
 const API_BASE = 'https://api.github.com';
 const PER_PAGE = 100;
 
-/**
- * Builds HTTP headers required for GitHub REST API requests using the provided token.
- *
- * @param token - A GitHub authentication token (personal access token, OAuth token, or GitHub App installation token)
- * @returns An object suitable for fetch/HTTP clients containing `Authorization`, `Accept`, and `X-GitHub-Api-Version` headers
- */
 function getHeaders(token: string): HeadersInit {
   return {
     Authorization: `Bearer ${token}`,
@@ -45,16 +40,10 @@ function getHeaders(token: string): HeadersInit {
   };
 }
 
-/**
- * Classifies a GitHub account login and account type as 'bot', 'human', or 'external'.
- *
- * @returns `'bot'` if the account is identified as a bot, `'human'` if the login matches the internal allowlist, `'external'` otherwise.
- */
-function classifyAuthor(login: string, type: string): PR['authorType'] {
-  if (type === 'Bot' || login.startsWith('app/') || login.includes('[bot]')) {
+function classifyAuthor(login: string, typename: string): PR['authorType'] {
+  if (typename === 'Bot' || login.startsWith('app/') || login.includes('[bot]')) {
     return 'bot';
   }
-  // Add your own username(s) here
   const knownHumans = ['k-dot-greyz', 'kasparsgreizis'];
   if (knownHumans.includes(login)) {
     return 'human';
@@ -62,36 +51,45 @@ function classifyAuthor(login: string, type: string): PR['authorType'] {
   return 'external';
 }
 
-/**
- * Converts a GitHub REST pull request response into the normalized `PR` shape.
- *
- * @param raw - The raw pull request object returned by the GitHub REST API
- * @returns A `PR` object with selected fields mapped from `raw`; `reviewDecision` is set to `null` because the REST response does not provide it
- */
-function mapPR(raw: PRApiResponse): PR {
-  return {
-    number: raw.number,
-    title: raw.title,
-    author: raw.user.login,
-    authorType: classifyAuthor(raw.user.login, raw.user.type),
-    createdAt: raw.created_at,
-    updatedAt: raw.updated_at,
-    headRefName: raw.head.ref,
-    isDraft: raw.draft,
-    reviewDecision: null, // REST API doesn't return this directly
-    labels: raw.labels.map((l) => l.name),
-    url: raw.html_url,
-  };
-}
+const prsQuery = `
+  query($owner: String!, $name: String!, $cursor: String) {
+    repository(owner: $owner, name: $name) {
+      pullRequests(states: OPEN, first: 100, after: $cursor) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        nodes {
+          number
+          title
+          isDraft
+          permalink
+          createdAt
+          updatedAt
+          headRefName
+          author {
+            login
+            __typename
+          }
+          mergeable
+          reviewDecision
+          labels(first: 10) {
+            nodes {
+              name
+            }
+          }
+          comments {
+            totalCount
+          }
+        }
+      }
+    }
+  }
+`;
 
 /**
- * Fetches all open pull requests for the given repository using paginated requests.
- *
- * Calls `onProgress` after each fetched page with the number of loaded PRs and an estimated total.
- *
- * @param onProgress - Optional callback invoked as `(loaded, estimatedTotal)` after each page is fetched
- * @returns An array of normalized `PR` objects for all open pull requests
- * @throws Error if the GitHub API responds with a non-OK status; the error message includes the HTTP status and response body
+ * Fetch all open PRs using GraphQL (includes merge conflict state).
  */
 export async function fetchOpenPRs(
   owner: string,
@@ -100,36 +98,67 @@ export async function fetchOpenPRs(
   onProgress?: (loaded: number, estimatedTotal: number) => void
 ): Promise<PR[]> {
   const allPRs: PR[] = [];
-  let page = 1;
-  let hasMore = true;
+  let cursor: string | null = null;
+  let hasNextPage = true;
 
-  while (hasMore) {
-    const url = `${API_BASE}/repos/${owner}/${repo}/pulls?state=open&per_page=${PER_PAGE}&page=${page}`;
-    const res = await fetch(url, { headers: getHeaders(token) });
+  while (hasNextPage) {
+    const res = await fetch('https://api.github.com/graphql', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: prsQuery,
+        variables: { owner, name: repo, cursor },
+      }),
+    });
 
     if (!res.ok) {
       const body = await res.text();
-      throw new Error(`GitHub API error ${res.status}: ${body}`);
+      throw new Error(`GitHub GraphQL error ${res.status}: ${body}`);
     }
 
-    const data: PRApiResponse[] = await res.json();
-    const mapped = data.map(mapPR);
-    allPRs.push(...mapped);
+    const responseData = await res.json();
+    if (responseData.errors) {
+      throw new Error(`GitHub GraphQL error: ${JSON.stringify(responseData.errors)}`);
+    }
 
-    // Parse Link header for total pages
-    const linkHeader = res.headers.get('Link') || '';
-    const lastMatch = linkHeader.match(/page=(\d+)>; rel="last"/);
-    const estimatedTotal = lastMatch
-      ? parseInt(lastMatch[1]) * PER_PAGE
-      : allPRs.length;
+    const repoData = responseData.data?.repository;
+    if (!repoData) {
+      throw new Error(`Repository ${owner}/${repo} not found or inaccessible.`);
+    }
 
-    onProgress?.(allPRs.length, estimatedTotal);
+    const prConnection = repoData.pullRequests;
+    const nodes = prConnection.nodes || [];
+    
+    for (const raw of nodes) {
+      const authorLogin = raw.author?.login || 'ghost';
+      const authorType = classifyAuthor(authorLogin, raw.author?.__typename || 'User');
+      
+      allPRs.push({
+        number: raw.number,
+        title: raw.title,
+        author: authorLogin,
+        authorType,
+        createdAt: raw.createdAt,
+        updatedAt: raw.updatedAt,
+        headRefName: raw.headRefName,
+        isDraft: raw.isDraft,
+        reviewDecision: raw.reviewDecision,
+        labels: raw.labels.nodes.map((l: any) => l.name),
+        url: raw.permalink,
+        mergeable: raw.mergeable || 'UNKNOWN',
+        commentCount: raw.comments?.totalCount || 0,
+      });
+    }
 
-    hasMore = data.length === PER_PAGE;
-    page++;
+    hasNextPage = prConnection.pageInfo.hasNextPage;
+    cursor = prConnection.pageInfo.endCursor;
 
-    // Respect rate limits — small delay between pages
-    if (hasMore) {
+    onProgress?.(allPRs.length, prConnection.totalCount || allPRs.length);
+
+    if (hasNextPage) {
       await new Promise((r) => setTimeout(r, 100));
     }
   }
@@ -137,15 +166,143 @@ export async function fetchOpenPRs(
   return allPRs;
 }
 
+const timelineQuery = `
+  query($owner: String!, $name: String!, $number: Int!) {
+    repository(owner: $owner, name: $name) {
+      pullRequest(number: $number) {
+        comments(first: 100) {
+          nodes {
+            id
+            author {
+              login
+              avatarUrl
+            }
+            body
+            createdAt
+          }
+        }
+        reviews(first: 50) {
+          nodes {
+            id
+            author {
+              login
+              avatarUrl
+            }
+            state
+            body
+            createdAt
+            comments(first: 50) {
+              nodes {
+                id
+                author {
+                  login
+                  avatarUrl
+                }
+                body
+                createdAt
+                path
+                line
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
 /**
- * Close a pull request and optionally remove its head branch.
- *
- * @param owner - Repository owner
- * @param repo - Repository name
- * @param number - Pull request number
- * @param token - GitHub API token used for authorization
- * @param deleteBranch - If `true`, attempts to delete the PR's head branch; branch deletion is best-effort and any deletion errors are ignored
- * @throws Error if the request to close the pull request fails; the error message includes the HTTP status and response body
+ * Fetch detailed timeline (comments and reviews) for a single PR.
+ */
+export async function fetchPRTimeline(
+  owner: string,
+  repo: string,
+  number: number,
+  token: string
+): Promise<TimelineItem[]> {
+  const res = await fetch('https://api.github.com/graphql', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: timelineQuery,
+      variables: { owner, name: repo, number },
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`GitHub GraphQL error ${res.status}: ${body}`);
+  }
+
+  const responseData = await res.json();
+  if (responseData.errors) {
+    throw new Error(`GitHub GraphQL error: ${JSON.stringify(responseData.errors)}`);
+  }
+
+  const pr = responseData.data?.repository?.pullRequest;
+  if (!pr) {
+    throw new Error(`Pull Request #${number} not found.`);
+  }
+
+  const items: TimelineItem[] = [];
+
+  // 1. General issue comments
+  if (pr.comments?.nodes) {
+    for (const c of pr.comments.nodes) {
+      items.push({
+        id: c.id,
+        type: 'comment',
+        author: c.author?.login || 'ghost',
+        authorAvatarUrl: c.author?.avatarUrl || '',
+        body: c.body,
+        createdAt: c.createdAt,
+      });
+    }
+  }
+
+  // 2. Reviews and line comments
+  if (pr.reviews?.nodes) {
+    for (const r of pr.reviews.nodes) {
+      // General review comment (only if body is not empty)
+      if (r.body && r.body.trim() !== '') {
+        items.push({
+          id: r.id,
+          type: 'review',
+          author: r.author?.login || 'ghost',
+          authorAvatarUrl: r.author?.avatarUrl || '',
+          body: r.body,
+          createdAt: r.createdAt,
+          reviewState: r.state,
+        });
+      }
+
+      // Line comments inside review
+      if (r.comments?.nodes) {
+        for (const lc of r.comments.nodes) {
+          items.push({
+            id: lc.id,
+            type: 'review-comment',
+            author: lc.author?.login || 'ghost',
+            authorAvatarUrl: lc.author?.avatarUrl || '',
+            body: lc.body,
+            createdAt: lc.createdAt,
+            filePath: lc.path,
+            lineNumber: lc.line,
+          });
+        }
+      }
+    }
+  }
+
+  // Sort chronologically
+  return items.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+}
+
+/**
+ * Close a single PR. Optionally delete its branch.
  */
 export async function closePR(
   owner: string,
@@ -154,7 +311,6 @@ export async function closePR(
   token: string,
   deleteBranch = false
 ): Promise<void> {
-  // Close the PR
   const closeUrl = `${API_BASE}/repos/${owner}/${repo}/pulls/${number}`;
   const closeRes = await fetch(closeUrl, {
     method: 'PATCH',
@@ -167,13 +323,11 @@ export async function closePR(
     throw new Error(`Failed to close PR #${number}: ${closeRes.status} ${body}`);
   }
 
-  // Delete branch if requested
   if (deleteBranch) {
     const prData = await closeRes.json();
     const branchRef = prData.head?.ref;
     if (branchRef) {
       const delUrl = `${API_BASE}/repos/${owner}/${repo}/git/refs/heads/${encodeURIComponent(branchRef)}`;
-      // Best-effort — branch may already be deleted or protected
       await fetch(delUrl, {
         method: 'DELETE',
         headers: getHeaders(token),
@@ -183,15 +337,7 @@ export async function closePR(
 }
 
 /**
- * Closes multiple pull requests sequentially, optionally deleting their head branches, with simple rate limiting and progress notifications.
- *
- * @param owner - Repository owner or organization
- * @param repo - Repository name
- * @param numbers - Array of pull request numbers to close, processed in order
- * @param token - GitHub API token used for authentication
- * @param deleteBranch - If `true`, attempt to delete each PR's head branch after closing (best-effort)
- * @param onProgress - Optional callback invoked after each attempt with `(completed, total, current)` where `completed` is the number of processed PRs, `total` is `numbers.length`, and `current` is the PR number just processed
- * @returns An object with `closed`, the list of PR numbers successfully closed, and `failed`, an array of `{ number, error }` entries for PRs that failed to close
+ * Bulk-close PRs with progress callback.
  */
 export async function bulkClosePRs(
   owner: string,
@@ -201,8 +347,6 @@ export async function bulkClosePRs(
   deleteBranch = false,
   onProgress?: (completed: number, total: number, current: number) => void
 ): Promise<{ closed: number[]; failed: { number: number; error: string }[] }> {
-  const DESIRED_REQUESTS_PER_MINUTE = 30;
-  const BASE_INTERVAL_MS = Math.ceil(60000 / DESIRED_REQUESTS_PER_MINUTE);
   const closed: number[] = [];
   const failed: { number: number; error: string }[] = [];
 
@@ -219,10 +363,8 @@ export async function bulkClosePRs(
     }
     onProgress?.(i + 1, numbers.length, num);
 
-    // Rate limit: computed per-iteration delay
     if (i < numbers.length - 1) {
-      const perIterationDelayMs = BASE_INTERVAL_MS * (deleteBranch ? 2 : 1);
-      await new Promise((r) => setTimeout(r, perIterationDelayMs));
+      await new Promise((r) => setTimeout(r, 250));
     }
   }
 
@@ -230,9 +372,51 @@ export async function bulkClosePRs(
 }
 
 /**
- * Check whether a GitHub token is valid and return the associated username.
- *
- * @returns The authenticated user's login name, or `null` if the token is invalid or the request fails.
+ * Add a label to an issue/PR (used for invoking Jules).
+ */
+export async function addIssueLabel(
+  owner: string,
+  repo: string,
+  number: number,
+  label: string,
+  token: string
+): Promise<void> {
+  const url = `${API_BASE}/repos/${owner}/${repo}/issues/${number}/labels`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: getHeaders(token),
+    body: JSON.stringify({ labels: [label] }),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Failed to add label: ${res.status} ${body}`);
+  }
+}
+
+/**
+ * Add a comment to an issue/PR (used for invoking Cursor).
+ */
+export async function createIssueComment(
+  owner: string,
+  repo: string,
+  number: number,
+  body: string,
+  token: string
+): Promise<void> {
+  const url = `${API_BASE}/repos/${owner}/${repo}/issues/${number}/comments`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: getHeaders(token),
+    body: JSON.stringify({ body }),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Failed to create comment: ${res.status} ${body}`);
+  }
+}
+
+/**
+ * Validate a GitHub token.
  */
 export async function validateToken(token: string): Promise<string | null> {
   try {
