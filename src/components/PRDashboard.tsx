@@ -5,7 +5,6 @@ import {
   categorizePRs,
   computeStats,
   detectFlood,
-  findDuplicates,
   timeAgo,
   type CategorizedPRs,
   type FloodPattern,
@@ -500,8 +499,12 @@ export default function PRDashboard() {
       (done, total) => setNukeProgress({ done, total })
     );
 
-    // Remove closed PRs from state
-    setPrs((prev) => prev.filter((p) => !result.closed.includes(p.number)));
+    const closedSet = new Set(result.closed);
+    const remaining = prs.filter((p) => !closedSet.has(p.number));
+    setPrs(remaining);
+    setCategories(categorizePRs(remaining));
+    setStats(computeStats(remaining));
+    setFloods(detectFlood(remaining));
     setSelectedPRs(new Set());
     setIsClosing(false);
     setNukeProgress(null);
@@ -509,12 +512,6 @@ export default function PRDashboard() {
     if (result.failed.length > 0) {
       setError(`Failed to close ${result.failed.length} PRs`);
     }
-
-    // Re-categorize
-    const remaining = prs.filter((p) => !result.closed.includes(p.number));
-    setCategories(categorizePRs(remaining));
-    setStats(computeStats(remaining));
-    setFloods(detectFlood(remaining));
   };
 
   const handleNukeFlood = async (floodPRs: PR[]) => {
@@ -606,7 +603,7 @@ export default function PRDashboard() {
           <button
             className="btn btn--sm"
             onClick={loadPRs}
-            disabled={loading}
+            disabled={loading || isClosing}
             title="Refresh (R)"
           >
             {loading ? '⟳' : '↻'} Refresh
