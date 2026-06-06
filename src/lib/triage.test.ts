@@ -4,6 +4,7 @@ import {
   computeStats,
   detectFlood,
   extractIssueRefs,
+  duplicateExtras,
   findDuplicates,
   timeAgo,
 } from './triage';
@@ -170,6 +171,22 @@ describe('findDuplicates', () => {
         ]),
       },
     ]);
+  });
+});
+
+describe('duplicateExtras', () => {
+  it('keeps the newest PR and returns older duplicates', () => {
+    const group = {
+      title: 'Duplicate title',
+      count: 3,
+      prs: [
+        makePR({ number: 1, createdAt: '2026-01-01T00:00:00Z' }),
+        makePR({ number: 2, createdAt: '2026-03-01T00:00:00Z' }),
+        makePR({ number: 3, createdAt: '2026-02-01T00:00:00Z' }),
+      ],
+    };
+
+    expect(duplicateExtras(group).map((p) => p.number)).toEqual([3, 1]);
   });
 });
 

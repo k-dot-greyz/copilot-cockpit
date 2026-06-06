@@ -13,7 +13,8 @@
 | 3 | — (automatic) | Paginated fetch of open PRs from `k-dot-greyz/dev-master` with progress bar |
 | 4 | Scan stat bar | Total · Ready · Drafts · Human · Bot · 🚨 Flood (if any) |
 | 5a | **Flood path:** click **☢ Nuke N PRs** on flood alert | Confirm dialog → sequential close + branch delete → progress bar → flood section clears |
-| 5b | **Human path:** review **🔥 Your PRs — Ready for Review** | PR cards with author badge, draft/ready, relative time, **View** link |
+| 5b | **Duplicate path:** review **🔁 Duplicate Title** alert | Select extras or **Close N extras** → keeps newest PR per title group |
+| 5c | **Human path:** review **🔥 Your PRs — Ready for Review** | PR cards with author badge, draft/ready, relative time, **View** link |
 | 6 | Optional: checkbox-select PRs → **Close N selected** | Confirm → bulk close with progress; partial failures surface in error banner |
 | 7 | Press **R** or click **↻ Refresh** | Re-fetch; empty repo shows **No open PRs found. 🎉** |
 
@@ -34,7 +35,7 @@
 - [x] One-click flood nuke with confirm + progress
 - [x] Bulk close selected with partial-failure reporting
 - [x] Keyboard `R` refresh (skipped when focused in input or during close)
-- [ ] Surface `findDuplicates` in UI (tested, not wired yet)
+- [x] Surface `findDuplicates` in UI — amber duplicate-title alerts with select/close extras
 - [ ] E2E smoke test against mocked GitHub API
 
 ---

@@ -537,6 +537,50 @@ code {
   color: var(--text-secondary);
 }
 
+/* -- Duplicate Title Alert -- */
+.duplicate-alert {
+  border: 1px solid var(--border-warning, rgba(251, 191, 36, 0.4));
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  background: rgba(251, 191, 36, 0.06);
+  margin-bottom: var(--space-xl);
+}
+
+.duplicate-alert__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-md);
+}
+
+.duplicate-alert__title {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60ch;
+}
+
+.duplicate-alert__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.duplicate-alert__stats a {
+  color: var(--accent-amber);
+  text-decoration: none;
+}
+
+.duplicate-alert__stats a:hover {
+  text-decoration: underline;
+}
+
 /* -- Loading -- */
 .spinner {
   width: 20px;
