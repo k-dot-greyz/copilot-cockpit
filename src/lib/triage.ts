@@ -37,7 +37,10 @@ export interface TriageStats {
 }
 
 /**
- * Extract issue references from PR title (e.g., "Fixes #123", "#456")
+ * Finds all issue references in a pull request title using the `#<number>` pattern.
+ *
+ * @param title - The pull request title to scan for `#<number>` references
+ * @returns An array of extracted issue numbers (empty if none found)
  */
 export function extractIssueRefs(title: string): number[] {
   const matches = title.matchAll(/#(\d+)/g);
@@ -45,8 +48,15 @@ export function extractIssueRefs(title: string): number[] {
 }
 
 /**
- * Detect flood patterns — branches that follow a common prefix
- * with many duplicate PRs targeting the same issues.
+ * Identify groups of PRs whose branch names follow the `greyzxc/<prefix>-<hash>` pattern and form a flood.
+ *
+ * For each detected prefix group with at least `minCount` members, returns a FloodPattern containing the
+ * group's prefix (`pattern`), the matching PRs, the group's size (`count`), the number of unique issue
+ * references found in PR titles (`uniqueIssues`), and the group's oldest/newest `createdAt` timestamps.
+ *
+ * @param prs - Array of PRs to analyze
+ * @param minCount - Minimum number of PRs required for a prefix group to be reported as a flood
+ * @returns Flood patterns that meet the `minCount` threshold, sorted by descending `count`
  */
 export function detectFlood(prs: PR[], minCount = 10): FloodPattern[] {
   // Group by branch prefix pattern
@@ -91,7 +101,12 @@ export function detectFlood(prs: PR[], minCount = 10): FloodPattern[] {
 }
 
 /**
- * Categorize PRs into groups for the dashboard.
+ * Assigns an array of PRs into dashboard categories.
+ *
+ * Flood-detected PRs are placed in `bot-flood`. Human authors are split into `human-draft` (drafts) and `human-ready` (non-drafts). Bot authors are classified as `bot-tests` when the title starts with `test(` or the head ref contains `security`, `coverage`, or `ux-security`; other bots go to `bot-other`. Non-human, non-bot authors go to `external`. Each category array is sorted newest-first by `createdAt`.
+ *
+ * @param prs - The list of pull requests to categorize
+ * @returns An object with arrays of PRs for each dashboard category
  */
 export function categorizePRs(prs: PR[]): CategorizedPRs {
   const floods = detectFlood(prs);
@@ -148,7 +163,16 @@ export function categorizePRs(prs: PR[]): CategorizedPRs {
 }
 
 /**
- * Compute summary stats for the dashboard header.
+ * Build aggregate triage statistics from a list of PRs for the dashboard header.
+ *
+ * @returns An object with:
+ * - `total`: total number of PRs
+ * - `drafts`: count of PRs where `isDraft` is true
+ * - `ready`: count of PRs where `isDraft` is false
+ * - `byAuthorType`: counts grouped by `human`, `bot`, and `external`
+ * - `floodCount`: total number of PRs included in detected flood patterns
+ * - `oldestPR`: the earliest `createdAt` value or an empty string if none
+ * - `newestPR`: the latest `createdAt` value or an empty string if none
  */
 export function computeStats(prs: PR[]): TriageStats {
   const floods = detectFlood(prs);
@@ -173,8 +197,11 @@ export function computeStats(prs: PR[]): TriageStats {
 }
 
 /**
- * Find duplicate PRs — same title appearing multiple times.
- */
+ * Identify groups of pull requests that share the exact same title.
+ *
+ * Only groups with more than one PR are returned; groups are sorted by descending size.
+ *
+ * @returns An array of objects for each duplicate-title group containing `title`, `count` (number of PRs in the group), and `prs` (the PRs in that group). */
 export function findDuplicates(
   prs: PR[]
 ): { title: string; count: number; prs: PR[] }[] {
@@ -193,7 +220,10 @@ export function findDuplicates(
 }
 
 /**
- * Relative time string (e.g., "2 days ago")
+ * Formats a timestamp string into a concise human-readable relative time label.
+ *
+ * @param dateStr - A date string accepted by the JS `Date` constructor (e.g., ISO 8601)
+ * @returns `just now` for <1 minute, `<Nm ago` for minutes, `<Nh ago` for hours, `<Nd ago` for days, `<Nw ago` for weeks, or `<Nmo ago` for months
  */
 export function timeAgo(dateStr: string): string {
   const now = Date.now();

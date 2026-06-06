@@ -19,7 +19,17 @@ const TOKEN_KEY = 'cockpit-gh-token';
 
 /* ------------------------------------------------------------------ */
 /*  Sub-components                                                     */
-/* ------------------------------------------------------------------ */
+/**
+ * Renders a modal prompting the user to enter a GitHub Personal Access Token.
+ *
+ * The modal displays an optional error message, an auto-focused password input,
+ * and a Connect button (disabled when the input is empty). Pressing Enter while
+ * the input has content or clicking Connect invokes `onSubmit` with the token.
+ *
+ * @param onSubmit - Callback invoked with the entered token when the user submits.
+ * @param error - Optional error message to show in the modal.
+ * @returns The token-entry modal JSX element.
+ */
 
 function TokenModal({
   onSubmit,
@@ -67,6 +77,12 @@ function TokenModal({
   );
 }
 
+/**
+ * Render a compact stat bar showing triage metrics for the current PR set.
+ *
+ * @param stats - Triage metrics including `total`, `ready`, `drafts`, `byAuthorType` (`human`/`bot`), and `floodCount`.
+ * @returns The stat bar element displaying Open PRs, Ready, Drafts, Human, Bot counts, and a highlighted "🚨 Flood" stat when `floodCount > 0`.
+ */
 function StatBar({ stats }: { stats: TriageStats }) {
   return (
     <div className="stat-bar">
@@ -110,6 +126,15 @@ function StatBar({ stats }: { stats: TriageStats }) {
   );
 }
 
+/**
+ * Render alert cards for each detected bot flood pattern and provide a per-flood "Nuke" action.
+ *
+ * @param floods - List of detected flood patterns to display; an empty array results in no output.
+ * @param onNuke - Callback invoked with the array of PRs for a flood when the flood's "Nuke" button is clicked.
+ * @param isNuking - When `true`, disables the "Nuke" buttons and updates their label to indicate an ongoing nuke operation.
+ * @param nukeProgress - Optional progress object; when provided a progress bar and "Closing X / Y..." text are shown. `done` is the number completed and `total` is the total to process.
+ * @returns The alert elements for the provided floods, or `null` if `floods` is empty.
+ */
 function FloodAlert({
   floods,
   onNuke,
@@ -181,6 +206,14 @@ function FloodAlert({
   );
 }
 
+/**
+ * Renders a pull request row with selection control, metadata, and a view link.
+ *
+ * @param pr - The pull request to display (number, title, url, author, authorType, isDraft, createdAt, headRefName).
+ * @param selected - Whether the PR is currently selected.
+ * @param onToggle - Callback invoked with the PR number when the selection checkbox is toggled.
+ * @returns The JSX element for the PR card row
+ */
 function PRCard({
   pr,
   selected,
@@ -236,6 +269,20 @@ function PRCard({
   );
 }
 
+/**
+ * Render a collapsible PR section with selection controls, metadata, and PR cards.
+ *
+ * Renders a header showing the section title, emoji, PR count badge, select/deselect all button, and a contextual "Close N selected" button. When the PR list is long the section starts collapsed and shows only the first 10 items with a "Show X more" button to expand. If `prs` is empty, renders `null`.
+ *
+ * @param category - Identifier for the PR category shown in this section.
+ * @param prs - The list of pull requests to display in this section.
+ * @param selectedPRs - Set of selected PR numbers used to compute per-section selection counts and card selection state.
+ * @param onToggle - Called with a PR number to toggle its selection state.
+ * @param onSelectAll - Toggles selection for all PRs in this section (selects or deselects the group).
+ * @param onCloseSelected - Closes the currently selected PRs in this section when invoked.
+ * @param isClosing - When `true`, disables action buttons to indicate a close operation is in progress.
+ * @returns A React element for the PR section, or `null` when `prs` is empty.
+ */
 function PRSection({
   title,
   emoji,
@@ -316,7 +363,15 @@ function PRSection({
 
 /* ------------------------------------------------------------------ */
 /*  Main Dashboard                                                     */
-/* ------------------------------------------------------------------ */
+/**
+ * Dashboard UI for triaging GitHub pull requests and performing bulk actions.
+ *
+ * Manages authentication via a stored GitHub token, fetches and categorizes open PRs,
+ * displays triage stats and flood alerts, and provides controls for selecting and
+ * bulk-closing PRs (including destructive "nuke" actions for flood patterns).
+ *
+ * @returns The rendered PR dashboard element
+ */
 
 export default function PRDashboard() {
   // Auth state

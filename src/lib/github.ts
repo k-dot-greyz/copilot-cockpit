@@ -31,6 +31,12 @@ export interface PRApiResponse {
 const API_BASE = 'https://api.github.com';
 const PER_PAGE = 100;
 
+/**
+ * Builds HTTP headers required for GitHub REST API requests using the provided token.
+ *
+ * @param token - A GitHub authentication token (personal access token, OAuth token, or GitHub App installation token)
+ * @returns An object suitable for fetch/HTTP clients containing `Authorization`, `Accept`, and `X-GitHub-Api-Version` headers
+ */
 function getHeaders(token: string): HeadersInit {
   return {
     Authorization: `Bearer ${token}`,
@@ -39,6 +45,11 @@ function getHeaders(token: string): HeadersInit {
   };
 }
 
+/**
+ * Classifies a GitHub account login and account type as 'bot', 'human', or 'external'.
+ *
+ * @returns `'bot'` if the account is identified as a bot, `'human'` if the login matches the internal allowlist, `'external'` otherwise.
+ */
 function classifyAuthor(login: string, type: string): PR['authorType'] {
   if (type === 'Bot' || login.startsWith('app/') || login.includes('[bot]')) {
     return 'bot';
@@ -51,6 +62,12 @@ function classifyAuthor(login: string, type: string): PR['authorType'] {
   return 'external';
 }
 
+/**
+ * Converts a GitHub REST pull request response into the normalized `PR` shape.
+ *
+ * @param raw - The raw pull request object returned by the GitHub REST API
+ * @returns A `PR` object with selected fields mapped from `raw`; `reviewDecision` is set to `null` because the REST response does not provide it
+ */
 function mapPR(raw: PRApiResponse): PR {
   return {
     number: raw.number,
@@ -68,8 +85,13 @@ function mapPR(raw: PRApiResponse): PR {
 }
 
 /**
- * Fetch all open PRs with pagination.
- * Calls onProgress with (loaded, total) for each page.
+ * Fetches all open pull requests for the given repository using paginated requests.
+ *
+ * Calls `onProgress` after each fetched page with the number of loaded PRs and an estimated total.
+ *
+ * @param onProgress - Optional callback invoked as `(loaded, estimatedTotal)` after each page is fetched
+ * @returns An array of normalized `PR` objects for all open pull requests
+ * @throws Error if the GitHub API responds with a non-OK status; the error message includes the HTTP status and response body
  */
 export async function fetchOpenPRs(
   owner: string,
@@ -116,7 +138,14 @@ export async function fetchOpenPRs(
 }
 
 /**
- * Close a single PR. Optionally delete its branch.
+ * Close a pull request and optionally remove its head branch.
+ *
+ * @param owner - Repository owner
+ * @param repo - Repository name
+ * @param number - Pull request number
+ * @param token - GitHub API token used for authorization
+ * @param deleteBranch - If `true`, attempts to delete the PR's head branch; branch deletion is best-effort and any deletion errors are ignored
+ * @throws Error if the request to close the pull request fails; the error message includes the HTTP status and response body
  */
 export async function closePR(
   owner: string,
@@ -154,7 +183,15 @@ export async function closePR(
 }
 
 /**
- * Bulk-close PRs with rate limiting and progress callback.
+ * Closes multiple pull requests sequentially, optionally deleting their head branches, with simple rate limiting and progress notifications.
+ *
+ * @param owner - Repository owner or organization
+ * @param repo - Repository name
+ * @param numbers - Array of pull request numbers to close, processed in order
+ * @param token - GitHub API token used for authentication
+ * @param deleteBranch - If `true`, attempt to delete each PR's head branch after closing (best-effort)
+ * @param onProgress - Optional callback invoked after each attempt with `(completed, total, current)` where `completed` is the number of processed PRs, `total` is `numbers.length`, and `current` is the PR number just processed
+ * @returns An object with `closed`, the list of PR numbers successfully closed, and `failed`, an array of `{ number, error }` entries for PRs that failed to close
  */
 export async function bulkClosePRs(
   owner: string,
@@ -190,7 +227,9 @@ export async function bulkClosePRs(
 }
 
 /**
- * Validate a GitHub token by fetching the authenticated user.
+ * Check whether a GitHub token is valid and return the associated username.
+ *
+ * @returns The authenticated user's login name, or `null` if the token is invalid or the request fails.
  */
 export async function validateToken(token: string): Promise<string | null> {
   try {
