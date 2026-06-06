@@ -63,8 +63,8 @@ export function detectFlood(prs: PR[], minCount = 10): FloodPattern[] {
   const prefixGroups = new Map<string, PR[]>();
 
   for (const pr of prs) {
-    // Extract prefix before the hash suffix (e.g., "greyzxc/issue-resolution-" → "issue-resolution")
-    const match = pr.headRefName.match(/^greyzxc\/([a-z-]+)-[a-f0-9]{4}$/);
+    // Extract prefix before the hash suffix (e.g., "namespace/issue-resolution-" → "issue-resolution")
+    const match = pr.headRefName.match(/^[^/]+\/([a-z-]+)-[a-f0-9]{4}$/);
     if (match) {
       const prefix = match[1];
       const group = prefixGroups.get(prefix) || [];
