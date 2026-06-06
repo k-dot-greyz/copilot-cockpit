@@ -4,6 +4,7 @@ import { fetchOpenPRs, bulkClosePRs, validateToken } from '../lib/github';
 import {
   categorizePRs,
   computeStats,
+  deriveStateAfterBulkClose,
   detectFlood,
   timeAgo,
   type CategorizedPRs,
@@ -499,12 +500,14 @@ export default function PRDashboard() {
       (done, total) => setNukeProgress({ done, total })
     );
 
-    const closedSet = new Set(result.closed);
-    const remaining = prs.filter((p) => !closedSet.has(p.number));
+    const { remaining, categories, stats, floods } = deriveStateAfterBulkClose(
+      prs,
+      result.closed
+    );
     setPrs(remaining);
-    setCategories(categorizePRs(remaining));
-    setStats(computeStats(remaining));
-    setFloods(detectFlood(remaining));
+    setCategories(categories);
+    setStats(stats);
+    setFloods(floods);
     setSelectedPRs(new Set());
     setIsClosing(false);
     setNukeProgress(null);
@@ -532,13 +535,14 @@ export default function PRDashboard() {
       (done, total) => setNukeProgress({ done, total })
     );
 
-    // Remove closed from state
-    const closedSet = new Set(result.closed);
-    const remaining = prs.filter((p) => !closedSet.has(p.number));
+    const { remaining, categories, stats, floods } = deriveStateAfterBulkClose(
+      prs,
+      result.closed
+    );
     setPrs(remaining);
-    setCategories(categorizePRs(remaining));
-    setStats(computeStats(remaining));
-    setFloods(detectFlood(remaining));
+    setCategories(categories);
+    setStats(stats);
+    setFloods(floods);
     setSelectedPRs(new Set());
     setIsClosing(false);
     setNukeProgress(null);

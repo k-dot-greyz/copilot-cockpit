@@ -220,6 +220,31 @@ export function findDuplicates(
 }
 
 /**
+ * Reconcile PR list and derived triage views after a bulk-close operation.
+ *
+ * All returned views are computed from the same `remaining` snapshot so categories,
+ * stats, and flood patterns stay consistent after partial closes.
+ */
+export function deriveStateAfterBulkClose(
+  prs: PR[],
+  closed: number[]
+): {
+  remaining: PR[];
+  categories: CategorizedPRs;
+  stats: TriageStats;
+  floods: FloodPattern[];
+} {
+  const closedSet = new Set(closed);
+  const remaining = prs.filter((p) => !closedSet.has(p.number));
+  return {
+    remaining,
+    categories: categorizePRs(remaining),
+    stats: computeStats(remaining),
+    floods: detectFlood(remaining),
+  };
+}
+
+/**
  * Formats a timestamp string into a concise human-readable relative time label.
  *
  * @param dateStr - A date string accepted by the JS `Date` constructor (e.g., ISO 8601)
