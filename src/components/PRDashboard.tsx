@@ -576,9 +576,11 @@ export default function PRDashboard() {
 
   const applyCloseResult = (closed: number[]) => {
     const closedSet = new Set(closed);
-    const remaining = prs.filter((p) => !closedSet.has(p.number));
-    setPrs(remaining);
-    syncTriage(remaining);
+    setPrs(prev => {
+      const remaining = prev.filter(p => !closedSet.has(p.number));
+      syncTriage(remaining);
+      return remaining;
+    });
     setSelectedPRs(new Set());
     setIsClosing(false);
     setNukeProgress(null);
@@ -600,15 +602,6 @@ export default function PRDashboard() {
     return result;
   };
 
-  const handleCloseSelected = async () => {
-    if (!token || selectedPRs.size === 0) return;
-    const confirmed = window.confirm(
-      `Close ${selectedPRs.size} PRs and delete their branches? This cannot be undone.`
-    );
-    if (!confirmed) return;
-
-    const result = await closePRs([...selectedPRs]);
-    if (!result) return;
   const handleCloseSelected = async (numbers?: number[]) => {
     const numbersToClose = numbers || [...selectedPRs];
     if (!token || numbersToClose.length === 0) return;
