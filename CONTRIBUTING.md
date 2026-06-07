@@ -27,8 +27,8 @@ Current tree (rescue phase) and target layout for the Astro rebuild. Paths marke
 | `CONTRIBUTING.md` | Contributor standards (this file) |
 | `dex-entry.md` | Dex registry metadata (`dex_id`, tags, status) for ecosystem indexing |
 | `tasks.md` | Public roadmap / epics (rescue, rebuild, data, deploy) |
-| `package.json` *(planned)* | Astro/TypeScript toolchain and scripts |
-| `astro.config.mjs` *(planned)* | Build and integration config (no hardcoded secrets) |
+| `package.json` | Astro/TypeScript toolchain and scripts |
+| `astro.config.mjs` | Build and integration config (no hardcoded secrets) |
 | `vercel.json` *(planned)* | Deployment config |
 | `public/` *(planned)* | Static assets (favicon, fonts, immutable JSON snapshots) |
 | `src/` *(planned)* | Application source |

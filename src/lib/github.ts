@@ -201,6 +201,8 @@ export async function bulkClosePRs(
   deleteBranch = false,
   onProgress?: (completed: number, total: number, current: number) => void
 ): Promise<{ closed: number[]; failed: { number: number; error: string }[] }> {
+  const DESIRED_REQUESTS_PER_MINUTE = 30;
+  const BASE_INTERVAL_MS = Math.ceil(60000 / DESIRED_REQUESTS_PER_MINUTE);
   const closed: number[] = [];
   const failed: { number: number; error: string }[] = [];
 
@@ -217,9 +219,10 @@ export async function bulkClosePRs(
     }
     onProgress?.(i + 1, numbers.length, num);
 
-    // Rate limit: ~30 requests per minute to be safe
+    // Rate limit: computed per-iteration delay
     if (i < numbers.length - 1) {
-      await new Promise((r) => setTimeout(r, 250));
+      const perIterationDelayMs = BASE_INTERVAL_MS * (deleteBranch ? 2 : 1);
+      await new Promise((r) => setTimeout(r, perIterationDelayMs));
     }
   }
 

@@ -48,7 +48,7 @@ function TokenModal({
         <p>
           Enter a Personal Access Token with <code>repo</code> scope.
           <br />
-          Stored in <code>localStorage</code> only — never sent anywhere except
+          Stored in <code>sessionStorage</code> only — never sent anywhere except
           the GitHub API.
         </p>
         {error && (
@@ -364,7 +364,7 @@ function PRCard({
  * @param selectedPRs - Set of selected PR numbers used to compute per-section selection counts and card selection state.
  * @param onToggle - Called with a PR number to toggle its selection state.
  * @param onSelectAll - Toggles selection for all PRs in this section (selects or deselects the group).
- * @param onCloseSelected - Closes the currently selected PRs in this section when invoked.
+ * @param onCloseSelected - Closes the currently selected PRs in this section when invoked; receives the array of selected PR numbers from this section.
  * @param isClosing - When `true`, disables action buttons to indicate a close operation is in progress.
  * @returns A React element for the PR section, or `null` when `prs` is empty.
  */
@@ -388,11 +388,12 @@ function PRSection({
   selectedPRs: Set<number>;
   onToggle: (n: number) => void;
   onSelectAll: (category: PRCategory) => void;
-  onCloseSelected: () => void;
+  onCloseSelected: (numbers: number[]) => void;
   isClosing: boolean;
 }) {
   const [collapsed, setCollapsed] = useState(prs.length > 20);
-  const selectedInGroup = prs.filter((p) => selectedPRs.has(p.number)).length;
+  const selectedInSection = prs.filter((p) => selectedPRs.has(p.number));
+  const selectedInGroup = selectedInSection.length;
   const displayPRs = collapsed ? prs.slice(0, 10) : prs;
 
   if (prs.length === 0) return null;
@@ -408,7 +409,7 @@ function PRSection({
           {selectedInGroup > 0 && (
             <button
               className="btn btn--danger btn--sm"
-              onClick={onCloseSelected}
+              onClick={() => onCloseSelected(selectedInSection.map(p => p.number))}
               disabled={isClosing}
             >
               Close {selectedInGroup} selected
@@ -490,7 +491,7 @@ export default function PRDashboard() {
 
   // Check for stored token on mount
   useEffect(() => {
-    const stored = localStorage.getItem(TOKEN_KEY);
+    const stored = sessionStorage.getItem(TOKEN_KEY);
     if (stored) {
       setToken(stored);
     } else {
@@ -507,7 +508,7 @@ export default function PRDashboard() {
       if (!username) {
         setTokenError('Invalid token — check scopes and expiry.');
         setShowTokenModal(true);
-        localStorage.removeItem(TOKEN_KEY);
+        sessionStorage.removeItem(TOKEN_KEY);
         setToken(null);
         return;
       }
@@ -545,7 +546,7 @@ export default function PRDashboard() {
   }, [token, syncTriage]);
 
   const handleTokenSubmit = (t: string) => {
-    localStorage.setItem(TOKEN_KEY, t);
+    sessionStorage.setItem(TOKEN_KEY, t);
     setTokenError(undefined);
     setToken(t);
   };
@@ -608,9 +609,43 @@ export default function PRDashboard() {
 
     const result = await closePRs([...selectedPRs]);
     if (!result) return;
+  const handleCloseSelected = async (numbers?: number[]) => {
+    const numbersToClose = numbers || [...selectedPRs];
+    if (!token || numbersToClose.length === 0) return;
+    const confirmed = window.confirm(
+      `Close ${numbersToClose.length} PRs and delete their branches? This cannot be undone.`
+    );
+    if (!confirmed) return;
 
-    if (result.failed.length > 0) {
-      setError(`Failed to close ${result.failed.length} PRs`);
+    setIsClosing(true);
+    try {
+      const result = await bulkClosePRs(
+        OWNER,
+        REPO,
+        numbersToClose,
+        token,
+        true,
+        (done, total) => setNukeProgress({ done, total })
+      );
+
+      // Remove closed PRs from state
+      setPrs((prev) => {
+        const remaining = prev.filter((p) => !result.closed.includes(p.number));
+        setCategories(categorizePRs(remaining));
+        setStats(computeStats(remaining));
+        setFloods(detectFlood(remaining));
+        return remaining;
+      });
+      setSelectedPRs(new Set());
+
+      if (result.failed.length > 0) {
+        setError(`Failed to close ${result.failed.length} PRs`);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to close PRs');
+    } finally {
+      setIsClosing(false);
+      setNukeProgress(null);
     }
   };
 
@@ -646,22 +681,54 @@ export default function PRDashboard() {
 
     const result = await closePRs(floodPRs.map((p) => p.number));
     if (!result) return;
-
-    if (result.failed.length > 0) {
-      setError(
-        `Nuked ${result.closed.length} PRs. ${result.failed.length} failed.`
+    setIsClosing(true);
+    try {
+      const numbers = floodPRs.map((p) => p.number);
+      const result = await bulkClosePRs(
+        OWNER,
+        REPO,
+        numbers,
+        token,
+        true,
+        (done, total) => setNukeProgress({ done, total })
       );
+
+      // Remove closed from state
+      setPrs((prev) => {
+        const closedSet = new Set(result.closed);
+        const remaining = prev.filter((p) => !closedSet.has(p.number));
+        setCategories(categorizePRs(remaining));
+        setStats(computeStats(remaining));
+        setFloods(detectFlood(remaining));
+        return remaining;
+      });
+      setSelectedPRs(new Set());
+
+      if (result.failed.length > 0) {
+        setError(
+          `Nuked ${result.closed.length} PRs. ${result.failed.length} failed.`
+        );
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to nuke flood PRs');
+    } finally {
+      setIsClosing(false);
+      setNukeProgress(null);
     }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
     setToken(null);
+    setUser('');
     setPrs([]);
     setCategories(null);
     setStats(null);
     setFloods([]);
     setDuplicates([]);
+    setSelectedPRs(new Set());
+    setError(null);
+    setLastFetched(null);
     setShowTokenModal(true);
   };
 
