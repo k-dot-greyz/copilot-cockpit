@@ -165,6 +165,8 @@ describe('computeStats', () => {
       floodCount: 10,
       oldestPR: '2026-01-01T00:00:00Z',
       newestPR: '2026-03-01T00:00:00Z',
+      checks: { success: 0, failure: 0, pending: 0, none: 12 },
+      reviews: { approved: 0, changesRequested: 0, required: 0, none: 12 },
     });
   });
 });
