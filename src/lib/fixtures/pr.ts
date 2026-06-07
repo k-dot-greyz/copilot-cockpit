@@ -12,6 +12,12 @@ export function makePR(overrides: Partial<PR> & Pick<PR, 'number'>): PR {
     reviewDecision: null,
     labels: [],
     url: `https://github.com/o/r/pull/${overrides.number}`,
+    checksStatus: 'none',
+    mergeable: 'UNKNOWN',
+    state: 'OPEN',
+    commentsCount: 0,
+    additions: 0,
+    deletions: 0,
     ...overrides,
   };
 }
