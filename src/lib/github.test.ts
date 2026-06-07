@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   bulkClosePRs,
+  closePR,
   fetchOpenPRs,
   validateToken,
 } from './github';
@@ -94,5 +95,53 @@ describe('bulkClosePRs', () => {
     expect(result.failed).toEqual([
       { number: 2, error: 'Failed to close PR #2: 403 forbidden' },
     ]);
+  });
+
+  it('deletes head branches when deleteBranch is enabled', async () => {
+    vi.useFakeTimers();
+
+    const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+      if (init?.method === 'PATCH') {
+        return {
+          ok: true,
+          json: async () => ({ head: { ref: 'greyzxc/coverage-deadbeef' } }),
+        };
+      }
+
+      if (init?.method === 'DELETE') {
+        return { ok: true };
+      }
+
+      throw new Error(`Unexpected fetch: ${url} ${init?.method ?? 'GET'}`);
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    const resultPromise = bulkClosePRs('owner', 'repo', [9], 'token', true);
+    await vi.runAllTimersAsync();
+    const result = await resultPromise;
+
+    expect(result).toEqual({ closed: [9], failed: [] });
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://api.github.com/repos/owner/repo/git/refs/heads/greyzxc%2Fcoverage-deadbeef',
+      expect.objectContaining({ method: 'DELETE' })
+    );
+  });
+});
+
+describe('closePR', () => {
+  it('throws when GitHub rejects the close request', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        text: async () => 'not found',
+      })
+    );
+
+    await expect(closePR('owner', 'repo', 99, 'token')).rejects.toThrow(
+      'Failed to close PR #99: 404 not found'
+    );
   });
 });

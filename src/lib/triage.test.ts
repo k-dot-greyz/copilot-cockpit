@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   categorizePRs,
   computeStats,
+  deriveStateAfterBulkClose,
   detectFlood,
   extractIssueRefs,
   findDuplicates,
@@ -164,6 +165,55 @@ describe('computeStats', () => {
       oldestPR: '2026-01-01T00:00:00Z',
       newestPR: '2026-03-01T00:00:00Z',
     });
+  });
+});
+
+describe('deriveStateAfterBulkClose', () => {
+  it('keeps categories, stats, and floods aligned on the same remaining snapshot', () => {
+    const floodPRs = Array.from({ length: 10 }, (_, i) =>
+      makePR({
+        number: i + 1,
+        title: 'chore: flood bot',
+        headRefName: `greyzxc/issue-resolution-${(i + 1).toString(16).padStart(4, '0')}`,
+        authorType: 'bot',
+        createdAt: `2026-01-${String(i + 1).padStart(2, '0')}T00:00:00Z`,
+      })
+    );
+    const humanPR = makePR({
+      number: 100,
+      authorType: 'human',
+      isDraft: false,
+      createdAt: '2026-02-01T00:00:00Z',
+    });
+    const prs = [...floodPRs, humanPR];
+
+    expect(computeStats(prs).floodCount).toBe(10);
+
+    const derived = deriveStateAfterBulkClose(prs, [1, 2, 3]);
+
+    expect(derived.remaining).toHaveLength(8);
+    expect(derived.stats.total).toBe(derived.remaining.length);
+    expect(derived.stats.floodCount).toBe(0);
+    expect(derived.floods).toEqual([]);
+    expect(derived.categories['bot-flood']).toHaveLength(0);
+
+    const categorizedTotal = (
+      Object.keys(derived.categories) as Array<keyof typeof derived.categories>
+    ).reduce((sum, key) => sum + derived.categories[key].length, 0);
+    expect(categorizedTotal).toBe(derived.remaining.length);
+  });
+
+  it('ignores PRs that failed to close', () => {
+    const prs = [
+      makePR({ number: 1, authorType: 'human' }),
+      makePR({ number: 2, authorType: 'human' }),
+      makePR({ number: 3, authorType: 'human' }),
+    ];
+
+    const derived = deriveStateAfterBulkClose(prs, [1, 3]);
+
+    expect(derived.remaining.map((p) => p.number)).toEqual([2]);
+    expect(derived.stats.total).toBe(1);
   });
 });
 
