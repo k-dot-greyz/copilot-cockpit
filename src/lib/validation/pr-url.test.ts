@@ -43,4 +43,36 @@ describe('sanitizePrUrl', () => {
     const url = 'https://github.com/k-dot-greyz/dev-master/pull/42';
     expect(sanitizePrUrl(url)).toBe(url);
   });
+
+  it('returns # for undefined input', () => {
+    expect(sanitizePrUrl(undefined)).toBe('#');
+  });
+
+  it('returns # for empty string', () => {
+    expect(sanitizePrUrl('')).toBe('#');
+  });
+});
+
+describe('isAllowedGithubPrUrl - additional boundary cases', () => {
+  it('rejects http (non-https) scheme', () => {
+    expect(
+      isAllowedGithubPrUrl('http://github.com/o/r/pull/1')
+    ).toBe(false);
+  });
+
+  it('rejects a completely unparseable string', () => {
+    expect(isAllowedGithubPrUrl('not a url at all')).toBe(false);
+  });
+
+  it('rejects github.com PR path with extra path segments', () => {
+    expect(
+      isAllowedGithubPrUrl('https://github.com/o/r/pull/1/files')
+    ).toBe(false);
+  });
+
+  it('accepts PR urls with trailing slash', () => {
+    expect(
+      isAllowedGithubPrUrl('https://github.com/o/r/pull/123/')
+    ).toBe(true);
+  });
 });

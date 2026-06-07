@@ -89,6 +89,104 @@ describe('fetchOpenPRs', () => {
     expect(prs[0].labels).toEqual(['ok']);
   });
 
+  it('produces safe defaults when user field is missing', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        headers: new Headers(),
+        json: async () => [
+          {
+            ...makeApiPR({ number: 20 }),
+            user: null,
+          },
+        ],
+      })
+    );
+
+    const prs = await fetchOpenPRs('o', 'r', 'token');
+    expect(prs[0].author).toBe('unknown');
+    expect(prs[0].authorType).toBe('external');
+  });
+
+  it('produces empty headRefName when head field is missing', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        headers: new Headers(),
+        json: async () => [
+          {
+            ...makeApiPR({ number: 21 }),
+            head: null,
+          },
+        ],
+      })
+    );
+
+    const prs = await fetchOpenPRs('o', 'r', 'token');
+    expect(prs[0].headRefName).toBe('');
+  });
+
+  it('coerces non-string title to empty string', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        headers: new Headers(),
+        json: async () => [
+          {
+            ...makeApiPR({ number: 22 }),
+            title: null,
+          },
+        ],
+      })
+    );
+
+    const prs = await fetchOpenPRs('o', 'r', 'token');
+    expect(prs[0].title).toBe('');
+  });
+
+  it('coerces truthy draft values to boolean true', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        headers: new Headers(),
+        json: async () => [
+          {
+            ...makeApiPR({ number: 23 }),
+            draft: true,
+          },
+        ],
+      })
+    );
+
+    const prs = await fetchOpenPRs('o', 'r', 'token');
+    expect(prs[0].isDraft).toBe(true);
+  });
+
+  it('produces empty createdAt and updatedAt when timestamps are missing', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        headers: new Headers(),
+        json: async () => [
+          {
+            ...makeApiPR({ number: 24 }),
+            created_at: null,
+            updated_at: undefined,
+          },
+        ],
+      })
+    );
+
+    const prs = await fetchOpenPRs('o', 'r', 'token');
+    expect(prs[0].createdAt).toBe('');
+    expect(prs[0].updatedAt).toBe('');
+  });
+
   it('maps author types and throws on non-OK responses', async () => {
     const fetchMock = vi
       .fn()
