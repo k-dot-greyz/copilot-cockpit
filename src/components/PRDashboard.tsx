@@ -1,6 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
-import type { PR } from '../lib/github';
-import { fetchOpenPRs, bulkClosePRs, validateToken } from '../lib/github';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import type { PR, PRDetail as PRDetailType } from '../lib/github';
+import { fetchPRs, fetchPRDetail, bulkClosePRs, validateToken } from '../lib/github';
+import { filterPRs, getUniqueLabels, type FilterCriteria } from '../lib/filters';
+import { FilterBar } from './FilterBar';
+import { PRDetail } from './PRDetail';
 import {
   categorizePRs,
   computeStats,
@@ -12,10 +15,13 @@ import {
   type TriageStats,
   type PRCategory,
 } from '../lib/triage';
+import { shouldHandleRefreshShortcut } from '../lib/keyboard-guards';
+import { getAuthorizeUrl, exchangeCodeForToken } from '../lib/auth/oauth';
 
 const OWNER = 'k-dot-greyz';
 const REPO = 'dev-master';
 const TOKEN_KEY = 'cockpit-gh-token';
+const CLIENT_ID = import.meta.env.PUBLIC_GITHUB_CLIENT_ID || '';
 
 /* ------------------------------------------------------------------ */
 /*  Sub-components                                                     */
@@ -33,9 +39,11 @@ const TOKEN_KEY = 'cockpit-gh-token';
 
 function TokenModal({
   onSubmit,
+  onOAuthLogin,
   error,
 }: {
   onSubmit: (token: string) => void;
+  onOAuthLogin: () => void;
   error?: string;
 }) {
   const [token, setToken] = useState('');
@@ -54,23 +62,45 @@ function TokenModal({
             ⚠ {error}
           </p>
         )}
-        <input
-          className="input"
-          type="password"
-          placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-          value={token}
-          onChange={(e) => setToken(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && token && onSubmit(token)}
-          autoFocus
-        />
-        <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
-          <button
-            className="btn btn--primary"
-            onClick={() => onSubmit(token)}
-            disabled={!token}
-          >
-            Connect
-          </button>
+        <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <input
+              className="input"
+              type="password"
+              placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && token && onSubmit(token)}
+              autoFocus
+              style={{ flex: 1 }}
+            />
+            <button
+              className="btn btn--primary"
+              onClick={() => onSubmit(token)}
+              disabled={!token}
+            >
+              Connect
+            </button>
+          </div>
+          {CLIENT_ID && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', margin: '0.5rem 0' }}>
+                <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--border-color)' }} />
+                <span style={{ padding: '0 0.5rem', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>OR</span>
+                <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--border-color)' }} />
+              </div>
+              <button
+                className="btn btn--secondary"
+                onClick={onOAuthLogin}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+              >
+                <svg height="18" width="18" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
+                </svg>
+                Login with GitHub
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -120,6 +150,38 @@ function StatBar({ stats }: { stats: TriageStats }) {
             {stats.floodCount}
           </span>
           <span className="stat-label">🚨 Flood</span>
+        </div>
+      )}
+      {stats.checks && stats.checks.success > 0 && (
+        <div className="stat-item">
+          <span className="stat-value" style={{ color: 'var(--accent-green)' }}>
+            {stats.checks.success}
+          </span>
+          <span className="stat-label">✓ Passing</span>
+        </div>
+      )}
+      {stats.checks && stats.checks.failure > 0 && (
+        <div className="stat-item" style={{ borderColor: 'var(--border-danger)' }}>
+          <span className="stat-value" style={{ color: 'var(--accent-red)' }}>
+            {stats.checks.failure}
+          </span>
+          <span className="stat-label">✗ Failing</span>
+        </div>
+      )}
+      {stats.reviews && stats.reviews.approved > 0 && (
+        <div className="stat-item">
+          <span className="stat-value" style={{ color: 'var(--accent-green)' }}>
+            {stats.reviews.approved}
+          </span>
+          <span className="stat-label">✓ Approved</span>
+        </div>
+      )}
+      {stats.reviews && stats.reviews.changesRequested > 0 && (
+        <div className="stat-item" style={{ borderColor: 'var(--border-danger)' }}>
+          <span className="stat-value" style={{ color: 'var(--accent-red)' }}>
+            {stats.reviews.changesRequested}
+          </span>
+          <span className="stat-label">✗ Changes</span>
         </div>
       )}
     </div>
@@ -218,10 +280,12 @@ function PRCard({
   pr,
   selected,
   onToggle,
+  onViewDetail,
 }: {
   pr: PR;
   selected: boolean;
   onToggle: (n: number) => void;
+  onViewDetail: (n: number) => void;
 }) {
   const authorBadgeClass =
     pr.authorType === 'human'
@@ -251,18 +315,53 @@ function PRCard({
           <span className={`badge ${pr.isDraft ? 'badge--draft' : 'badge--ready'}`}>
             {pr.isDraft ? 'draft' : 'ready'}
           </span>
+          
+          {/* Checks Badge */}
+          {pr.checksStatus === 'success' && (
+            <span className="badge badge--ready" title="All CI checks passed">✓ PASS</span>
+          )}
+          {pr.checksStatus === 'failure' && (
+            <span className="badge badge--flood" title="CI checks failed">✗ FAIL</span>
+          )}
+          {pr.checksStatus === 'pending' && (
+            <span className="badge badge--draft" title="CI checks pending">⟳ PENDING</span>
+          )}
+
+          {/* Review Decision Badge */}
+          {pr.reviewDecision === 'APPROVED' && (
+            <span className="badge badge--ready" title="Review approved">✓ APPROVED</span>
+          )}
+          {pr.reviewDecision === 'CHANGES_REQUESTED' && (
+            <span className="badge badge--flood" title="Changes requested">✗ CHANGES</span>
+          )}
+          {pr.reviewDecision === 'REVIEW_REQUIRED' && (
+            <span className="badge badge--draft" title="Review required">⟳ REVIEW</span>
+          )}
+
+          {/* Mergeable Indicator */}
+          {pr.mergeable === 'CONFLICTING' && (
+            <span className="badge badge--flood" title="Merge conflict detected">⚠️ CONFLICT</span>
+          )}
+
           <span>{timeAgo(pr.createdAt)}</span>
           <code style={{ fontSize: '0.7rem', opacity: 0.6 }}>{pr.headRefName}</code>
         </div>
       </div>
-      <div className="pr-card__actions">
+      <div className="pr-card__actions" style={{ display: 'flex', gap: '0.25rem' }}>
+        <button
+          className="btn btn--sm btn--primary"
+          onClick={() => onViewDetail(pr.number)}
+        >
+          Inspect
+        </button>
         <a
           className="btn btn--sm"
           href={pr.url}
           target="_blank"
           rel="noopener noreferrer"
+          title="Open on GitHub"
         >
-          View
+          ↗
         </a>
       </div>
     </div>
@@ -294,6 +393,7 @@ function PRSection({
   onSelectAll,
   onCloseSelected,
   isClosing,
+  onViewDetail,
 }: {
   title: string;
   emoji: string;
@@ -305,6 +405,7 @@ function PRSection({
   onSelectAll: (category: PRCategory) => void;
   onCloseSelected: (numbers: number[]) => void;
   isClosing: boolean;
+  onViewDetail: (n: number) => void;
 }) {
   const [collapsed, setCollapsed] = useState(prs.length > 20);
   const selectedInSection = prs.filter((p) => selectedPRs.has(p.number));
@@ -346,6 +447,7 @@ function PRSection({
             pr={pr}
             selected={selectedPRs.has(pr.number)}
             onToggle={onToggle}
+            onViewDetail={onViewDetail}
           />
         ))}
       </div>
@@ -388,6 +490,19 @@ export default function PRDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [lastFetched, setLastFetched] = useState<string | null>(null);
 
+  // Filter state
+  const [filterCriteria, setFilterCriteria] = useState<FilterCriteria>({
+    state: 'OPEN',
+    authorType: 'all',
+    label: 'all',
+    reviewDecision: 'all',
+    checksStatus: 'all',
+    isDraft: 'all',
+    searchQuery: '',
+  });
+
+  const uniqueLabels = useMemo(() => getUniqueLabels(prs), [prs]);
+
   // Triage state
   const [categories, setCategories] = useState<CategorizedPRs | null>(null);
   const [stats, setStats] = useState<TriageStats | null>(null);
@@ -403,17 +518,82 @@ export default function PRDashboard() {
     total: number;
   } | null>(null);
 
-  // Check for stored token on mount
+  // Detail drawer state
+  const [activeDetailNumber, setActiveDetailNumber] = useState<number | null>(null);
+  const [detailData, setDetailData] = useState<PRDetailType | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
+
+  const handleViewDetail = useCallback(async (num: number) => {
+    if (!token) return;
+    setActiveDetailNumber(num);
+    setDetailLoading(true);
+    setDetailError(null);
+    setDetailData(null);
+    try {
+      const data = await fetchPRDetail(OWNER, REPO, num, token);
+      setDetailData(data);
+    } catch (err) {
+      setDetailError(err instanceof Error ? err.message : 'Failed to fetch PR details');
+    } finally {
+      setDetailLoading(false);
+    }
+  }, [token]);
+
+  const handleCloseDetail = useCallback(() => {
+    setActiveDetailNumber(null);
+    setDetailData(null);
+    setDetailLoading(false);
+    setDetailError(null);
+  }, []);
+
+  // OAuth state
+  const [oauthLoading, setOauthLoading] = useState(false);
+  const [oauthError, setOauthError] = useState<string | null>(null);
+
+  const handleOAuthLogin = useCallback(() => {
+    const redirectUri = window.location.origin + window.location.pathname;
+    const authorizeUrl = getAuthorizeUrl(CLIENT_ID, redirectUri);
+    window.location.href = authorizeUrl;
+  }, []);
+
+  // Check for stored token or OAuth code on mount
   useEffect(() => {
-    const stored = sessionStorage.getItem(TOKEN_KEY);
-    if (stored) {
-      setToken(stored);
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    if (code) {
+      const exchange = async () => {
+        setOauthLoading(true);
+        setOauthError(null);
+        try {
+          const token = await exchangeCodeForToken(code);
+          sessionStorage.setItem(TOKEN_KEY, token);
+          setToken(token);
+          // Remove code from URL
+          const url = new URL(window.location.href);
+          url.searchParams.delete('code');
+          window.history.replaceState({}, document.title, url.toString());
+        } catch (err) {
+          const errMsg = err instanceof Error ? err.message : 'Failed to exchange OAuth code';
+          setOauthError(errMsg);
+          setTokenError(errMsg);
+          setShowTokenModal(true);
+        } finally {
+          setOauthLoading(false);
+        }
+      };
+      exchange();
     } else {
-      setShowTokenModal(true);
+      const stored = sessionStorage.getItem(TOKEN_KEY);
+      if (stored) {
+        setToken(stored);
+      } else {
+        setShowTokenModal(true);
+      }
     }
   }, []);
 
-  // Validate token and fetch PRs
+  // Validate token
   useEffect(() => {
     if (!token) return;
 
@@ -428,7 +608,6 @@ export default function PRDashboard() {
       }
       setUser(username);
       setShowTokenModal(false);
-      loadPRs();
     };
 
     init();
@@ -439,20 +618,40 @@ export default function PRDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchOpenPRs(OWNER, REPO, token, (loaded, total) => {
-        setLoadProgress({ loaded, total });
+      const statesToFetch: ('OPEN' | 'CLOSED' | 'MERGED')[] =
+        filterCriteria.state === 'ALL'
+          ? ['OPEN', 'CLOSED', 'MERGED']
+          : [filterCriteria.state || 'OPEN'];
+
+      const data = await fetchPRs(OWNER, REPO, token, {
+        states: statesToFetch,
+        onProgress: (loaded, total) => {
+          setLoadProgress({ loaded, total });
+        },
       });
       setPrs(data);
-      setCategories(categorizePRs(data));
-      setStats(computeStats(data));
-      setFloods(detectFlood(data));
       setLastFetched(new Date().toLocaleTimeString());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch PRs');
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [token, filterCriteria.state]);
+
+  // Load PRs on token or state filter change
+  useEffect(() => {
+    if (token && user) {
+      loadPRs();
+    }
+  }, [token, user, loadPRs]);
+
+  // Apply filters and update categorization/stats/floods
+  useEffect(() => {
+    const filtered = filterPRs(prs, filterCriteria);
+    setCategories(categorizePRs(filtered));
+    setStats(computeStats(filtered));
+    setFloods(detectFlood(filtered));
+  }, [prs, filterCriteria]);
 
   const handleTokenSubmit = (t: string) => {
     sessionStorage.setItem(TOKEN_KEY, t);
@@ -605,19 +804,38 @@ export default function PRDashboard() {
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement) return;
-      if (e.key === 'r') loadPRs();
+      if (
+        !shouldHandleRefreshShortcut(e.key, e.target, {
+          isClosing,
+          loading,
+        })
+      ) {
+        return;
+      }
+      loadPRs();
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [loadPRs]);
+  }, [loadPRs, isClosing, loading]);
 
   /* ---- Render ---- */
 
   return (
     <div className="app-shell">
       {showTokenModal && (
-        <TokenModal onSubmit={handleTokenSubmit} error={tokenError} />
+        <TokenModal
+          onSubmit={handleTokenSubmit}
+          onOAuthLogin={handleOAuthLogin}
+          error={tokenError}
+        />
+      )}
+
+      {/* OAuth Loading */}
+      {oauthLoading && (
+        <div className="loading-state">
+          <div className="spinner" />
+          <span>Exchanging GitHub OAuth code for access token...</span>
+        </div>
       )}
 
       {/* Header */}
@@ -703,6 +921,12 @@ export default function PRDashboard() {
         <>
           <StatBar stats={stats} />
 
+          <FilterBar
+            criteria={filterCriteria}
+            onChange={setFilterCriteria}
+            uniqueLabels={uniqueLabels}
+          />
+
           <FloodAlert
             floods={floods}
             onNuke={handleNukeFlood}
@@ -758,6 +982,7 @@ export default function PRDashboard() {
             onSelectAll={handleSelectAll}
             onCloseSelected={handleCloseSelected}
             isClosing={isClosing}
+            onViewDetail={handleViewDetail}
           />
 
           <PRSection
@@ -771,6 +996,7 @@ export default function PRDashboard() {
             onSelectAll={handleSelectAll}
             onCloseSelected={handleCloseSelected}
             isClosing={isClosing}
+            onViewDetail={handleViewDetail}
           />
 
           <PRSection
@@ -784,6 +1010,7 @@ export default function PRDashboard() {
             onSelectAll={handleSelectAll}
             onCloseSelected={handleCloseSelected}
             isClosing={isClosing}
+            onViewDetail={handleViewDetail}
           />
 
           <PRSection
@@ -797,6 +1024,7 @@ export default function PRDashboard() {
             onSelectAll={handleSelectAll}
             onCloseSelected={handleCloseSelected}
             isClosing={isClosing}
+            onViewDetail={handleViewDetail}
           />
 
           <PRSection
@@ -810,6 +1038,7 @@ export default function PRDashboard() {
             onSelectAll={handleSelectAll}
             onCloseSelected={handleCloseSelected}
             isClosing={isClosing}
+            onViewDetail={handleViewDetail}
           />
 
           <PRSection
@@ -823,6 +1052,15 @@ export default function PRDashboard() {
             onSelectAll={handleSelectAll}
             onCloseSelected={handleCloseSelected}
             isClosing={isClosing}
+            onViewDetail={handleViewDetail}
+          />
+
+          {/* Rich Detail Drawer */}
+          <PRDetail
+            detail={detailData}
+            loading={detailLoading}
+            error={detailError}
+            onClose={handleCloseDetail}
           />
         </>
       )}
