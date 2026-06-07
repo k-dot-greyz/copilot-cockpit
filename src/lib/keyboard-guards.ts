@@ -1,7 +1,15 @@
 function isTextInput(target: EventTarget | null): boolean {
   if (!target || typeof target !== 'object') return false;
-  const tag = (target as { tagName?: string }).tagName;
-  return tag === 'INPUT' || tag === 'TEXTAREA';
+
+  // Allow shortcuts on checkboxes, radios, buttons, etc.
+  if (target instanceof HTMLTextAreaElement) return true;
+
+  if (target instanceof HTMLInputElement) {
+    const textLikeTypes = ['text', 'password', 'email', 'search', 'tel', 'url', 'number'];
+    return textLikeTypes.includes(target.type);
+  }
+
+  return false;
 }
 
 /**
