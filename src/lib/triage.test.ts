@@ -4,6 +4,7 @@ import {
   computeStats,
   detectFlood,
   extractIssueRefs,
+  duplicateExtras,
   findDuplicates,
   timeAgo,
 } from './triage';
@@ -152,6 +153,26 @@ describe('categorizePRs', () => {
     expect(categorized['bot-tests'].map((p) => p.number)).toEqual([1, 2, 3]);
     expect(categorized['bot-other']).toHaveLength(0);
   });
+
+  it('routes bot PRs whose title starts with "test(" to bot-tests regardless of branch', () => {
+    const categorized = categorizePRs([
+      makePR({
+        number: 1,
+        authorType: 'bot',
+        title: 'test(auth): add login coverage',
+        headRefName: 'bot/misc-branch',
+      }),
+      makePR({
+        number: 2,
+        authorType: 'bot',
+        title: 'test(ui): snapshot tests',
+        headRefName: 'bot/another-misc',
+      }),
+    ]);
+
+    expect(categorized['bot-tests'].map((p) => p.number)).toEqual([2, 1]);
+    expect(categorized['bot-other']).toHaveLength(0);
+  });
 });
 
 describe('computeStats', () => {
@@ -253,10 +274,139 @@ describe('findDuplicates', () => {
       },
     ]);
   });
+
+  it('returns empty array for an empty input', () => {
+    expect(findDuplicates([])).toEqual([]);
+  });
+
+  it('returns empty array when all titles are unique', () => {
+    const result = findDuplicates([
+      makePR({ number: 1, title: 'Fix login' }),
+      makePR({ number: 2, title: 'Add tests' }),
+      makePR({ number: 3, title: 'Update docs' }),
+    ]);
+
+    expect(result).toEqual([]);
+  });
+
+  it('sorts groups by descending count when multiple duplicate groups exist', () => {
+    const result = findDuplicates([
+      makePR({ number: 1, title: 'Group A' }),
+      makePR({ number: 2, title: 'Group A' }),
+      makePR({ number: 3, title: 'Group B' }),
+      makePR({ number: 4, title: 'Group B' }),
+      makePR({ number: 5, title: 'Group B' }),
+      makePR({ number: 6, title: 'Group B' }),
+    ]);
+
+    expect(result).toHaveLength(2);
+    expect(result[0].title).toBe('Group B');
+    expect(result[0].count).toBe(4);
+    expect(result[1].title).toBe('Group A');
+    expect(result[1].count).toBe(2);
+  });
+
+  it('treats titles as case-sensitive (different case = different group)', () => {
+    const result = findDuplicates([
+      makePR({ number: 1, title: 'fix bug' }),
+      makePR({ number: 2, title: 'Fix bug' }),
+      makePR({ number: 3, title: 'FIX BUG' }),
+    ]);
+
+    // Each title is unique in its own casing → no duplicates
+    expect(result).toEqual([]);
+  });
+
+  it('each returned DuplicateGroup has title, count, and prs properties', () => {
+    const result = findDuplicates([
+      makePR({ number: 1, title: 'chore: update deps' }),
+      makePR({ number: 2, title: 'chore: update deps' }),
+    ]);
+
+    expect(result).toHaveLength(1);
+    const group = result[0];
+    expect(group).toHaveProperty('title', 'chore: update deps');
+    expect(group).toHaveProperty('count', 2);
+    expect(group).toHaveProperty('prs');
+    expect(group.prs).toHaveLength(2);
+  });
+});
+
+describe('duplicateExtras', () => {
+  it('keeps the newest PR and returns older duplicates', () => {
+    const group = {
+      title: 'Duplicate title',
+      count: 3,
+      prs: [
+        makePR({ number: 1, createdAt: '2026-01-01T00:00:00Z' }),
+        makePR({ number: 2, createdAt: '2026-03-01T00:00:00Z' }),
+        makePR({ number: 3, createdAt: '2026-02-01T00:00:00Z' }),
+      ],
+    };
+
+    expect(duplicateExtras(group).map((p) => p.number)).toEqual([3, 1]);
+  });
+
+  it('returns empty array when group has only one PR', () => {
+    const group = {
+      title: 'Solo PR',
+      count: 1,
+      prs: [makePR({ number: 10, createdAt: '2026-01-01T00:00:00Z' })],
+    };
+
+    expect(duplicateExtras(group)).toEqual([]);
+  });
+
+  it('returns one extra when group has exactly two PRs', () => {
+    const group = {
+      title: 'Pair',
+      count: 2,
+      prs: [
+        makePR({ number: 5, createdAt: '2026-01-01T00:00:00Z' }),
+        makePR({ number: 6, createdAt: '2026-06-01T00:00:00Z' }),
+      ],
+    };
+
+    const extras = duplicateExtras(group);
+    expect(extras).toHaveLength(1);
+    // Older PR (5) is the extra; newer (6) is kept
+    expect(extras[0].number).toBe(5);
+  });
+
+  it('does not mutate the original group.prs array', () => {
+    const prs = [
+      makePR({ number: 1, createdAt: '2026-01-01T00:00:00Z' }),
+      makePR({ number: 2, createdAt: '2026-03-01T00:00:00Z' }),
+    ];
+    const group = { title: 'Immutable', count: 2, prs };
+
+    duplicateExtras(group);
+
+    expect(prs.map((p) => p.number)).toEqual([1, 2]);
+  });
+
+  it('returns extras sorted newest-first when all extras share the same timestamp', () => {
+    const sameDate = '2026-04-01T00:00:00Z';
+    const group = {
+      title: 'Ties',
+      count: 4,
+      prs: [
+        makePR({ number: 1, createdAt: sameDate }),
+        makePR({ number: 2, createdAt: sameDate }),
+        makePR({ number: 3, createdAt: sameDate }),
+        makePR({ number: 4, createdAt: '2026-05-01T00:00:00Z' }),
+      ],
+    };
+
+    const extras = duplicateExtras(group);
+    // PR 4 is the newest and is kept; the 3 tied extras are all returned
+    expect(extras).toHaveLength(3);
+    extras.forEach((pr) => expect(pr.number).not.toBe(4));
+  });
 });
 
 describe('timeAgo', () => {
-  afterEach(() => {
+
     vi.useRealTimers();
   });
 

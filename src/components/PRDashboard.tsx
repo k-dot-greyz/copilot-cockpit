@@ -5,8 +5,11 @@ import {
   categorizePRs,
   computeStats,
   detectFlood,
+  duplicateExtras,
+  findDuplicates,
   timeAgo,
   type CategorizedPRs,
+  type DuplicateGroup,
   type FloodPattern,
   type TriageStats,
   type PRCategory,
@@ -206,6 +209,89 @@ function FloodAlert({
 }
 
 /**
+ * Render alert cards for PR groups that share the exact same title.
+ *
+ * @param duplicates - Duplicate title groups from `findDuplicates`
+ * @param onSelectExtras - Select all but the newest PR in a duplicate group
+ * @param onCloseExtras - Close all but the newest PR in a duplicate group
+ * @param isClosing - Disables actions while a bulk close is in progress
+ */
+function DuplicateAlert({
+  duplicates,
+  onSelectExtras,
+  onCloseExtras,
+  isClosing,
+}: {
+  duplicates: DuplicateGroup[];
+  onSelectExtras: (prs: PR[]) => void;
+  onCloseExtras: (prs: PR[]) => void;
+  isClosing: boolean;
+}) {
+  if (duplicates.length === 0) return null;
+
+  return (
+    <>
+      {duplicates.map((group) => {
+        const extras = duplicateExtras(group);
+        const extraNumbers = new Set(extras.map((pr) => pr.number));
+        const newest = group.prs.find((pr) => !extraNumbers.has(pr.number));
+
+        return (
+          <div className="duplicate-alert" key={group.title}>
+            <div className="duplicate-alert__header">
+              <div>
+                <h3 style={{ color: 'var(--accent-amber)', marginBottom: '0.5rem' }}>
+                  🔁 Duplicate Title: {group.count} PRs
+                </h3>
+                <p
+                  className="duplicate-alert__title"
+                  title={group.title}
+                >
+                  {group.title}
+                </p>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                  Keeping newest #{newest?.number} · {extras.length} older duplicate
+                  {extras.length === 1 ? '' : 's'} can be closed
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+                <button
+                  className="btn btn--sm"
+                  onClick={() => onSelectExtras(extras)}
+                  disabled={isClosing}
+                >
+                  Select {extras.length} extras
+                </button>
+                <button
+                  className="btn btn--danger btn--sm"
+                  onClick={() => onCloseExtras(extras)}
+                  disabled={isClosing}
+                >
+                  Close {extras.length} extras
+                </button>
+              </div>
+            </div>
+            <div className="duplicate-alert__stats">
+              {group.prs.map((pr) => (
+                <a
+                  key={pr.number}
+                  href={pr.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  #{pr.number}
+                  {pr.number === newest?.number ? ' (keep)' : ''}
+                </a>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
+/**
  * Renders a pull request row with selection control, metadata, and a view link.
  *
  * @param pr - The pull request to display (number, title, url, author, authorType, isDraft, createdAt, headRefName).
@@ -391,6 +477,7 @@ export default function PRDashboard() {
   const [categories, setCategories] = useState<CategorizedPRs | null>(null);
   const [stats, setStats] = useState<TriageStats | null>(null);
   const [floods, setFloods] = useState<FloodPattern[]>([]);
+  const [duplicates, setDuplicates] = useState<DuplicateGroup[]>([]);
 
   // Selection state
   const [selectedPRs, setSelectedPRs] = useState<Set<number>>(new Set());
@@ -433,6 +520,13 @@ export default function PRDashboard() {
     init();
   }, [token]);
 
+  const syncTriage = useCallback((data: PR[]) => {
+    setCategories(categorizePRs(data));
+    setStats(computeStats(data));
+    setFloods(detectFlood(data));
+    setDuplicates(findDuplicates(data));
+  }, []);
+
   const loadPRs = useCallback(async () => {
     if (!token) return;
     setLoading(true);
@@ -442,16 +536,14 @@ export default function PRDashboard() {
         setLoadProgress({ loaded, total });
       });
       setPrs(data);
-      setCategories(categorizePRs(data));
-      setStats(computeStats(data));
-      setFloods(detectFlood(data));
+      syncTriage(data);
       setLastFetched(new Date().toLocaleTimeString());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch PRs');
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [token, syncTriage]);
 
   const handleTokenSubmit = (t: string) => {
     sessionStorage.setItem(TOKEN_KEY, t);
@@ -482,6 +574,41 @@ export default function PRDashboard() {
     });
   };
 
+  const applyCloseResult = (closed: number[]) => {
+    const closedSet = new Set(closed);
+    const remaining = prs.filter((p) => !closedSet.has(p.number));
+    setPrs(remaining);
+    syncTriage(remaining);
+    setSelectedPRs(new Set());
+    setIsClosing(false);
+    setNukeProgress(null);
+  };
+
+  const closePRs = async (numbers: number[]) => {
+    if (!token || numbers.length === 0) return null;
+
+    setIsClosing(true);
+    const result = await bulkClosePRs(
+      OWNER,
+      REPO,
+      numbers,
+      token,
+      true,
+      (done, total) => setNukeProgress({ done, total })
+    );
+    applyCloseResult(result.closed);
+    return result;
+  };
+
+  const handleCloseSelected = async () => {
+    if (!token || selectedPRs.size === 0) return;
+    const confirmed = window.confirm(
+      `Close ${selectedPRs.size} PRs and delete their branches? This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    const result = await closePRs([...selectedPRs]);
+    if (!result) return;
   const handleCloseSelected = async (numbers?: number[]) => {
     const numbersToClose = numbers || [...selectedPRs];
     if (!token || numbersToClose.length === 0) return;
@@ -522,6 +649,29 @@ export default function PRDashboard() {
     }
   };
 
+  const handleSelectExtras = (extras: PR[]) => {
+    setSelectedPRs((prev) => {
+      const next = new Set(prev);
+      for (const pr of extras) next.add(pr.number);
+      return next;
+    });
+  };
+
+  const handleCloseExtras = async (extras: PR[]) => {
+    if (extras.length === 0) return;
+    const confirmed = window.confirm(
+      `Close ${extras.length} older duplicate PRs and delete their branches?\n\nThe newest PR in each title group will be kept.\n\nThis cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    const result = await closePRs(extras.map((pr) => pr.number));
+    if (result && result.failed.length > 0) {
+      setError(
+        `Closed ${result.closed.length} duplicates. ${result.failed.length} failed.`
+      );
+    }
+  };
+
   const handleNukeFlood = async (floodPRs: PR[]) => {
     if (!token) return;
     const confirmed = window.confirm(
@@ -529,6 +679,8 @@ export default function PRDashboard() {
     );
     if (!confirmed) return;
 
+    const result = await closePRs(floodPRs.map((p) => p.number));
+    if (!result) return;
     setIsClosing(true);
     try {
       const numbers = floodPRs.map((p) => p.number);
@@ -573,6 +725,7 @@ export default function PRDashboard() {
     setCategories(null);
     setStats(null);
     setFloods([]);
+    setDuplicates([]);
     setSelectedPRs(new Set());
     setError(null);
     setLastFetched(null);
@@ -685,6 +838,13 @@ export default function PRDashboard() {
             onNuke={handleNukeFlood}
             isNuking={isClosing}
             nukeProgress={nukeProgress}
+          />
+
+          <DuplicateAlert
+            duplicates={duplicates}
+            onSelectExtras={handleSelectExtras}
+            onCloseExtras={handleCloseExtras}
+            isClosing={isClosing}
           />
 
           {/* Bulk action bar */}

@@ -64,6 +64,12 @@ describe('validateToken', () => {
 
     await expect(validateToken('any-token')).resolves.toBeNull();
   });
+
+  it('returns null when the network rejects with a non-Error value', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue('network down'));
+
+    await expect(validateToken('any-token')).resolves.toBeNull();
+  });
 });
 
 describe('bulkClosePRs', () => {

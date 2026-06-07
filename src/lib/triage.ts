@@ -202,9 +202,13 @@ export function computeStats(prs: PR[]): TriageStats {
  * Only groups with more than one PR are returned; groups are sorted by descending size.
  *
  * @returns An array of objects for each duplicate-title group containing `title`, `count` (number of PRs in the group), and `prs` (the PRs in that group). */
-export function findDuplicates(
-  prs: PR[]
-): { title: string; count: number; prs: PR[] }[] {
+export interface DuplicateGroup {
+  title: string;
+  count: number;
+  prs: PR[];
+}
+
+export function findDuplicates(prs: PR[]): DuplicateGroup[] {
   const groups = new Map<string, PR[]>();
 
   for (const pr of prs) {
@@ -217,6 +221,19 @@ export function findDuplicates(
     .filter(([, g]) => g.length > 1)
     .map(([title, g]) => ({ title, count: g.length, prs: g }))
     .sort((a, b) => b.count - a.count);
+}
+
+/**
+ * Returns duplicate PRs to close, keeping the newest PR in each group.
+ *
+ * @param group - A duplicate title group from `findDuplicates`
+ * @returns PRs sorted newest-first, excluding the newest (the one to keep)
+ */
+export function duplicateExtras(group: DuplicateGroup): PR[] {
+  const sorted = [...group.prs].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+  return sorted.slice(1);
 }
 
 /**
