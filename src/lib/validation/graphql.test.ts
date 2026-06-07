@@ -289,4 +289,266 @@ describe('validateAndMapGraphQLPRDetail', () => {
     expect(result.title).toBe('Malformed PR Detail');
     expect(result.url).toBe('#');
   });
+
+  it('parses commits, files, reviews, and linked issues correctly', () => {
+    const rawNode = {
+      number: 200,
+      title: 'PR with rich data',
+      body: 'body text',
+      state: 'MERGED',
+      draft: false,
+      createdAt: '2026-01-01T00:00:00Z',
+      updatedAt: '2026-01-02T00:00:00Z',
+      url: 'https://github.com/o/r/pull/200',
+      headRefName: 'feat/rich',
+      baseRefName: 'main',
+      additions: 30,
+      deletions: 5,
+      changedFiles: 2,
+      mergeable: 'MERGEABLE',
+      reviewDecision: 'CHANGES_REQUESTED',
+      author: { login: 'k-dot-greyz', avatarUrl: 'https://avatars.com/k' },
+      commits: {
+        nodes: [
+          {
+            commit: {
+              oid: 'abc1234567890',
+              abbreviatedOid: 'abc1234',
+              message: 'feat: initial commit',
+              committedDate: '2026-01-01T10:00:00Z',
+              author: { name: 'Dev' },
+            },
+          },
+          // node with null commit should be skipped
+          { commit: null },
+        ],
+      },
+      files: {
+        nodes: [
+          { path: 'src/index.ts', additions: 20, deletions: 3 },
+          { path: 'src/utils.ts', additions: 10, deletions: 2 },
+        ],
+      },
+      reviews: {
+        nodes: [
+          {
+            author: { login: 'reviewer' },
+            state: 'CHANGES_REQUESTED',
+            body: 'Please refactor.',
+            submittedAt: '2026-01-01T15:00:00Z',
+          },
+          // malformed review state should default to PENDING
+          {
+            author: { login: 'reviewer2' },
+            state: 'NOT_A_REAL_STATE',
+            body: '',
+            submittedAt: '2026-01-01T16:00:00Z',
+          },
+        ],
+      },
+      closingIssuesReferences: {
+        nodes: [
+          { number: 10, title: 'Bug #10', url: 'https://github.com/o/r/issues/10' },
+        ],
+      },
+    };
+
+    const result = validateAndMapGraphQLPRDetail(rawNode);
+
+    expect(result.state).toBe('MERGED');
+    expect(result.reviewDecision).toBe('CHANGES_REQUESTED');
+    expect(result.commits).toHaveLength(1);
+    expect(result.commits[0]).toEqual({
+      oid: 'abc1234567890',
+      abbreviatedOid: 'abc1234',
+      message: 'feat: initial commit',
+      committedDate: '2026-01-01T10:00:00Z',
+      authorName: 'Dev',
+    });
+    expect(result.files).toHaveLength(2);
+    expect(result.files[0]).toEqual({ path: 'src/index.ts', additions: 20, deletions: 3 });
+    expect(result.reviews).toHaveLength(2);
+    expect(result.reviews[0].state).toBe('CHANGES_REQUESTED');
+    expect(result.reviews[1].state).toBe('PENDING');
+    expect(result.linkedIssues).toHaveLength(1);
+    expect(result.linkedIssues[0]).toEqual({
+      number: 10,
+      title: 'Bug #10',
+      url: 'https://github.com/o/r/issues/10',
+    });
+  });
+});
+
+describe('validateAndMapGraphQLPR — additional edge cases', () => {
+  it('classifies bot authors by [bot] suffix in login', () => {
+    const node = {
+      number: 1,
+      author: { login: 'dependabot[bot]', __typename: 'User' },
+      headRef: null,
+      labels: { nodes: [] },
+      comments: { totalCount: 0 },
+      url: 'https://github.com/o/r/pull/1',
+    };
+    const result = validateAndMapGraphQLPR(node);
+    expect(result.authorType).toBe('bot');
+  });
+
+  it('classifies bot authors by Bot __typename', () => {
+    const node = {
+      number: 2,
+      author: { login: 'copilot', __typename: 'Bot' },
+      headRef: null,
+      labels: { nodes: [] },
+      comments: { totalCount: 0 },
+      url: 'https://github.com/o/r/pull/2',
+    };
+    const result = validateAndMapGraphQLPR(node);
+    expect(result.authorType).toBe('bot');
+  });
+
+  it('classifies bot authors by app/ prefix in login', () => {
+    const node = {
+      number: 3,
+      author: { login: 'app/github-actions', __typename: 'User' },
+      headRef: null,
+      labels: { nodes: [] },
+      comments: { totalCount: 0 },
+      url: 'https://github.com/o/r/pull/3',
+    };
+    const result = validateAndMapGraphQLPR(node);
+    expect(result.authorType).toBe('bot');
+  });
+
+  it('maps checksStatus to failure for FAILURE rollup state', () => {
+    const node = {
+      number: 4,
+      headRef: {
+        target: {
+          statusCheckRollup: { state: 'FAILURE' },
+        },
+      },
+      labels: { nodes: [] },
+      comments: { totalCount: 0 },
+      url: 'https://github.com/o/r/pull/4',
+    };
+    const result = validateAndMapGraphQLPR(node);
+    expect(result.checksStatus).toBe('failure');
+  });
+
+  it('maps checksStatus to failure for ERROR rollup state', () => {
+    const node = {
+      number: 5,
+      headRef: {
+        target: {
+          statusCheckRollup: { state: 'ERROR' },
+        },
+      },
+      labels: { nodes: [] },
+      comments: { totalCount: 0 },
+      url: 'https://github.com/o/r/pull/5',
+    };
+    const result = validateAndMapGraphQLPR(node);
+    expect(result.checksStatus).toBe('failure');
+  });
+
+  it('maps checksStatus to pending for PENDING rollup state', () => {
+    const node = {
+      number: 6,
+      headRef: {
+        target: {
+          statusCheckRollup: { state: 'PENDING' },
+        },
+      },
+      labels: { nodes: [] },
+      comments: { totalCount: 0 },
+      url: 'https://github.com/o/r/pull/6',
+    };
+    const result = validateAndMapGraphQLPR(node);
+    expect(result.checksStatus).toBe('pending');
+  });
+
+  it('maps checksStatus to pending for EXPECTED rollup state', () => {
+    const node = {
+      number: 7,
+      headRef: {
+        target: {
+          statusCheckRollup: { state: 'EXPECTED' },
+        },
+      },
+      labels: { nodes: [] },
+      comments: { totalCount: 0 },
+      url: 'https://github.com/o/r/pull/7',
+    };
+    const result = validateAndMapGraphQLPR(node);
+    expect(result.checksStatus).toBe('pending');
+  });
+
+  it('maps mergeable to CONFLICTING', () => {
+    const node = {
+      number: 8,
+      mergeable: 'CONFLICTING',
+      headRef: null,
+      labels: { nodes: [] },
+      comments: { totalCount: 0 },
+      url: 'https://github.com/o/r/pull/8',
+    };
+    const result = validateAndMapGraphQLPR(node);
+    expect(result.mergeable).toBe('CONFLICTING');
+  });
+
+  it('maps state CLOSED and MERGED correctly', () => {
+    const closedNode = {
+      number: 9,
+      state: 'CLOSED',
+      headRef: null,
+      labels: { nodes: [] },
+      comments: { totalCount: 0 },
+      url: 'https://github.com/o/r/pull/9',
+    };
+    expect(validateAndMapGraphQLPR(closedNode).state).toBe('CLOSED');
+
+    const mergedNode = { ...closedNode, number: 10, state: 'MERGED' };
+    expect(validateAndMapGraphQLPR(mergedNode).state).toBe('MERGED');
+  });
+
+  it('maps CHANGES_REQUESTED and REVIEW_REQUIRED reviewDecision', () => {
+    const changesNode = {
+      number: 11,
+      reviewDecision: 'CHANGES_REQUESTED',
+      headRef: null,
+      labels: { nodes: [] },
+      comments: { totalCount: 0 },
+      url: 'https://github.com/o/r/pull/11',
+    };
+    expect(validateAndMapGraphQLPR(changesNode).reviewDecision).toBe('CHANGES_REQUESTED');
+
+    const requiredNode = { ...changesNode, number: 12, reviewDecision: 'REVIEW_REQUIRED' };
+    expect(validateAndMapGraphQLPR(requiredNode).reviewDecision).toBe('REVIEW_REQUIRED');
+  });
+
+  it('sanitizes XSS URLs from GraphQL nodes', () => {
+    const node = {
+      number: 13,
+      url: 'javascript:alert("xss")',
+      headRef: null,
+      labels: { nodes: [] },
+      comments: { totalCount: 0 },
+    };
+    const result = validateAndMapGraphQLPR(node);
+    expect(result.url).toBe('#');
+  });
+
+  it('filters null and nameless entries from labels', () => {
+    const node = {
+      number: 14,
+      labels: {
+        nodes: [null, { name: 'valid-label' }, { notName: true }, { name: '' }],
+      },
+      headRef: null,
+      comments: { totalCount: 0 },
+      url: 'https://github.com/o/r/pull/14',
+    };
+    const result = validateAndMapGraphQLPR(node);
+    expect(result.labels).toEqual(['valid-label']);
+  });
 });

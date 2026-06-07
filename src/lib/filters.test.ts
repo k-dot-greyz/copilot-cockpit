@@ -122,4 +122,93 @@ describe('getUniqueLabels', () => {
     ];
     expect(getUniqueLabels(mockPRs)).toEqual(['bug', 'dependencies', 'ui']);
   });
+
+  it('returns an empty array when no labels exist', () => {
+    const prs = [makePR({ number: 1, labels: [] }), makePR({ number: 2, labels: [] })];
+    expect(getUniqueLabels(prs)).toEqual([]);
+  });
+});
+
+describe('filterPRs — additional edge cases', () => {
+  it('filters by MERGED state', () => {
+    const prs = [
+      makePR({ number: 1, state: 'OPEN' }),
+      makePR({ number: 2, state: 'CLOSED' }),
+      makePR({ number: 3, state: 'MERGED' }),
+    ];
+    expect(filterPRs(prs, { state: 'MERGED' })).toHaveLength(1);
+    expect(filterPRs(prs, { state: 'MERGED' })[0].number).toBe(3);
+  });
+
+  it('ALL state returns all PRs regardless of state', () => {
+    const prs = [
+      makePR({ number: 1, state: 'OPEN' }),
+      makePR({ number: 2, state: 'CLOSED' }),
+      makePR({ number: 3, state: 'MERGED' }),
+    ];
+    expect(filterPRs(prs, { state: 'ALL' })).toHaveLength(3);
+  });
+
+  it('searchQuery matches PR number as plain integer string', () => {
+    const prs = [
+      makePR({ number: 42, title: 'Some PR', headRefName: 'branch-x' }),
+      makePR({ number: 99, title: 'Other PR', headRefName: 'branch-y' }),
+    ];
+    expect(filterPRs(prs, { searchQuery: '42' })).toHaveLength(1);
+    expect(filterPRs(prs, { searchQuery: '42' })[0].number).toBe(42);
+  });
+
+  it('searchQuery with #number prefix matches by PR number', () => {
+    const prs = [
+      makePR({ number: 42, title: 'Some PR', headRefName: 'branch-x' }),
+    ];
+    expect(filterPRs(prs, { searchQuery: '#42' })).toHaveLength(1);
+  });
+
+  it('searchQuery is case-insensitive for title matching', () => {
+    const prs = [
+      makePR({ number: 1, title: 'Fix Auth Bug', headRefName: 'fix/auth' }),
+    ];
+    expect(filterPRs(prs, { searchQuery: 'AUTH' })).toHaveLength(1);
+    expect(filterPRs(prs, { searchQuery: 'auth' })).toHaveLength(1);
+  });
+
+  it('whitespace-only searchQuery returns all PRs', () => {
+    const prs = [
+      makePR({ number: 1, title: 'PR 1' }),
+      makePR({ number: 2, title: 'PR 2' }),
+    ];
+    expect(filterPRs(prs, { searchQuery: '   ' })).toHaveLength(2);
+  });
+
+  it('returns empty array when no PRs match combined strict criteria', () => {
+    const prs = [
+      makePR({ number: 1, authorType: 'bot', isDraft: false, state: 'OPEN' }),
+    ];
+    const result = filterPRs(prs, {
+      authorType: 'human',
+      isDraft: true,
+      state: 'CLOSED',
+    });
+    expect(result).toHaveLength(0);
+  });
+
+  it('isDraft false filter excludes draft PRs', () => {
+    const prs = [
+      makePR({ number: 1, isDraft: true }),
+      makePR({ number: 2, isDraft: false }),
+      makePR({ number: 3, isDraft: false }),
+    ];
+    const result = filterPRs(prs, { isDraft: false });
+    expect(result).toHaveLength(2);
+    expect(result.map((p) => p.number)).toEqual([2, 3]);
+  });
+
+  it("'all' isDraft value does not filter any PRs", () => {
+    const prs = [
+      makePR({ number: 1, isDraft: true }),
+      makePR({ number: 2, isDraft: false }),
+    ];
+    expect(filterPRs(prs, { isDraft: 'all' })).toHaveLength(2);
+  });
 });
