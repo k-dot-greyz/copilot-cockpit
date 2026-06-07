@@ -10,7 +10,9 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:ux": "playwright test"
   },
   "dependencies": {
     "@astrojs/react": "^5.0.7",
@@ -21,6 +23,7 @@
     "react-dom": "^19.2.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.52.0",
     "vitest": "^4.1.8"
   }
 }

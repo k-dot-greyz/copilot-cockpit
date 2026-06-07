@@ -12,6 +12,7 @@ import {
   type TriageStats,
   type PRCategory,
 } from '../lib/triage';
+import { shouldHandleRefreshShortcut } from '../lib/keyboard-guards';
 
 const OWNER = 'k-dot-greyz';
 const REPO = 'dev-master';
@@ -605,12 +606,19 @@ export default function PRDashboard() {
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement) return;
-      if (e.key === 'r') loadPRs();
+      if (
+        !shouldHandleRefreshShortcut(e.key, e.target, {
+          isClosing,
+          loading,
+        })
+      ) {
+        return;
+      }
+      loadPRs();
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [loadPRs]);
+  }, [loadPRs, isClosing, loading]);
 
   /* ---- Render ---- */
 
