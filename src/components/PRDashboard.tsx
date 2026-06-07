@@ -5,7 +5,6 @@ import {
   categorizePRs,
   computeStats,
   detectFlood,
-  findDuplicates,
   timeAgo,
   type CategorizedPRs,
   type FloodPattern,
@@ -623,7 +622,7 @@ export default function PRDashboard() {
           <button
             className="btn btn--sm"
             onClick={loadPRs}
-            disabled={loading}
+            disabled={loading || isClosing}
             title="Refresh (R)"
           >
             {loading ? '⟳' : '↻'} Refresh
