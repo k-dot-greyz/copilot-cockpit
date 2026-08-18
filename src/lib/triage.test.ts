@@ -161,12 +161,14 @@ describe('categorizePRs', () => {
         authorType: 'bot',
         title: 'test(auth): add login coverage',
         headRefName: 'bot/misc-branch',
+        createdAt: '2026-01-01T00:00:00Z',
       }),
       makePR({
         number: 2,
         authorType: 'bot',
         title: 'test(ui): snapshot tests',
         headRefName: 'bot/another-misc',
+        createdAt: '2026-01-02T00:00:00Z',
       }),
     ]);
 
@@ -406,7 +408,7 @@ describe('duplicateExtras', () => {
 });
 
 describe('timeAgo', () => {
-
+  afterEach(() => {
     vi.useRealTimers();
   });
 
