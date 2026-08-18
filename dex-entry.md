@@ -8,7 +8,12 @@ legacy_map:
   midi_1_0_bank: 125
   midi_1_0_prog: 16
 status: "active"
-tags: ["copilot", "agents", "cockpit", "glitchworks", "reference", "workflow", "visualization"]
+tags: ["copilot", "agents", "cockpit", "glitchworks", "reference", "workflow", "visualization", "pipeline", "hydration"]
+child_epics:
+  - dex_id: "0x7D:0x11"
+    title: "COCKPIT-PIPELINE-002"
+    spec: "docs/epics/COCKPIT-PIPELINE-002.md"
+    cards: "dex/cards/"
 ---
 
 # Copilot Cockpit — dex entry

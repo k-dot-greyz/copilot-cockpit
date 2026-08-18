@@ -34,8 +34,39 @@
 - [x] One-click flood nuke with confirm + progress
 - [x] Bulk close selected with partial-failure reporting
 - [x] Keyboard `R` refresh (skipped when focused in input or during close)
-- [ ] Surface `findDuplicates` in UI (tested, not wired yet)
-- [ ] E2E smoke test against mocked GitHub API
+- [ ] Surface `findDuplicates` in UI (tested, not wired yet) → **MOD-DUPLICATES-UI**
+- [ ] E2E smoke test against mocked GitHub API → **MOD-PLAYWRIGHT-E2E**
+
+---
+
+## Epic: COCKPIT-PIPELINE-002 — Post-#7 Hardening & Dex Hydration
+
+**dex_id:** `0x7D:0x11` | **Spec:** `docs/epics/COCKPIT-PIPELINE-002.md` | **Cards:** `dex/cards/`
+
+Follow-up to merged [#7](https://github.com/k-dot-greyz/copilot-cockpit/pull/7). Modules are idempotent, tiered by dependency, and communicate via joint entities + pipes.
+
+### Tier 0 — parallel, no deps
+
+- [ ] **MOD-TEST-NITPICK** — Fix #7 review nitpicks (draft coercion, pagination mock) `dex/cards/MOD-TEST-NITPICK.json`
+- [ ] **MOD-KBD-GUARDS** — Text-input-only keyboard guard (absorb [#10](https://github.com/k-dot-greyz/copilot-cockpit/pull/10)) `dex/cards/MOD-KBD-GUARDS.json`
+- [ ] **MOD-PLAYWRIGHT-MIGRATE** — Move pure-fn Playwright specs to Vitest `dex/cards/MOD-PLAYWRIGHT-MIGRATE.json`
+- [x] **MOD-JOINT-ENTITIES** — Shared entity contracts (`src/lib/entities/`) `dex/cards/MOD-JOINT-ENTITIES.json`
+
+### Tier 1 — depends on Tier 0
+
+- [ ] **MOD-PLAYWRIGHT-CONFIG** — Browser project config (absorb [#10](https://github.com/k-dot-greyz/copilot-cockpit/pull/10)) `dex/cards/MOD-PLAYWRIGHT-CONFIG.json`
+- [x] **MOD-PIPE-HYDRATE** — API → PRCardEntity (`src/lib/pipes/hydrate-pr.ts`) `dex/cards/MOD-PIPE-HYDRATE.json`
+- [x] **MOD-PIPE-SANITIZE** — Metadata sanitization (`src/lib/pipes/sanitize-metadata.ts`) `dex/cards/MOD-PIPE-SANITIZE.json`
+
+### Tier 2 — depends on Tier 1
+
+- [ ] **MOD-PLAYWRIGHT-E2E** — Real browser E2E smoke `dex/cards/MOD-PLAYWRIGHT-E2E.json`
+- [x] **MOD-PIPE-DEX** — Entity → DexAssetCard (`src/lib/pipes/to-dex-card.ts`) `dex/cards/MOD-PIPE-DEX.json`
+- [ ] **MOD-DUPLICATES-UI** — Wire findDuplicates to dashboard `dex/cards/MOD-DUPLICATES-UI.json`
+
+### Tier 3 — integration
+
+- [ ] **MOD-PR-PARITY-SYNC** — Reconcile with [#8](https://github.com/k-dot-greyz/copilot-cockpit/pull/8) GraphQL model `dex/cards/MOD-PR-PARITY-SYNC.json`
 
 ---
 
