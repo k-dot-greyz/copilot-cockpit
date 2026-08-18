@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  isAllowedGithubAvatarUrl,
   isAllowedGithubIssueUrl,
   isAllowedGithubPrUrl,
+  sanitizeGithubAvatarUrl,
   sanitizeGithubIssueUrl,
   sanitizePrUrl,
 } from './pr-url';
@@ -112,5 +114,52 @@ describe('sanitizeGithubIssueUrl', () => {
   it('passes through allowed issue URLs unchanged', () => {
     const url = 'https://github.com/k-dot-greyz/dev-master/issues/42';
     expect(sanitizeGithubIssueUrl(url)).toBe(url);
+  });
+});
+
+describe('isAllowedGithubAvatarUrl', () => {
+  it('accepts legitimate avatars.githubusercontent.com URLs', () => {
+    expect(
+      isAllowedGithubAvatarUrl('https://avatars.githubusercontent.com/u/12345?v=4')
+    ).toBe(true);
+    expect(
+      isAllowedGithubAvatarUrl('https://avatars.githubusercontent.com/u/1')
+    ).toBe(true);
+  });
+
+  it('rejects javascript, data, and http schemes', () => {
+    expect(
+      isAllowedGithubAvatarUrl('javascript:alert(1)//avatars.githubusercontent.com/u/1')
+    ).toBe(false);
+    expect(isAllowedGithubAvatarUrl('data:text/html,<script>')).toBe(false);
+    expect(
+      isAllowedGithubAvatarUrl('http://avatars.githubusercontent.com/u/1')
+    ).toBe(false);
+  });
+
+  it('rejects lookalike hosts and userinfo smuggling', () => {
+    expect(
+      isAllowedGithubAvatarUrl('https://avatars.githubusercontent.com.evil.example/u/1')
+    ).toBe(false);
+    expect(
+      isAllowedGithubAvatarUrl('https://evil.com/avatars.githubusercontent.com/u/1')
+    ).toBe(false);
+    expect(
+      isAllowedGithubAvatarUrl('https://user:pass@avatars.githubusercontent.com/u/1')
+    ).toBe(false);
+  });
+});
+
+describe('sanitizeGithubAvatarUrl', () => {
+  it('returns empty string for hostile or missing URLs', () => {
+    expect(sanitizeGithubAvatarUrl(null)).toBe('');
+    expect(sanitizeGithubAvatarUrl(undefined)).toBe('');
+    expect(sanitizeGithubAvatarUrl('javascript:alert(1)')).toBe('');
+    expect(sanitizeGithubAvatarUrl('https://evil.com/avatar.png')).toBe('');
+  });
+
+  it('passes through allowed avatar URLs unchanged', () => {
+    const url = 'https://avatars.githubusercontent.com/u/12345?v=4';
+    expect(sanitizeGithubAvatarUrl(url)).toBe(url);
   });
 });
