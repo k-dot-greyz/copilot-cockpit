@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stickhrpg.zenos/schemas/scene_card.schema.json",
+  "title": "SceneCard",
+  "description": "Environment, scenery, location node, and atmospheric metadata manifest.",
+  "type": "object",
+  "allOf": [
+    { "$ref": "base_entity_card.schema.json" }
+  ],
+  "properties": {
+    "card_type": { "const": "scene" },
+    "params": {
+      "type": "object",
+      "required": [
+        "district",
+        "bg_style",
+        "audio_theme",
+        "lighting",
+        "entry_requirements",
+        "connected_scene_ids",
+        "spawn_table",
+        "ambient_modifiers"
+      ],
+      "properties": {
+        "district": {
+          "type": "string",
+          "enum": ["downtown_slums", "office_park", "red_light", "penthouse_heights", "underground_pit", "subway_terminal"]
+        },
+        "bg_style": {
+          "type": "object",
+          "required": ["css_gradient", "crt_flicker_intensity", "noise_opacity", "sprite_backdrop"],
+          "properties": {
+            "css_gradient": { "type": "string" },
+            "crt_flicker_intensity": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+            "noise_opacity": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+            "sprite_backdrop": { "type": ["string", "null"] }
+          },
+          "additionalProperties": false
+        },
+        "audio_theme": {
+          "type": "object",
+          "required": ["bgm_track_id", "ambient_loop", "bpm"],
+          "properties": {
+            "bgm_track_id": { "type": "string" },
+            "ambient_loop": { "type": "string" },
+            "bpm": { "type": "integer", "minimum": 40, "maximum": 240 }
+          },
+          "additionalProperties": false
+        },
+        "lighting": {
+          "type": "string",
+          "enum": ["neon_dusk", "sodium_haze", "fluorescent_corporate", "pitch_black_glitch", "golden_hour"]
+        },
+        "entry_requirements": {
+          "type": "object",
+          "required": ["min_hour", "max_hour", "min_krm", "max_krm", "min_dgn", "required_item_ids"],
+          "properties": {
+            "min_hour": { "type": "integer", "minimum": 0, "maximum": 23 },
+            "max_hour": { "type": "integer", "minimum": 0, "maximum": 23 },
+            "min_krm": { "type": "integer", "minimum": -100, "maximum": 100 },
+            "max_krm": { "type": "integer", "minimum": -100, "maximum": 100 },
+            "min_dgn": { "type": "integer", "minimum": 0, "maximum": 10000 },
+            "required_item_ids": { "type": "array", "items": { "type": "string" } }
+          },
+          "additionalProperties": false
+        },
+        "connected_scene_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "spawn_table": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["entity_card_id", "weight", "time_window"],
+            "properties": {
+              "entity_card_id": { "type": "string" },
+              "weight": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+              "time_window": {
+                "type": "object",
+                "required": ["start_hour", "end_hour"],
+                "properties": {
+                  "start_hour": { "type": "integer", "minimum": 0, "maximum": 23 },
+                  "end_hour": { "type": "integer", "minimum": 0, "maximum": 23 }
+                }
+              }
+            }
+          }
+        },
+        "ambient_modifiers": {
+          "type": "object",
+          "required": ["energy_drain_rate", "xp_bonus_type", "xp_bonus_multiplier", "danger_level"],
+          "properties": {
+            "energy_drain_rate": { "type": "number", "minimum": 0.5, "maximum": 3.0 },
+            "xp_bonus_type": { "type": "string", "enum": ["none", "str", "int", "chm", "dgn"] },
+            "xp_bonus_multiplier": { "type": "number", "minimum": 1.0, "maximum": 3.0 },
+            "danger_level": { "type": "integer", "minimum": 0, "maximum": 10 }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

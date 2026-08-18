@@ -30,6 +30,8 @@ npm run test       # Run Vitest test suite
 | [`docs/SPEC.md`](docs/SPEC.md) | **Four-View Matrix (Dex/Arena/Oracle/Forge) Spec & Data Contracts** |
 | [`docs/TESTING.md`](docs/TESTING.md) | **Testing Methodology, Coverage & Quality Gates** |
 | [`docs/TESTIDS.md`](docs/TESTIDS.md) | **Canonical data-testid Registry for Accessible E2E & RTL Testing** |
+| [`docs/QUICKSTART-PROMPT-CHAIN.md`](docs/QUICKSTART-PROMPT-CHAIN.md) | **Prompt Chain for AI-driven Card Generation & Fork Hydration** |
+| [`docs/SYNC-ARCHITECTURE.md`](docs/SYNC-ARCHITECTURE.md) | **Local & Cloud Sync (vivgdrive / Object Store / SysEx) Architecture** |
 | [`docs/mechanics/`](docs/mechanics/) | **Per-Mechanic Planning Specs with Embedded JSON Manifest Schemas** |
 
 ---
