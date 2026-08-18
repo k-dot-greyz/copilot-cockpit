@@ -605,9 +605,11 @@ export default function PRDashboard() {
 
   const applyCloseResult = (closed: number[]) => {
     const closedSet = new Set(closed);
-    const remaining = prs.filter((p) => !closedSet.has(p.number));
-    setPrs(remaining);
-    syncTriage(remaining);
+    setPrs(prev => {
+      const remaining = prev.filter(p => !closedSet.has(p.number));
+      syncTriage(remaining);
+      return remaining;
+    });
     setSelectedPRs(new Set());
     setIsClosing(false);
     setNukeProgress(null);
