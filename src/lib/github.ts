@@ -1,6 +1,7 @@
 // GitHub API client for copilot-cockpit
 // Client-side only — uses token from sessionStorage
 
+import { classifyAuthor } from './validation/author-classification';
 import { sanitizePrUrl } from './validation/pr-url';
 import { validateAndMapGraphQLPR, validateAndMapGraphQLPRDetail } from './validation/graphql';
 
@@ -103,23 +104,6 @@ function getHeaders(token: string): HeadersInit {
     Accept: 'application/vnd.github+json',
     'X-GitHub-Api-Version': '2022-11-28',
   };
-}
-
-/**
- * Classifies a GitHub account login and account type as 'bot', 'human', or 'external'.
- *
- * @returns `'bot'` if the account is identified as a bot, `'human'` if the login matches the internal allowlist, `'external'` otherwise.
- */
-function classifyAuthor(login: string, type: string): PR['authorType'] {
-  if (type === 'Bot' || login.startsWith('app/') || login.includes('[bot]')) {
-    return 'bot';
-  }
-  // Add your own username(s) here
-  const knownHumans = ['k-dot-greyz', 'kasparsgreizis'];
-  if (knownHumans.includes(login)) {
-    return 'human';
-  }
-  return 'external';
 }
 
 /**

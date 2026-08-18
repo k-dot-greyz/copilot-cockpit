@@ -8,6 +8,15 @@ interface PRDetailProps {
   onClose: () => void;
 }
 
+const FOCUSABLE_SELECTOR =
+  'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+function getFocusableElements(container: HTMLElement): HTMLElement[] {
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+    (element) => !element.hasAttribute('disabled')
+  );
+}
+
 export const PRDetail: React.FC<PRDetailProps> = ({
   detail,
   loading,
@@ -15,26 +24,54 @@ export const PRDetail: React.FC<PRDetailProps> = ({
   onClose,
 }) => {
   const drawerRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const isOpen = Boolean(detail || loading || error);
 
-  // Handle Escape key to close the drawer
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+    if (!isOpen) {
+      previousFocusRef.current?.focus();
+      return;
+    }
+
+    previousFocusRef.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+    const drawer = drawerRef.current;
+    if (!drawer) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
         onClose();
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+
+      const focusable = getFocusableElements(drawer);
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+
+      if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
 
-  // Focus the drawer when opened for accessibility (focus trap / focus handling)
-  useEffect(() => {
-    if (detail || loading || error) {
-      drawerRef.current?.focus();
-    }
-  }, [detail, loading, error]);
+    const focusable = getFocusableElements(drawer);
+    (focusable[0] ?? drawer).focus();
 
-  if (!detail && !loading && !error) return null;
+    drawer.addEventListener('keydown', handleKeyDown);
+    return () => drawer.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
 
   return (
     <>
@@ -276,9 +313,9 @@ export const PRDetail: React.FC<PRDetailProps> = ({
                     💬 REVIEWS
                   </h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
-                    {detail.reviews.map((review, idx) => (
+                    {detail.reviews.map((review) => (
                       <div
-                        key={idx}
+                        key={`${review.author}-${review.submittedAt}-${review.state}`}
                         className="card"
                         style={{
                           padding: 'var(--space-md)',

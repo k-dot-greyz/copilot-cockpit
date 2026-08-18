@@ -42,7 +42,7 @@ describe('shouldHandleRefreshShortcut', () => {
     ).toBe(false);
   });
 
-  it('ignores shortcuts when focus is in a TEXTAREA', () => {
+  it('ignores shortcuts when focus is in a textarea', () => {
     const textarea = { tagName: 'TEXTAREA' } as EventTarget;
     expect(
       shouldHandleRefreshShortcut('r', textarea, {
@@ -58,7 +58,10 @@ describe('shouldHandleRefreshShortcut', () => {
     ).toBe(false);
   });
 
-  it('rejects keys other than R/r even when idle and no input focused', () => {
+  it('does not trigger for keys other than r or R', () => {
+    expect(
+      shouldHandleRefreshShortcut('a', null, { isClosing: false, loading: false })
+    ).toBe(false);
     expect(
       shouldHandleRefreshShortcut('s', null, { isClosing: false, loading: false })
     ).toBe(false);
@@ -73,17 +76,30 @@ describe('shouldHandleRefreshShortcut', () => {
     ).toBe(false);
   });
 
-  it('blocks when both isClosing and loading are true', () => {
+  it('blocks when both isClosing and loading are true simultaneously', () => {
     expect(
-      shouldHandleRefreshShortcut('r', null, { isClosing: true, loading: true })
+      shouldHandleRefreshShortcut('r', null, {
+        isClosing: true,
+        loading: true,
+      })
     ).toBe(false);
   });
 
-  it('does not block for non-element targets (e.g., document)', () => {
-    // A target without tagName (e.g. window or document body when not INPUT/TEXTAREA)
-    const bodyTarget = { tagName: 'DIV' } as EventTarget;
+  it('allows refresh when target is a non-input element', () => {
+    const button = { tagName: 'BUTTON' } as EventTarget;
     expect(
-      shouldHandleRefreshShortcut('r', bodyTarget, { isClosing: false, loading: false })
+      shouldHandleRefreshShortcut('r', button, {
+        isClosing: false,
+        loading: false,
+      })
+    ).toBe(true);
+
+    const div = { tagName: 'DIV' } as EventTarget;
+    expect(
+      shouldHandleRefreshShortcut('r', div, {
+        isClosing: false,
+        loading: false,
+      })
     ).toBe(true);
   });
 });

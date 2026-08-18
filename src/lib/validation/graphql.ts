@@ -1,19 +1,6 @@
-import { sanitizePrUrl } from './pr-url';
+import { classifyAuthor } from './author-classification';
+import { sanitizeGithubIssueUrl, sanitizePrUrl } from './pr-url';
 import type { PR, PRDetail } from '../github';
-
-/**
- * Classifies a GitHub account login and account type as 'bot', 'human', or 'external'.
- */
-function classifyAuthor(login: string, type: string): PR['authorType'] {
-  if (type === 'Bot' || login.startsWith('app/') || login.includes('[bot]')) {
-    return 'bot';
-  }
-  const knownHumans = ['k-dot-greyz', 'kasparsgreizis'];
-  if (knownHumans.includes(login)) {
-    return 'human';
-  }
-  return 'external';
-}
 
 /**
  * Safely parses and validates a raw GraphQL Pull Request node, mapping it to the extended PR interface.
@@ -216,10 +203,15 @@ export function validateAndMapGraphQLPRDetail(node: any): PRDetail {
         const reviewAuthorNode = r.author && typeof r.author === 'object' ? r.author : null;
         const reviewAuthor = reviewAuthorNode && typeof reviewAuthorNode.login === 'string' ? reviewAuthorNode.login : 'unknown';
         
-        let reviewState: PRDetail['reviews'][0]['state'] = 'PENDING';
-        if (['APPROVED', 'CHANGES_REQUESTED', 'COMMENTED', 'DISMISSED', 'PENDING'].includes(r.state)) {
-          reviewState = r.state;
-        }
+        const allowedReviewStates = [
+          'APPROVED',
+          'CHANGES_REQUESTED',
+          'COMMENTED',
+          'DISMISSED',
+          'PENDING',
+        ] as const;
+        const reviewState: PRDetail['reviews'][0]['state'] =
+          allowedReviewStates.includes(r.state) ? r.state : 'PENDING';
 
         reviews.push({
           author: reviewAuthor,
@@ -239,7 +231,9 @@ export function validateAndMapGraphQLPRDetail(node: any): PRDetail {
         linkedIssues.push({
           number: typeof issue.number === 'number' ? issue.number : 0,
           title: typeof issue.title === 'string' ? issue.title : '',
-          url: typeof issue.url === 'string' ? issue.url : '#',
+          url: sanitizeGithubIssueUrl(
+            typeof issue.url === 'string' ? issue.url : undefined
+          ),
         });
       }
     });

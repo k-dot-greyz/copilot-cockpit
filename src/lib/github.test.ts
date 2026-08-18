@@ -91,6 +91,104 @@ describe('fetchOpenPRs', () => {
     expect(prs[0].labels).toEqual(['ok']);
   });
 
+  it('produces safe defaults when user field is missing', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        headers: new Headers(),
+        json: async () => [
+          {
+            ...makeApiPR({ number: 20 }),
+            user: null,
+          },
+        ],
+      })
+    );
+
+    const prs = await fetchOpenPRs('o', 'r', 'token');
+    expect(prs[0].author).toBe('unknown');
+    expect(prs[0].authorType).toBe('external');
+  });
+
+  it('produces empty headRefName when head field is missing', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        headers: new Headers(),
+        json: async () => [
+          {
+            ...makeApiPR({ number: 21 }),
+            head: null,
+          },
+        ],
+      })
+    );
+
+    const prs = await fetchOpenPRs('o', 'r', 'token');
+    expect(prs[0].headRefName).toBe('');
+  });
+
+  it('coerces non-string title to empty string', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        headers: new Headers(),
+        json: async () => [
+          {
+            ...makeApiPR({ number: 22 }),
+            title: null,
+          },
+        ],
+      })
+    );
+
+    const prs = await fetchOpenPRs('o', 'r', 'token');
+    expect(prs[0].title).toBe('');
+  });
+
+  it('coerces truthy draft values to boolean true', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        headers: new Headers(),
+        json: async () => [
+          {
+            ...makeApiPR({ number: 23 }),
+            draft: true,
+          },
+        ],
+      })
+    );
+
+    const prs = await fetchOpenPRs('o', 'r', 'token');
+    expect(prs[0].isDraft).toBe(true);
+  });
+
+  it('produces empty createdAt and updatedAt when timestamps are missing', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        headers: new Headers(),
+        json: async () => [
+          {
+            ...makeApiPR({ number: 24 }),
+            created_at: null,
+            updated_at: undefined,
+          },
+        ],
+      })
+    );
+
+    const prs = await fetchOpenPRs('o', 'r', 'token');
+    expect(prs[0].createdAt).toBe('');
+    expect(prs[0].updatedAt).toBe('');
+  });
+
   it('maps author types and throws on non-OK responses', async () => {
     const fetchMock = vi
       .fn()
@@ -199,6 +297,54 @@ describe('bulkClosePRs', () => {
     expect(result.failed).toEqual([
       { number: 2, error: 'Failed to close PR #2: 403 forbidden' },
     ]);
+  });
+
+  it('deletes head branches when deleteBranch is enabled', async () => {
+    vi.useFakeTimers();
+
+    const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+      if (init?.method === 'PATCH') {
+        return {
+          ok: true,
+          json: async () => ({ head: { ref: 'greyzxc/coverage-deadbeef' } }),
+        };
+      }
+
+      if (init?.method === 'DELETE') {
+        return { ok: true };
+      }
+
+      throw new Error(`Unexpected fetch: ${url} ${init?.method ?? 'GET'}`);
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    const resultPromise = bulkClosePRs('owner', 'repo', [9], 'token', true);
+    await vi.runAllTimersAsync();
+    const result = await resultPromise;
+
+    expect(result).toEqual({ closed: [9], failed: [] });
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://api.github.com/repos/owner/repo/git/refs/heads/greyzxc%2Fcoverage-deadbeef',
+      expect.objectContaining({ method: 'DELETE' })
+    );
+  });
+});
+
+describe('closePR', () => {
+  it('throws when GitHub rejects the close request', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        text: async () => 'not found',
+      })
+    );
+
+    await expect(closePR('owner', 'repo', 99, 'token')).rejects.toThrow(
+      'Failed to close PR #99: 404 not found'
+    );
   });
 });
 

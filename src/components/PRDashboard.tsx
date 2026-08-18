@@ -7,6 +7,7 @@ import { PRDetail } from './PRDetail';
 import {
   categorizePRs,
   computeStats,
+  deriveStateAfterBulkClose,
   detectFlood,
   timeAgo,
   type CategorizedPRs,
@@ -15,7 +16,7 @@ import {
   type PRCategory,
 } from '../lib/triage';
 import { shouldHandleRefreshShortcut } from '../lib/keyboard-guards';
-import { getAuthorizeUrl, exchangeCodeForToken } from '../lib/auth/oauth';
+import { getAuthorizeUrl, exchangeCodeForToken, validateOAuthState } from '../lib/auth/oauth';
 
 const OWNER = 'k-dot-greyz';
 const REPO = 'dev-master';
@@ -560,17 +561,22 @@ export default function PRDashboard() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
+    const state = urlParams.get('state');
     if (code) {
       const exchange = async () => {
         setOauthLoading(true);
         setOauthError(null);
         try {
+          if (!validateOAuthState(state)) {
+            throw new Error('OAuth state mismatch — please try logging in again.');
+          }
           const token = await exchangeCodeForToken(code);
           sessionStorage.setItem(TOKEN_KEY, token);
           setToken(token);
-          // Remove code from URL
+          // Remove OAuth params from URL
           const url = new URL(window.location.href);
           url.searchParams.delete('code');
+          url.searchParams.delete('state');
           window.history.replaceState({}, document.title, url.toString());
         } catch (err) {
           const errMsg = err instanceof Error ? err.message : 'Failed to exchange OAuth code';
@@ -700,6 +706,17 @@ export default function PRDashboard() {
         (done, total) => setNukeProgress({ done, total })
       );
 
+    const { remaining, categories, stats, floods } = deriveStateAfterBulkClose(
+      prs,
+      result.closed
+    );
+    setPrs(remaining);
+    setCategories(categories);
+    setStats(stats);
+    setFloods(floods);
+    setSelectedPRs(new Set());
+    setIsClosing(false);
+    setNukeProgress(null);
       // Remove closed PRs from state
       setPrs((prev) => {
         const remaining = prev.filter((p) => !result.closed.includes(p.number));
@@ -740,6 +757,17 @@ export default function PRDashboard() {
         (done, total) => setNukeProgress({ done, total })
       );
 
+    const { remaining, categories, stats, floods } = deriveStateAfterBulkClose(
+      prs,
+      result.closed
+    );
+    setPrs(remaining);
+    setCategories(categories);
+    setStats(stats);
+    setFloods(floods);
+    setSelectedPRs(new Set());
+    setIsClosing(false);
+    setNukeProgress(null);
       // Remove closed from state
       setPrs((prev) => {
         const closedSet = new Set(result.closed);

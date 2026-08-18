@@ -1,5 +1,35 @@
-import { describe, expect, it, vi, afterEach } from 'vitest';
-import { getAuthorizeUrl, exchangeCodeForToken } from './oauth';
+import { describe, expect, it, vi, afterEach, beforeEach } from 'vitest';
+import {
+  getAuthorizeUrl,
+  exchangeCodeForToken,
+  createOAuthState,
+  validateOAuthState,
+  OAUTH_STATE_KEY,
+} from './oauth';
+
+const sessionStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: (key: string) => store[key] ?? null,
+    setItem: (key: string, value: string) => {
+      store[key] = value;
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
+  };
+})();
+
+beforeEach(() => {
+  sessionStorageMock.clear();
+  vi.stubGlobal('sessionStorage', sessionStorageMock);
+  vi.stubGlobal('crypto', {
+    randomUUID: () => 'test-oauth-state-uuid',
+  });
+});
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -7,22 +37,52 @@ afterEach(() => {
 
 describe('getAuthorizeUrl', () => {
   it('builds the correct GitHub OAuth URL with client_id and scope', () => {
-    const url = getAuthorizeUrl('my-client-id');
+    const url = getAuthorizeUrl('my-client-id', undefined, 'fixed-state');
     const parsed = new URL(url);
     expect(parsed.origin).toBe('https://github.com');
     expect(parsed.pathname).toBe('/login/oauth/authorize');
     expect(parsed.searchParams.get('client_id')).toBe('my-client-id');
     expect(parsed.searchParams.get('scope')).toBe('repo,read:org,user');
+    expect(parsed.searchParams.get('state')).toBe('fixed-state');
   });
 
   it('includes redirect_uri if provided', () => {
-    const url = getAuthorizeUrl('my-client-id', 'https://my-app.com/callback');
+    const url = getAuthorizeUrl('my-client-id', 'https://my-app.com/callback', 'fixed-state');
     const parsed = new URL(url);
     expect(parsed.searchParams.get('redirect_uri')).toBe('https://my-app.com/callback');
   });
 
+  it('creates and stores state when not provided', () => {
+    const url = getAuthorizeUrl('my-client-id');
+    const parsed = new URL(url);
+    expect(parsed.searchParams.get('state')).toBe('test-oauth-state-uuid');
+    expect(sessionStorage.getItem(OAUTH_STATE_KEY)).toBe('test-oauth-state-uuid');
+  });
+
   it('throws an error if client_id is missing', () => {
     expect(() => getAuthorizeUrl('')).toThrow('GitHub Client ID is required');
+  });
+});
+
+describe('validateOAuthState', () => {
+  it('accepts matching state once and clears storage', () => {
+    sessionStorage.setItem(OAUTH_STATE_KEY, 'abc123');
+    expect(validateOAuthState('abc123')).toBe(true);
+    expect(sessionStorage.getItem(OAUTH_STATE_KEY)).toBeNull();
+  });
+
+  it('rejects missing or mismatched state', () => {
+    sessionStorage.setItem(OAUTH_STATE_KEY, 'abc123');
+    expect(validateOAuthState('wrong')).toBe(false);
+    expect(validateOAuthState(null)).toBe(false);
+  });
+});
+
+describe('createOAuthState', () => {
+  it('stores a generated state value', () => {
+    const state = createOAuthState();
+    expect(state).toBe('test-oauth-state-uuid');
+    expect(sessionStorage.getItem(OAUTH_STATE_KEY)).toBe('test-oauth-state-uuid');
   });
 });
 
@@ -32,7 +92,7 @@ describe('exchangeCodeForToken', () => {
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
-        json: async () => ({ access_token: 'gho_secret_token_123' }),
+        text: async () => JSON.stringify({ access_token: 'gho_secret_token_123' }),
       })
     );
 
@@ -52,24 +112,25 @@ describe('exchangeCodeForToken', () => {
       vi.fn().mockResolvedValue({
         ok: false,
         status: 400,
-        text: async () => 'Bad Request',
+        text: async () => JSON.stringify({ error: 'bad_verification_code' }),
       })
     );
 
     await expect(exchangeCodeForToken('my-code')).rejects.toThrow(
-      'Failed to exchange code: 400 Bad Request'
+      'bad_verification_code'
     );
   });
 
-  it('throws an error if API returns OAuth error', async () => {
+  it('throws an error if API returns OAuth error in a 200 response', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
-        json: async () => ({
-          error: 'bad_verification_code',
-          error_description: 'The code passed is incorrect or expired.',
-        }),
+        text: async () =>
+          JSON.stringify({
+            error: 'bad_verification_code',
+            error_description: 'The code passed is incorrect or expired.',
+          }),
       })
     );
 
@@ -83,7 +144,7 @@ describe('exchangeCodeForToken', () => {
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
-        json: async () => ({ token_type: 'bearer' }), // missing access_token
+        text: async () => JSON.stringify({ token_type: 'bearer' }),
       })
     );
 
@@ -97,9 +158,10 @@ describe('exchangeCodeForToken', () => {
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
-        json: async () => ({
-          error: 'bad_verification_code',
-        }),
+        text: async () =>
+          JSON.stringify({
+            error: 'bad_verification_code',
+          }),
       })
     );
 
@@ -111,7 +173,7 @@ describe('exchangeCodeForToken', () => {
   it('sends POST request to /api/auth/token with the code', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ access_token: 'gho_test_token' }),
+      text: async () => JSON.stringify({ access_token: 'gho_test_token' }),
     });
     vi.stubGlobal('fetch', fetchMock);
 
@@ -130,13 +192,13 @@ describe('exchangeCodeForToken', () => {
 
 describe('getAuthorizeUrl — additional edge cases', () => {
   it('does not include redirect_uri when not provided', () => {
-    const url = getAuthorizeUrl('some-client-id');
+    const url = getAuthorizeUrl('some-client-id', undefined, 'fixed-state');
     const parsed = new URL(url);
     expect(parsed.searchParams.has('redirect_uri')).toBe(false);
   });
 
   it('always uses https://github.com/login/oauth/authorize as base', () => {
-    const url = getAuthorizeUrl('client-id', 'https://myapp.com/callback');
+    const url = getAuthorizeUrl('client-id', 'https://myapp.com/callback', 'fixed-state');
     expect(url.startsWith('https://github.com/login/oauth/authorize')).toBe(true);
   });
 });

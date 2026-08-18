@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { isAllowedGithubPrUrl, sanitizePrUrl } from './pr-url';
+import {
+  isAllowedGithubIssueUrl,
+  isAllowedGithubPrUrl,
+  sanitizeGithubIssueUrl,
+  sanitizePrUrl,
+} from './pr-url';
 
 describe('isAllowedGithubPrUrl', () => {
   it('accepts legitimate github.com pull links', () => {
@@ -44,7 +49,7 @@ describe('sanitizePrUrl', () => {
     expect(sanitizePrUrl(url)).toBe(url);
   });
 
-  it('returns # for undefined', () => {
+  it('returns # for undefined input', () => {
     expect(sanitizePrUrl(undefined)).toBe('#');
   });
 
@@ -53,8 +58,8 @@ describe('sanitizePrUrl', () => {
   });
 });
 
-describe('isAllowedGithubPrUrl — additional edge cases', () => {
-  it('rejects http:// (non-HTTPS) GitHub links', () => {
+describe('isAllowedGithubPrUrl - additional boundary cases', () => {
+  it('rejects http (non-https) scheme', () => {
     expect(isAllowedGithubPrUrl('http://github.com/o/r/pull/1')).toBe(false);
   });
 
@@ -62,19 +67,50 @@ describe('isAllowedGithubPrUrl — additional edge cases', () => {
     expect(isAllowedGithubPrUrl('')).toBe(false);
   });
 
-  it('rejects unparseable strings', () => {
+  it('rejects a completely unparseable string', () => {
     expect(isAllowedGithubPrUrl('not a url at all')).toBe(false);
   });
 
-  it('rejects a PR URL with trailing junk after the number', () => {
-    expect(isAllowedGithubPrUrl('https://github.com/o/r/pull/1/files')).toBe(false);
-  });
-
-  it('accepts trailing slash on PR URLs', () => {
-    expect(isAllowedGithubPrUrl('https://github.com/o/r/pull/1/')).toBe(true);
+  it('rejects github.com PR path with extra path segments', () => {
+    expect(isAllowedGithubPrUrl('https://github.com/o/r/pull/1/files')).toBe(
+      false
+    );
   });
 
   it('rejects a numeric path segment that is non-integer-looking', () => {
     expect(isAllowedGithubPrUrl('https://github.com/o/r/pull/abc')).toBe(false);
+  });
+
+  it('accepts PR urls with trailing slash', () => {
+    expect(isAllowedGithubPrUrl('https://github.com/o/r/pull/123/')).toBe(true);
+  });
+});
+
+describe('isAllowedGithubIssueUrl', () => {
+  it('accepts legitimate github.com issue links', () => {
+    expect(
+      isAllowedGithubIssueUrl('https://github.com/k-dot-greyz/dev-master/issues/42')
+    ).toBe(true);
+  });
+
+  it('rejects pull URLs and hostile hosts', () => {
+    expect(
+      isAllowedGithubIssueUrl('https://github.com/k-dot-greyz/dev-master/pull/42')
+    ).toBe(false);
+    expect(
+      isAllowedGithubIssueUrl('https://evil.com/k-dot-greyz/dev-master/issues/42')
+    ).toBe(false);
+  });
+});
+
+describe('sanitizeGithubIssueUrl', () => {
+  it('returns # for hostile or missing URLs', () => {
+    expect(sanitizeGithubIssueUrl('javascript:alert(1)')).toBe('#');
+    expect(sanitizeGithubIssueUrl(null)).toBe('#');
+  });
+
+  it('passes through allowed issue URLs unchanged', () => {
+    const url = 'https://github.com/k-dot-greyz/dev-master/issues/42';
+    expect(sanitizeGithubIssueUrl(url)).toBe(url);
   });
 });

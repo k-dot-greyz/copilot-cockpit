@@ -5,6 +5,7 @@ afterEach(() => {
   vi.restoreAllMocks();
   delete process.env.PUBLIC_GITHUB_CLIENT_ID;
   delete process.env.GITHUB_CLIENT_SECRET;
+  delete process.env.ALLOWED_ORIGINS;
 });
 
 /**
@@ -12,9 +13,10 @@ afterEach(() => {
  */
 function makeReq(
   method: string,
-  body: Record<string, unknown> = {}
+  body: Record<string, unknown> = {},
+  headers: Record<string, string> = {}
 ): any {
-  return { method, body };
+  return { method, body, headers };
 }
 
 /**
@@ -49,12 +51,21 @@ function makeRes() {
 
 describe('api/auth/token handler', () => {
   describe('CORS headers', () => {
-    it('sets CORS headers on every request', async () => {
+    it('does not set wildcard CORS headers for same-origin requests', async () => {
       const req = makeReq('GET');
       const res = makeRes();
       await handler(req as any, res as any);
-      expect(res.headers['Access-Control-Allow-Origin']).toBe('*');
+      expect(res.headers['Access-Control-Allow-Origin']).toBeUndefined();
+    });
+
+    it('reflects allowed origins when Origin header is present', async () => {
+      process.env.ALLOWED_ORIGINS = 'https://cockpit.example.com';
+      const req = makeReq('OPTIONS', {}, { origin: 'https://cockpit.example.com' });
+      const res = makeRes();
+      await handler(req as any, res as any);
+      expect(res.headers['Access-Control-Allow-Origin']).toBe('https://cockpit.example.com');
       expect(res.headers['Access-Control-Allow-Credentials']).toBe('true');
+      expect(res.headers['Vary']).toBe('Origin');
     });
   });
 

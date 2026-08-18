@@ -1,17 +1,37 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
+function getAllowedOrigins(): string[] {
+  return (process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+}
+
+function applyCorsHeaders(req: VercelRequest, res: VercelResponse): void {
+  const origin = req.headers?.origin;
+  const allowedOrigins = getAllowedOrigins();
+
+  if (!origin) {
+    return;
+  }
+
+  if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
+    res.setHeader(
+      'Access-Control-Allow-Headers',
+      'Content-Type, X-Requested-With'
+    );
+  }
+}
+
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
-  // Enable CORS
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
+  applyCorsHeaders(req, res);
 
   if (req.method === 'OPTIONS') {
     res.status(200).end();

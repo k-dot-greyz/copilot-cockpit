@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   categorizePRs,
   computeStats,
+  deriveStateAfterBulkClose,
   detectFlood,
   extractIssueRefs,
   findDuplicates,
@@ -69,6 +70,23 @@ describe('detectFlood', () => {
     ];
 
     expect(detectFlood(prs, 1)).toEqual([]);
+  });
+
+  it('detects floods for any namespace prefix, not only greyzxc', () => {
+    const prs = Array.from({ length: 10 }, (_, i) =>
+      makePR({
+        number: i + 1,
+        title: `Auto #${200 + i}`,
+        headRefName: `cursor-agent/regression-shield-${(i + 1).toString(16).padStart(4, '0')}`,
+        authorType: 'bot',
+      })
+    );
+
+    const floods = detectFlood(prs, 10);
+
+    expect(floods).toHaveLength(1);
+    expect(floods[0].pattern).toBe('regression-shield');
+    expect(floods[0].count).toBe(10);
   });
 });
 
@@ -168,6 +186,55 @@ describe('computeStats', () => {
       checks: { success: 0, failure: 0, pending: 0, none: 12 },
       reviews: { approved: 0, changesRequested: 0, required: 0, none: 12 },
     });
+  });
+});
+
+describe('deriveStateAfterBulkClose', () => {
+  it('keeps categories, stats, and floods aligned on the same remaining snapshot', () => {
+    const floodPRs = Array.from({ length: 10 }, (_, i) =>
+      makePR({
+        number: i + 1,
+        title: 'chore: flood bot',
+        headRefName: `greyzxc/issue-resolution-${(i + 1).toString(16).padStart(4, '0')}`,
+        authorType: 'bot',
+        createdAt: `2026-01-${String(i + 1).padStart(2, '0')}T00:00:00Z`,
+      })
+    );
+    const humanPR = makePR({
+      number: 100,
+      authorType: 'human',
+      isDraft: false,
+      createdAt: '2026-02-01T00:00:00Z',
+    });
+    const prs = [...floodPRs, humanPR];
+
+    expect(computeStats(prs).floodCount).toBe(10);
+
+    const derived = deriveStateAfterBulkClose(prs, [1, 2, 3]);
+
+    expect(derived.remaining).toHaveLength(8);
+    expect(derived.stats.total).toBe(derived.remaining.length);
+    expect(derived.stats.floodCount).toBe(0);
+    expect(derived.floods).toEqual([]);
+    expect(derived.categories['bot-flood']).toHaveLength(0);
+
+    const categorizedTotal = (
+      Object.keys(derived.categories) as Array<keyof typeof derived.categories>
+    ).reduce((sum, key) => sum + derived.categories[key].length, 0);
+    expect(categorizedTotal).toBe(derived.remaining.length);
+  });
+
+  it('ignores PRs that failed to close', () => {
+    const prs = [
+      makePR({ number: 1, authorType: 'human' }),
+      makePR({ number: 2, authorType: 'human' }),
+      makePR({ number: 3, authorType: 'human' }),
+    ];
+
+    const derived = deriveStateAfterBulkClose(prs, [1, 3]);
+
+    expect(derived.remaining.map((p) => p.number)).toEqual([2]);
+    expect(derived.stats.total).toBe(1);
   });
 });
 
