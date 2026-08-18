@@ -19,13 +19,16 @@ Type-checking effectively happens through `npm run build` (Vite/esbuild).
 
 ### Tooling Workflows (env-doctor & git-butler)
 
+- **Automated Tool Hydration**:
+  - `scripts/hydrate-tools.sh` is executed during the install/setup phase to pull and symlink `env-doctor`, `git-butler`, `neuro-spicy-devkit`, and `dinit` into `~/.local/bin/`.
+  - `scripts/start.sh` runs silently on boot (`<200ms`) to verify PATH and execute `env-doctor -q` as a pre-flight health gate.
 - **Environment Diagnostics (`env-doctor`)**:
-  - Run `bash env-doctor.sh -j` (or clone `k-dot-greyz/env-doctor`) for non-interactive JSON diagnostic streams.
+  - Run `env-doctor -j` for non-interactive JSON diagnostic streams.
   - The repo contains `.env-doctor.conf` configured for brand `copilot-cockpit` and Node `>=22.12.0` checks.
-  - Use `-q` for silent exit-code health checks before launching builds.
+  - Use `env-doctor -q` for silent exit-code health checks before launching builds.
 - **Git Flow & Branch Hygiene (`git-butler` / `git-steward`)**:
   - For automated conventional commit and guided PR workflows without token-heavy LLM chat round-trips, run:
-    `SKIP_CONFIRM=1 bash scripts/guided-pr-flow.sh`
+    `SKIP_CONFIRM=1 git-steward` (or `SKIP_CONFIRM=1 git-butler`)
   - Ensures clean branch naming (`greyzxcursor/<descriptive-name>-d7df`) and draft PR creation via `gh pr create --fill --draft`.
 
 ### Non-obvious gotchas
