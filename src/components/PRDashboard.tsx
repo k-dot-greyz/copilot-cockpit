@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { PR } from '../lib/github';
 import { fetchOpenPRs, bulkClosePRs, validateToken } from '../lib/github';
+import { MOCK_PRS } from '../lib/fixtures/pr';
 import {
   categorizePRs,
   computeStats,
@@ -15,8 +16,18 @@ import {
   type PRCategory,
 } from '../lib/triage';
 
-const OWNER = 'k-dot-greyz';
-const REPO = 'dev-master';
+const DEFAULT_OWNER = 'k-dot-greyz';
+const DEFAULT_REPO = 'dev-master';
+const OWNER =
+  (typeof import.meta !== 'undefined' &&
+    import.meta.env &&
+    import.meta.env.PUBLIC_GITHUB_OWNER) ||
+  DEFAULT_OWNER;
+const REPO =
+  (typeof import.meta !== 'undefined' &&
+    import.meta.env &&
+    import.meta.env.PUBLIC_GITHUB_REPO) ||
+  DEFAULT_REPO;
 const TOKEN_KEY = 'cockpit-gh-token';
 
 /* ------------------------------------------------------------------ */
@@ -25,19 +36,21 @@ const TOKEN_KEY = 'cockpit-gh-token';
  * Renders a modal prompting the user to enter a GitHub Personal Access Token.
  *
  * The modal displays an optional error message, an auto-focused password input,
- * and a Connect button (disabled when the input is empty). Pressing Enter while
- * the input has content or clicking Connect invokes `onSubmit` with the token.
+ * a Connect button (disabled when the input is empty), and a button to load demo/mock data.
  *
  * @param onSubmit - Callback invoked with the entered token when the user submits.
+ * @param onUseDemo - Callback invoked when the user selects mock data demo mode.
  * @param error - Optional error message to show in the modal.
  * @returns The token-entry modal JSX element.
  */
 
 function TokenModal({
   onSubmit,
+  onUseDemo,
   error,
 }: {
   onSubmit: (token: string) => void;
+  onUseDemo: () => void;
   error?: string;
 }) {
   const [token, setToken] = useState('');
@@ -72,6 +85,13 @@ function TokenModal({
             disabled={!token}
           >
             Connect
+          </button>
+          <button
+            className="btn btn--secondary"
+            onClick={onUseDemo}
+            type="button"
+          >
+            Use Demo Data
           </button>
         </div>
       </div>
@@ -551,6 +571,15 @@ export default function PRDashboard() {
     setToken(t);
   };
 
+  const handleUseDemo = () => {
+    setUser('demo-user (mock data)');
+    setShowTokenModal(false);
+    setTokenError(undefined);
+    setPrs(MOCK_PRS);
+    syncTriage(MOCK_PRS);
+    setLastFetched(new Date().toLocaleTimeString());
+  };
+
   const handleToggle = (n: number) => {
     setSelectedPRs((prev) => {
       const next = new Set(prev);
@@ -600,52 +629,27 @@ export default function PRDashboard() {
     return result;
   };
 
-  const handleCloseSelected = async () => {
-    if (!token || selectedPRs.size === 0) return;
-    const confirmed = window.confirm(
-      `Close ${selectedPRs.size} PRs and delete their branches? This cannot be undone.`
-    );
-    if (!confirmed) return;
-
-    const result = await closePRs([...selectedPRs]);
-    if (!result) return;
   const handleCloseSelected = async (numbers?: number[]) => {
     const numbersToClose = numbers || [...selectedPRs];
-    if (!token || numbersToClose.length === 0) return;
+    if (numbersToClose.length === 0) return;
     const confirmed = window.confirm(
       `Close ${numbersToClose.length} PRs and delete their branches? This cannot be undone.`
     );
     if (!confirmed) return;
 
-    setIsClosing(true);
-    try {
-      const result = await bulkClosePRs(
-        OWNER,
-        REPO,
-        numbersToClose,
-        token,
-        true,
-        (done, total) => setNukeProgress({ done, total })
-      );
-
-      // Remove closed PRs from state
-      setPrs((prev) => {
-        const remaining = prev.filter((p) => !result.closed.includes(p.number));
-        setCategories(categorizePRs(remaining));
-        setStats(computeStats(remaining));
-        setFloods(detectFlood(remaining));
-        return remaining;
-      });
+    if (!token) {
+      // Demo mode fallback: simulate local removal
+      const closedSet = new Set(numbersToClose);
+      const remaining = prs.filter((p) => !closedSet.has(p.number));
+      setPrs(remaining);
+      syncTriage(remaining);
       setSelectedPRs(new Set());
+      return;
+    }
 
-      if (result.failed.length > 0) {
-        setError(`Failed to close ${result.failed.length} PRs`);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to close PRs');
-    } finally {
-      setIsClosing(false);
-      setNukeProgress(null);
+    const result = await closePRs(numbersToClose);
+    if (result && result.failed.length > 0) {
+      setError(`Failed to close ${result.failed.length} PRs`);
     }
   };
 
@@ -664,6 +668,15 @@ export default function PRDashboard() {
     );
     if (!confirmed) return;
 
+    if (!token) {
+      const closedSet = new Set(extras.map((pr) => pr.number));
+      const remaining = prs.filter((p) => !closedSet.has(p.number));
+      setPrs(remaining);
+      syncTriage(remaining);
+      setSelectedPRs(new Set());
+      return;
+    }
+
     const result = await closePRs(extras.map((pr) => pr.number));
     if (result && result.failed.length > 0) {
       setError(
@@ -673,47 +686,25 @@ export default function PRDashboard() {
   };
 
   const handleNukeFlood = async (floodPRs: PR[]) => {
-    if (!token) return;
     const confirmed = window.confirm(
       `☢ NUKE ${floodPRs.length} flood PRs and delete their branches?\n\nThis will close all duplicate bot PRs. The underlying issues remain open.\n\nThis cannot be undone.`
     );
     if (!confirmed) return;
 
-    const result = await closePRs(floodPRs.map((p) => p.number));
-    if (!result) return;
-    setIsClosing(true);
-    try {
-      const numbers = floodPRs.map((p) => p.number);
-      const result = await bulkClosePRs(
-        OWNER,
-        REPO,
-        numbers,
-        token,
-        true,
-        (done, total) => setNukeProgress({ done, total })
-      );
-
-      // Remove closed from state
-      setPrs((prev) => {
-        const closedSet = new Set(result.closed);
-        const remaining = prev.filter((p) => !closedSet.has(p.number));
-        setCategories(categorizePRs(remaining));
-        setStats(computeStats(remaining));
-        setFloods(detectFlood(remaining));
-        return remaining;
-      });
+    if (!token) {
+      const closedSet = new Set(floodPRs.map((p) => p.number));
+      const remaining = prs.filter((p) => !closedSet.has(p.number));
+      setPrs(remaining);
+      syncTriage(remaining);
       setSelectedPRs(new Set());
+      return;
+    }
 
-      if (result.failed.length > 0) {
-        setError(
-          `Nuked ${result.closed.length} PRs. ${result.failed.length} failed.`
-        );
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to nuke flood PRs');
-    } finally {
-      setIsClosing(false);
-      setNukeProgress(null);
+    const result = await closePRs(floodPRs.map((p) => p.number));
+    if (result && result.failed.length > 0) {
+      setError(
+        `Nuked ${result.closed.length} PRs. ${result.failed.length} failed.`
+      );
     }
   };
 
@@ -747,7 +738,11 @@ export default function PRDashboard() {
   return (
     <div className="app-shell">
       {showTokenModal && (
-        <TokenModal onSubmit={handleTokenSubmit} error={tokenError} />
+        <TokenModal
+          onSubmit={handleTokenSubmit}
+          onUseDemo={handleUseDemo}
+          error={tokenError}
+        />
       )}
 
       {/* Header */}

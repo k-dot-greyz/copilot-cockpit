@@ -17,6 +17,17 @@ There is **no lint script** and `@astrojs/check` is not a declared dependency, s
 `astro check` will prompt to install and should not be treated as a required gate.
 Type-checking effectively happens through `npm run build` (Vite/esbuild).
 
+### Tooling Workflows (env-doctor & git-butler)
+
+- **Environment Diagnostics (`env-doctor`)**:
+  - Run `bash env-doctor.sh -j` (or clone `k-dot-greyz/env-doctor`) for non-interactive JSON diagnostic streams.
+  - The repo contains `.env-doctor.conf` configured for brand `copilot-cockpit` and Node `>=22.12.0` checks.
+  - Use `-q` for silent exit-code health checks before launching builds.
+- **Git Flow & Branch Hygiene (`git-butler` / `git-steward`)**:
+  - For automated conventional commit and guided PR workflows without token-heavy LLM chat round-trips, run:
+    `SKIP_CONFIRM=1 bash scripts/guided-pr-flow.sh`
+  - Ensures clean branch naming (`greyzxcursor/<descriptive-name>-d7df`) and draft PR creation via `gh pr create --fill --draft`.
+
 ### Non-obvious gotchas
 
 - The **entire UI is a single client island**: `src/pages/index.astro` renders
@@ -24,10 +35,8 @@ Type-checking effectively happens through `npm run build` (Vite/esbuild).
   transform (e.g. a syntax error), the dev server still returns HTTP 200 with the HTML
   shell, but the page renders **blank** — check the dev-server terminal / browser
   console for the esbuild error rather than assuming the server is down.
-- **No mock/demo data path.** On load the dashboard shows a token modal and expects a
-  **GitHub Personal Access Token** (`repo` scope), stored in `sessionStorage` under
-  `cockpit-gh-token`. It then hits the live GitHub REST API for open PRs of
-  `k-dot-greyz/dev-master` (hardcoded `OWNER`/`REPO` in `PRDashboard.tsx`). A full
-  end-to-end UI hello-world therefore needs a valid PAT; without one you can only reach
-  the token modal. Core triage/client logic is covered without a token via the Vitest
-  suites (`src/lib/*.test.ts`).
+- **Mock & Demo Data Support**:
+  - The dashboard supports instant offline/demo testing via the "Use Demo Data" button in the token modal, or by hydrating state with fixtures from `src/lib/fixtures/pr.ts`.
+  - To target a specific GitHub repository dynamically, set `PUBLIC_GITHUB_OWNER` and `PUBLIC_GITHUB_REPO` in environment variables (defaults to `k-dot-greyz/dev-master`).
+- **GitHub PAT Authentication**:
+  - When connecting to live GitHub data, a Personal Access Token with `repo` scope is stored in `sessionStorage` under `cockpit-gh-token` and used for client-side REST calls.
