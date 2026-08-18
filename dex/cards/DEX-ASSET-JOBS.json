@@ -1,0 +1,21 @@
+{
+  "dex_id": "0x7D:0x21:DEX-ASSET-JOBS",
+  "dex_type": "pipe",
+  "status": "active",
+  "module_id": "DEX-ASSET-JOBS",
+  "title": "Job Cards → Dex Asset Card Pipe",
+  "description": "Ingests career and wage-slaving JSON cards from content/cards/jobs/ and compiles them into indexable Dex asset cards.",
+  "tags": ["pipe", "dex", "jobs", "career", "hydration"],
+  "inputs": ["content/cards/jobs/*.json", "schemas/job_card.schema.json"],
+  "outputs": ["DexAssetCard", "JobCardEntity"],
+  "tier": 1,
+  "acceptance": [
+    "Validates all job cards against schemas/job_card.schema.json",
+    "Maps career tracks (fast_food, tech, finance, crime) to Dex registry",
+    "Computes base payout scaling and stat requirements"
+  ],
+  "links": [
+    { "rel": "parent", "href": "dex-entry.md", "label": "StickHRPG 0x7D:0x20" }
+  ],
+  "files": ["content/cards/jobs/", "schemas/job_card.schema.json", "src/components/views/ArenaView.tsx"]
+}

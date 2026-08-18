@@ -1,11 +1,11 @@
 {
-  "dex_id": "0x7D:0x11",
-  "dex_type": "tool",
-  "status": "planning",
-  "title": "COCKPIT-PIPELINE-002 — Module Index",
-  "description": "Manifest of idempotent development modules for post-#7 hardening and dex hydration pipeline.",
-  "tags": ["pipeline", "manifest", "cockpit"],
-  "cards": [
+  "dex_id": "0x7D:0x20",
+  "dex_type": "game_engine",
+  "status": "active",
+  "title": "StickHRPG & Copilot Cockpit — Dex Master Catalog",
+  "description": "Unified manifest of all development modules, asset pipes, and JSON card entities for Copilot Cockpit & StickHRPG.",
+  "tags": ["pipeline", "manifest", "cockpit", "stickhrpg", "dex-pipes", "atelier"],
+  "cockpit_modules": [
     "MOD-TEST-NITPICK",
     "MOD-KBD-GUARDS",
     "MOD-PLAYWRIGHT-MIGRATE",
@@ -18,11 +18,17 @@
     "MOD-DUPLICATES-UI",
     "MOD-PR-PARITY-SYNC"
   ],
+  "stickhrpg_asset_pipes": [
+    "DEX-ASSET-JOBS",
+    "DEX-ASSET-OUTFITS",
+    "DEX-ASSET-TAROT",
+    "DEX-ASSET-COMPANIONS",
+    "DEX-ASSET-ENCOUNTERS"
+  ],
   "links": [
-    { "rel": "parent", "href": "dex-entry.md", "label": "Copilot Cockpit 0x7D:0x10" },
-    { "rel": "doc", "href": "docs/epics/COCKPIT-PIPELINE-002.md", "label": "Epic spec" },
-    { "rel": "pr", "href": "https://github.com/k-dot-greyz/copilot-cockpit/pull/7", "label": "PR #7" },
-    { "rel": "pr", "href": "https://github.com/k-dot-greyz/copilot-cockpit/pull/8", "label": "PR #8" },
-    { "rel": "pr", "href": "https://github.com/k-dot-greyz/copilot-cockpit/pull/10", "label": "PR #10" }
+    { "rel": "parent", "href": "dex-entry.md", "label": "StickHRPG / Cockpit 0x7D:0x20" },
+    { "rel": "doc", "href": "docs/epics/COCKPIT-PIPELINE-002.md", "label": "Cockpit Pipeline Epic" },
+    { "rel": "doc", "href": "docs/epics/AT-2869-STICKHRPG-001.md", "label": "Atelier StickHRPG Fork Epic" },
+    { "rel": "doc", "href": "docs/whitepaper_stick_rpg.md", "label": "StickHRPG Whitepaper" }
   ]
 }
