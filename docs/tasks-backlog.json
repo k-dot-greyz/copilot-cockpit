@@ -1,0 +1,112 @@
+[
+  {
+    "id": "TASK-WASM-001",
+    "epic": "STICKHRPG-WASM-001",
+    "title": "Compile stick-core to WebAssembly via wasm-bindgen and integrate with Astro client island",
+    "status": "pending",
+    "priority": "P1",
+    "description": "Build wasm-pack bindings for packages/stick-core exposing deterministic stat XP math, job promotion validation, gacha pity RNG, and SysEx delta packing directly in browser runtime.",
+    "acceptance_criteria": [
+      "wasm-pack build output configured under packages/stick-core/pkg",
+      "TypeScript wrapper with fallback to pure TS implementation if WebAssembly is unavailable",
+      "Benchmarked zero-allocation delta hydration under 0.5ms per tick"
+    ],
+    "target_files": [
+      "packages/stick-core/Cargo.toml",
+      "packages/stick-core/src/lib.rs",
+      "src/lib/game/wasm-loader.ts"
+    ]
+  },
+  {
+    "id": "TASK-SYSEX-002",
+    "epic": "STICKHRPG-SYNC-002",
+    "title": "WebSocket live MIDI 2.0 / SysEx state sync channel and multiplayer ghost leaderboard",
+    "status": "pending",
+    "priority": "P2",
+    "description": "Implement bidirectional WebSocket channel streaming 0xF0 (full handshake) and 0xF7 (bitmask sparse diff) packets to synchronize player ghost actions and high-score leaderboards.",
+    "acceptance_criteria": [
+      "WebSocket client handler with automatic reconnection and exponential backoff",
+      "SysEx bitmask unpacker handling packet sequences without dropped state ticks",
+      "Leaderboard component in Dex view showing high-roller Degen scores"
+    ],
+    "target_files": [
+      "src/lib/game/sysex-socket.ts",
+      "src/components/views/DexView.tsx",
+      "schemas/sysex_delta_packet.schema.json"
+    ]
+  },
+  {
+    "id": "TASK-VN-003",
+    "epic": "STICKHRPG-OTOME-003",
+    "title": "Interactive visual novel dialogue engine with branching choice trees and affinity checks",
+    "status": "pending",
+    "priority": "P1",
+    "description": "Create reusable EncounterModal / VisualNovelDialogue component parsing JSON narrative cards with branching choices conditioned on Charm, Degen, and Karma stats.",
+    "acceptance_criteria": [
+      "Encounter card JSON schema and 3 narrative encounter fixtures (Watercooler Rizz, Back-Alley Crypto Shakedown, Penthouse Dinner)",
+      "Choice selection checks against player CHM/KRM/DGN stats",
+      "Affinity XP reward triggers and companion perk unlock animations"
+    ],
+    "target_files": [
+      "schemas/encounter_card.schema.json",
+      "content/cards/encounters/back_alley_deal.json",
+      "content/cards/encounters/awkward_watercooler.json",
+      "src/components/EncounterModal.tsx",
+      "src/lib/game/encounter-engine.ts"
+    ]
+  },
+  {
+    "id": "TASK-COMBAT-004",
+    "epic": "STICKHRPG-COMBAT-004",
+    "title": "Underground Fight Pit turn-based brawler mini-game with outfit/tarot elemental damage",
+    "status": "pending",
+    "priority": "P2",
+    "description": "Implement turn-based combat arena in Arena view utilizing player STR, equipped outfit element multipliers (Void, Fire, Water, Aether), and Tarot card ATK/DEF/SPD attributes.",
+    "acceptance_criteria": [
+      "Turn-based combat state machine with Attack, Defend, Degen Gambits, and Item actions",
+      "Elemental rock-paper-scissors effectiveness matrix (Fire > Aether > Water > Void > Fire)",
+      "Loot drops (Cash, Relic Cards, Degen Score) upon defeating underground champions"
+    ],
+    "target_files": [
+      "src/lib/game/combat-engine.ts",
+      "src/components/views/ArenaView.tsx",
+      "src/lib/game/__tests__/combat.test.ts"
+    ]
+  },
+  {
+    "id": "TASK-CASINO-005",
+    "epic": "STICKHRPG-CASINO-005",
+    "title": "Crypto liquidation roulette & dynamic rugpull market simulator",
+    "status": "pending",
+    "priority": "P2",
+    "description": "Expand Casino Mini-Game into a speculative market terminal with high-leverage 100x margin trading, liquidation warnings, and meme coin rugpull mechanics.",
+    "acceptance_criteria": [
+      "Dynamic price ticker with Poisson rugpull probability based on Degen score",
+      "10x to 100x leverage sliders with margin call liquidation triggers",
+      "Existential Dread recovery activities in Forge view"
+    ],
+    "target_files": [
+      "src/components/CasinoMiniGame.tsx",
+      "src/lib/game/market-engine.ts",
+      "docs/mechanics/04_consoomer_casino.md"
+    ]
+  },
+  {
+    "id": "TASK-A11Y-006",
+    "epic": "STICKHRPG-A11Y-006",
+    "title": "WCAG 2.2 AAA accessibility control panel & neurodivergent sensory settings",
+    "status": "pending",
+    "priority": "P1",
+    "description": "Build A11ySettingsModal with configurable reduced motion, screen-shake toggle, flashing light suppression, high-contrast theme overrides, and text-to-speech ARIA live region pacing.",
+    "acceptance_criteria": [
+      "Accessible modal navigable completely via keyboard (Esc to close, Tab traps)",
+      "Persistent user preferences in localStorage",
+      "Passes automated axe-core / Playwright accessibility checks with 0 violations"
+    ],
+    "target_files": [
+      "src/components/A11ySettingsModal.tsx",
+      "src/styles/global.css",
+      "tests/a11y-wcag.spec.ts"
+    ]
+  }
+]

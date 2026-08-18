@@ -190,6 +190,13 @@ export function GameShell() {
         </div>
 
         <div className="header-right">
+          <a
+            className="btn btn--sm"
+            href="/"
+            style={{ textDecoration: 'none' }}
+          >
+            👨‍✈️ Cockpit
+          </a>
           <div style={{ display: 'flex', gap: '0.25rem' }}>
             <button
               className={`btn btn--sm ${activeTab === 'dex' ? 'btn--primary' : ''}`}
