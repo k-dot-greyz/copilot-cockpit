@@ -2,15 +2,16 @@
 # ==============================================================================
 # 🚀 zenOS / GlitchWorks Fast Boot Pre-flight
 # Runs on every boot (START phase).
-# Super fast (<200ms), zero token sink, ensures PATH & runs silent health gate.
+# Super fast (<50ms), zero token sink, ensures PATH & runs silent health gate.
 # ==============================================================================
 set -euo pipefail
 
-export PATH="${HOME}/.local/bin:${PATH}"
+BIN_DIR="${HOME}/.local/bin"
+[[ ":$PATH:" != *":${BIN_DIR}:"* ]] && export PATH="${BIN_DIR}:${PATH}"
 
-# 1. Run silent health check if env-doctor is present
-if command -v env-doctor >/dev/null 2>&1; then
-  env-doctor -q || true
+# 1. Fast pre-flight check if env-doctor is present
+if [[ -x "${BIN_DIR}/env-doctor" ]]; then
+  "${BIN_DIR}/env-doctor" -q || true
 fi
 
 # 2. Compact single-line readiness beacon
