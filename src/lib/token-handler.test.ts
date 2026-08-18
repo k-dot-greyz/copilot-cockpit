@@ -67,6 +67,22 @@ describe('api/auth/token handler', () => {
       expect(res.headers['Access-Control-Allow-Credentials']).toBe('true');
       expect(res.headers['Vary']).toBe('Origin');
     });
+
+    it('does not reflect CORS headers for disallowed origins when allowlist is configured', async () => {
+      process.env.ALLOWED_ORIGINS = 'https://cockpit.example.com';
+      const req = makeReq('OPTIONS', {}, { origin: 'https://evil.example.com' });
+      const res = makeRes();
+      await handler(req as any, res as any);
+      expect(res.headers['Access-Control-Allow-Origin']).toBeUndefined();
+      expect(res.headers['Access-Control-Allow-Credentials']).toBeUndefined();
+    });
+
+    it('allows any origin when ALLOWED_ORIGINS is unset (empty allowlist)', async () => {
+      const req = makeReq('OPTIONS', {}, { origin: 'https://arbitrary.example.com' });
+      const res = makeRes();
+      await handler(req as any, res as any);
+      expect(res.headers['Access-Control-Allow-Origin']).toBe('https://arbitrary.example.com');
+    });
   });
 
   describe('OPTIONS preflight', () => {
