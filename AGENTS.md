@@ -12,6 +12,7 @@ Docker dependencies. Node `>=22.12.0` is required (see `package.json` `engines`)
 - `npm run build` — static production build into `dist/`.
 - `npm run preview` — serve the built `dist/` output.
 - `npm run test` — Vitest (`vitest run`). Tests live next to source as `*.test.ts`.
+  - Comprehensive unit suites: `github.test.ts`, `triage.test.ts`, `sitrep.test.ts`, `ux-journeys.test.ts`.
 
 There is **no lint script** and `@astrojs/check` is not a declared dependency, so
 `astro check` will prompt to install and should not be treated as a required gate.
