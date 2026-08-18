@@ -1,5 +1,7 @@
 // GitHub API client for copilot-cockpit
-// Client-side only — uses token from localStorage
+// Client-side only — uses token from sessionStorage
+
+import { sanitizePrUrl } from './validation/pr-url';
 
 export interface PR {
   number: number;
@@ -69,18 +71,24 @@ function classifyAuthor(login: string, type: string): PR['authorType'] {
  * @returns A `PR` object with selected fields mapped from `raw`; `reviewDecision` is set to `null` because the REST response does not provide it
  */
 function mapPR(raw: PRApiResponse): PR {
+  const labels = Array.isArray(raw.labels)
+    ? raw.labels
+        .map((l) => (l && typeof l.name === 'string' ? l.name : ''))
+        .filter(Boolean)
+    : [];
+
   return {
     number: raw.number,
-    title: raw.title,
-    author: raw.user.login,
-    authorType: classifyAuthor(raw.user.login, raw.user.type),
-    createdAt: raw.created_at,
-    updatedAt: raw.updated_at,
-    headRefName: raw.head.ref,
-    isDraft: raw.draft,
+    title: typeof raw.title === 'string' ? raw.title : '',
+    author: raw.user?.login ?? 'unknown',
+    authorType: classifyAuthor(raw.user?.login ?? '', raw.user?.type ?? ''),
+    createdAt: raw.created_at ?? '',
+    updatedAt: raw.updated_at ?? '',
+    headRefName: raw.head?.ref ?? '',
+    isDraft: Boolean(raw.draft),
     reviewDecision: null, // REST API doesn't return this directly
-    labels: raw.labels.map((l) => l.name),
-    url: raw.html_url,
+    labels,
+    url: sanitizePrUrl(raw.html_url),
   };
 }
 
