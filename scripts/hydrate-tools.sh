@@ -13,6 +13,7 @@ set -euo pipefail
 TOOLS_DIR="${HOME}/.local/share/zen-tools"
 BIN_DIR="${HOME}/.local/bin"
 mkdir -p "${TOOLS_DIR}" "${BIN_DIR}"
+export PATH="${BIN_DIR}:${PATH}"
 
 REPOS=(
   "k-dot-greyz/env-doctor"
@@ -21,7 +22,7 @@ REPOS=(
   "k-dot-greyz/dinit"
 )
 
-echo "⚡ [Hydrate] Syncing zen-tools ecosystem to ${TOOLS_DIR}..."
+echo "⚡ [Hydrate] Syncing zen-tools ecosystem in parallel to ${TOOLS_DIR}..."
 
 sync_repo() {
   local repo="$1"
@@ -66,3 +67,49 @@ if [[ -f "${TOOLS_DIR}/dinit/dinit.sh" ]]; then
 fi
 
 echo "✓ [Hydrate] Tool shims installed in ${BIN_DIR}"
+
+# ------------------------------------------------------------------------------
+# Pinged dependency & tool sitrep matrix
+# ------------------------------------------------------------------------------
+format_tool_version() {
+  local name="$1"
+  local cmd="$2"
+  local ver="missing"
+  local channel="release stable"
+
+  if command -v "${cmd%% *}" >/dev/null 2>&1; then
+    ver=$(eval "$cmd" 2>&1 | head -n 1 || echo "unknown")
+    printf "  %-18s %-32s [%s]\n" "$name" "$ver" "$channel"
+  else
+    printf "  %-18s %-32s [not installed]\n" "$name" "$ver"
+  fi
+}
+
+format_repo_version() {
+  local name="$1"
+  local dir="${TOOLS_DIR}/$1"
+  if [[ -d "${dir}/.git" ]]; then
+    local sha
+    local date
+    sha=$(git -C "${dir}" rev-parse --short HEAD 2>/dev/null || echo "unknown")
+    date=$(git -C "${dir}" log -1 --format=%cd --date=format:'%Y-%m-%d' 2>/dev/null || echo "")
+    printf "  %-18s rev %-12s (%s)  [nightly/head]\n" "$name" "$sha" "$date"
+  else
+    printf "  %-18s missing                [unavailable]\n" "$name"
+  fi
+}
+
+echo ""
+echo "┌── zenOS Dep & Tooling Sitrep ───────────────────────────────"
+format_tool_version "Node.js" "node --version"
+format_tool_version "npm" "npm --version"
+format_tool_version "Git" "git --version"
+format_tool_version "GitHub CLI" "gh --version | head -1"
+format_tool_version "Python" "python3 --version"
+echo "├─────────────────────────────────────────────────────────────"
+format_repo_version "env-doctor"
+format_repo_version "git-butler"
+format_repo_version "neuro-spicy-devkit"
+format_repo_version "dinit"
+echo "└─────────────────────────────────────────────────────────────"
+echo ""

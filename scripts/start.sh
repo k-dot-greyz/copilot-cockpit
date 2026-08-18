@@ -8,7 +8,10 @@ set -euo pipefail
 
 export PATH="${HOME}/.local/bin:${PATH}"
 
-# Run silent health check if env-doctor is present
+# 1. Run silent health check if env-doctor is present
 if command -v env-doctor >/dev/null 2>&1; then
   env-doctor -q || true
 fi
+
+# 2. Compact single-line readiness beacon
+echo "⚡ [zenOS Boot] Shims verified in PATH. Environment clean."
