@@ -47,6 +47,70 @@ This happy path is fully verified by an end-to-end integration test in **Vitest*
 - **Test File:** `src/lib/happy-path.test.ts`
 - **What it covers:** Token validation, paginated fetching, stat calculation, multi-lane categorization, and a full mock-nuke sequence (sequentially closing 12 flood PRs and deleting their branches) followed by post-nuke state verification.
 - **Run command:** `npm run test`
+- **Coverage:** 139+ unit tests across triage, OAuth, filters, GraphQL validation, and the happy-path integration suite.
+
+---
+
+## OAuth Login
+
+In addition to manual PAT entry, the dashboard supports GitHub OAuth for a one-click login flow.
+
+### Flow
+
+1. User clicks **Sign in with GitHub** → browser redirects to `https://github.com/login/oauth/authorize` with `client_id`, `scope` (`repo,read:org,user`), and a random `state` value.
+2. GitHub redirects back to the app callback URL with `?code=…&state=…`.
+3. Client validates `state` against the value stored in `sessionStorage` (CSRF protection), then POSTs the `code` to `/api/auth/token`.
+4. The serverless function exchanges the code for an access token using `GITHUB_CLIENT_SECRET` and returns it to the client.
+5. Token is stored in `sessionStorage` (never on disk) and OAuth query params are stripped from the URL.
+
+### Environment Variables
+
+| Variable | Where | Purpose |
+| :--- | :--- | :--- |
+| `PUBLIC_GITHUB_CLIENT_ID` | Client + server | GitHub OAuth App client ID (public) |
+| `GITHUB_CLIENT_SECRET` | Server only | Secret used to exchange authorization codes |
+| `ALLOWED_ORIGINS` | Server only | Comma-separated list of allowed CORS origins for `/api/auth/token` |
+
+### Callback URL Setup
+
+In your GitHub OAuth App settings, set the **Authorization callback URL** to your deployment origin (e.g. `https://cockpit.glitchworks.tech/` or `http://localhost:4321/` for local dev). The app uses `window.location.origin + window.location.pathname` as the `redirect_uri`.
+
+### CSRF State Protection
+
+Before redirecting to GitHub, `createOAuthState()` generates a UUID and stores it in `sessionStorage` under `cockpit-oauth-state`. On callback, `validateOAuthState()` compares the returned `state` param, clears the stored value, and rejects mismatches.
+
+---
+
+## PR Filters & Detail Drawer
+
+### FilterBar
+
+The **Filter Console** above the triage lanes supports multi-dimensional filtering:
+
+| Dimension | Options |
+| :--- | :--- |
+| **Search** | Title, branch name, or `#number` |
+| **PR State** | Open · Closed · Merged · All |
+| **Author Type** | All · Human · Bot · External |
+| **Label** | Dynamic list from fetched PRs |
+| **Review Decision** | Approved · Changes Requested · Review Required · None |
+| **CI Checks** | Success · Failure · Pending · None |
+| **Draft Status** | All · Draft Only · Ready Only |
+
+Filters apply client-side on top of the fetched PR list. Changing **PR State** triggers a re-fetch from the GitHub API. A **Reset Filters** button appears when any non-default filter is active.
+
+### Inspect Drawer
+
+Each PR card has an **Inspect** button that opens a slide-over detail drawer fetched via GraphQL:
+
+- **Plain-text description** — rendered with `white-space: pre-wrap` (no HTML injection)
+- **Focus trap** — Tab cycles within the drawer; `Escape` closes and restores focus
+- **Linked issues** — closing-issue references with sanitized GitHub URLs
+- **Files changed** — path list with per-file addition/deletion counts
+- **Reviews** — author, state badge, and review body (plain text)
+- **Commits** — abbreviated SHA and commit message
+
+Avatar URLs from the GraphQL response are sanitized to `https://avatars.githubusercontent.com/` hosts only.
 
 ---
 

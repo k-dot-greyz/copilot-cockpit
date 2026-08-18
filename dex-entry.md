@@ -8,7 +8,7 @@ legacy_map:
   midi_1_0_bank: 125
   midi_1_0_prog: 16
 status: "active"
-tags: ["copilot", "agents", "cockpit", "glitchworks", "reference", "workflow", "visualization"]
+tags: ["copilot", "agents", "cockpit", "glitchworks", "reference", "workflow", "visualization", "oauth", "graphql", "pr-triage"]
 ---
 
 # Copilot Cockpit — dex entry
