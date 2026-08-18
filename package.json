@@ -6,21 +6,26 @@
     "node": ">=22.12.0"
   },
   "scripts": {
+    "predev": "ENV_DOCTOR_ASSUME_YES=true bash scripts/ensure-python314.sh && bash scripts/start.sh",
+    "prebuild": "ENV_DOCTOR_ASSUME_YES=true bash scripts/ensure-python314.sh",
+    "pretest": "ENV_DOCTOR_ASSUME_YES=true bash scripts/ensure-python314.sh",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "test": "vitest run"
+    "test": "vitest run",
+    "env:check": "bash scripts/env-config.sh check",
+    "env:init": "ENV_DOCTOR_ASSUME_YES=true bash vendor/env-doctor/env-doctor.sh --init --tier 3 --yes"
   },
   "dependencies": {
-    "@astrojs/react": "^5.0.7",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "astro": "^6.4.6",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "@astrojs/react": "^6.0.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "astro": "^7.2.2",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.10"
   }
 }
