@@ -1,0 +1,28 @@
+{
+  "dex_id": "0x7D:0x11:MOD-JOINT-ENTITIES",
+  "dex_type": "entity",
+  "status": "active",
+  "module_id": "MOD-JOINT-ENTITIES",
+  "title": "Shared joint entity contracts",
+  "description": "Define PRCardEntity, TriageViewEntity, and DexAssetCard types as the single source of truth for cross-module data exchange.",
+  "tags": ["architecture", "types", "hydration"],
+  "depends_on": [],
+  "inputs": [],
+  "outputs": ["PRCardEntity", "TriageViewEntity", "DexAssetCard"],
+  "tier": 0,
+  "acceptance": [
+    "src/lib/entities/ exports all joint types",
+    "No DOM or fetch imports in entity modules",
+    "Types are JSON-serializable (no functions, no Date objects)"
+  ],
+  "links": [
+    { "rel": "doc", "href": "docs/epics/COCKPIT-PIPELINE-002.md", "label": "Epic COCKPIT-PIPELINE-002" },
+    { "rel": "parent", "href": "dex-entry.md", "label": "Copilot Cockpit 0x7D:0x10" }
+  ],
+  "files": [
+    "src/lib/entities/pr-card.ts",
+    "src/lib/entities/triage-view.ts",
+    "src/lib/entities/dex-card.ts",
+    "src/lib/entities/index.ts"
+  ]
+}

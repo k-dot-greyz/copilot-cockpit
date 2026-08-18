@@ -1,0 +1,23 @@
+{
+  "dex_id": "0x7D:0x11:MOD-PIPE-SANITIZE",
+  "dex_type": "pipe",
+  "status": "active",
+  "module_id": "MOD-PIPE-SANITIZE",
+  "title": "Metadata sanitization pipe",
+  "description": "sanitizeMetadata recursively clamps strings, drops functions/symbols, and limits depth for hostile AI/API payloads.",
+  "tags": ["pipe", "security", "sanitization"],
+  "depends_on": ["MOD-JOINT-ENTITIES"],
+  "inputs": ["unknown"],
+  "outputs": ["SanitizedMetadata"],
+  "tier": 1,
+  "acceptance": [
+    "sanitizeMetadata is idempotent",
+    "Strings truncated to MAX_STRING_LEN",
+    "Functions and symbols dropped",
+    "Depth capped at 8 levels"
+  ],
+  "links": [
+    { "rel": "doc", "href": "CONTRIBUTING.md", "label": "Boundary validation policy" }
+  ],
+  "files": ["src/lib/pipes/sanitize-metadata.ts"]
+}

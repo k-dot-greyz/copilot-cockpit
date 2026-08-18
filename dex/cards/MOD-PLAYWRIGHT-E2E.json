@@ -1,0 +1,23 @@
+{
+  "dex_id": "0x7D:0x11:MOD-PLAYWRIGHT-E2E",
+  "dex_type": "task",
+  "status": "planning",
+  "module_id": "MOD-PLAYWRIGHT-E2E",
+  "title": "Real browser E2E smoke tests",
+  "description": "Add Playwright specs that render PRDashboard in headless Chromium: token modal, stat bar, lane rendering, keyboard R refresh.",
+  "tags": ["test", "e2e", "playwright", "a11y"],
+  "depends_on": ["MOD-PLAYWRIGHT-CONFIG"],
+  "inputs": [],
+  "outputs": ["tests/e2e-dashboard.spec.ts"],
+  "tier": 2,
+  "acceptance": [
+    "Test loads dashboard with mocked GitHub API (route interception)",
+    "Verifies stat bar renders after connect",
+    "Verifies R key triggers refresh when idle",
+    "npm run test:ux passes in CI"
+  ],
+  "links": [
+    { "rel": "doc", "href": "tasks.md", "label": "COCKPIT-TRIAGE-001 E2E criterion" }
+  ],
+  "files": ["tests/e2e-dashboard.spec.ts"]
+}

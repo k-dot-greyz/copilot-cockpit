@@ -34,6 +34,8 @@ export interface TriageStats {
   floodCount: number;
   oldestPR: string;
   newestPR: string;
+  checks: { success: number; failure: number; pending: number; none: number };
+  reviews: { approved: number; changesRequested: number; required: number; none: number };
 }
 
 /**
@@ -181,6 +183,20 @@ export function computeStats(prs: PR[]): TriageStats {
 
   const dates = prs.map((p) => p.createdAt).sort();
 
+  const checks = {
+    success: prs.filter((p) => p.checksStatus === 'success').length,
+    failure: prs.filter((p) => p.checksStatus === 'failure').length,
+    pending: prs.filter((p) => p.checksStatus === 'pending').length,
+    none: prs.filter((p) => p.checksStatus === 'none').length,
+  };
+
+  const reviews = {
+    approved: prs.filter((p) => p.reviewDecision === 'APPROVED').length,
+    changesRequested: prs.filter((p) => p.reviewDecision === 'CHANGES_REQUESTED').length,
+    required: prs.filter((p) => p.reviewDecision === 'REVIEW_REQUIRED').length,
+    none: prs.filter((p) => p.reviewDecision === null).length,
+  };
+
   return {
     total: prs.length,
     drafts: prs.filter((p) => p.isDraft).length,
@@ -193,6 +209,8 @@ export function computeStats(prs: PR[]): TriageStats {
     floodCount,
     oldestPR: dates[0] || '',
     newestPR: dates[dates.length - 1] || '',
+    checks,
+    reviews,
   };
 }
 

@@ -1,0 +1,27 @@
+{
+  "dex_id": "0x7D:0x11:MOD-KBD-GUARDS",
+  "dex_type": "task",
+  "status": "planning",
+  "module_id": "MOD-KBD-GUARDS",
+  "title": "Text-input-only keyboard guard",
+  "description": "Narrow isTextInput to text-like input types so checkbox/radio focus does not block R refresh. Absorb or supersede CodeRabbit autofix from PR #10.",
+  "tags": ["ux", "security", "keyboard"],
+  "depends_on": [],
+  "inputs": [],
+  "outputs": ["keyboard-guards.ts"],
+  "tier": 0,
+  "acceptance": [
+    "HTMLInputElement type checkbox does not block refresh shortcut",
+    "HTMLTextAreaElement and type=text still block refresh",
+    "keyboard-guards.test.ts covers checkbox case",
+    "npm run test passes"
+  ],
+  "links": [
+    { "rel": "pr", "href": "https://github.com/k-dot-greyz/copilot-cockpit/pull/7", "label": "PR #7 (merged)" },
+    { "rel": "pr", "href": "https://github.com/k-dot-greyz/copilot-cockpit/pull/10", "label": "PR #10 (autofix — absorb)" }
+  ],
+  "files": [
+    "src/lib/keyboard-guards.ts",
+    "src/lib/keyboard-guards.test.ts"
+  ]
+}

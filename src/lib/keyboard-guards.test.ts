@@ -50,6 +50,12 @@ describe('shouldHandleRefreshShortcut', () => {
         loading: false,
       })
     ).toBe(false);
+    expect(
+      shouldHandleRefreshShortcut('R', textarea, {
+        isClosing: false,
+        loading: false,
+      })
+    ).toBe(false);
   });
 
   it('does not trigger for keys other than r or R', () => {
@@ -57,10 +63,16 @@ describe('shouldHandleRefreshShortcut', () => {
       shouldHandleRefreshShortcut('a', null, { isClosing: false, loading: false })
     ).toBe(false);
     expect(
+      shouldHandleRefreshShortcut('s', null, { isClosing: false, loading: false })
+    ).toBe(false);
+    expect(
       shouldHandleRefreshShortcut('Enter', null, { isClosing: false, loading: false })
     ).toBe(false);
     expect(
       shouldHandleRefreshShortcut(' ', null, { isClosing: false, loading: false })
+    ).toBe(false);
+    expect(
+      shouldHandleRefreshShortcut('F5', null, { isClosing: false, loading: false })
     ).toBe(false);
   });
 
@@ -77,6 +89,14 @@ describe('shouldHandleRefreshShortcut', () => {
     const button = { tagName: 'BUTTON' } as EventTarget;
     expect(
       shouldHandleRefreshShortcut('r', button, {
+        isClosing: false,
+        loading: false,
+      })
+    ).toBe(true);
+
+    const div = { tagName: 'DIV' } as EventTarget;
+    expect(
+      shouldHandleRefreshShortcut('r', div, {
         isClosing: false,
         loading: false,
       })
