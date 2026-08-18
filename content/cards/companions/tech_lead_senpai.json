@@ -1,0 +1,15 @@
+{
+  "id": "companion_tech_senpai",
+  "name": "Evelyn K.",
+  "title": "Overworked Tech-Lead Senpai",
+  "element": "aether",
+  "rarity": "SSR",
+  "affinity_level": 120,
+  "bio": "Survives on dark roast espresso and automated test coverage. Secretly fixes your codebase while you sleep.",
+  "passive_perk": {
+    "name": "Automated Tax & Wage Arbitrage",
+    "payout_multiplier": 1.35,
+    "xp_multiplier": 1.5,
+    "energy_reduction": 5
+  }
+}

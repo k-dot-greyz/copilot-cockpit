@@ -1,0 +1,15 @@
+{
+  "id": "outfit_tracksuit",
+  "name": "Stained Greaser Tracksuit",
+  "rarity": "R",
+  "element": "fire",
+  "desc": "Standard issue degenerate starter gear smelling faintly of burnt oil and energy drinks.",
+  "icon": "Shield",
+  "multipliers": {
+    "str_buff": 1.1,
+    "int_buff": 1.0,
+    "chm_buff": 0.9,
+    "payout_buff": 1.05,
+    "degen_buff": 1.1
+  }
+}

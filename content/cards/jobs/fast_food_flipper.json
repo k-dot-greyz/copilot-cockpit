@@ -1,0 +1,16 @@
+{
+  "id": "job_fast_food_flipper",
+  "title": "Fast Food Patty Flipper",
+  "track": "fast_food",
+  "tier": 1,
+  "base_payout": 45,
+  "energy_cost": 25,
+  "hours": 4,
+  "description": "Flipping mysterious synthetic protein squares under buzzing sodium lights.",
+  "requirements": {
+    "str": 1,
+    "int": 1,
+    "chm": 1,
+    "krm": 0
+  }
+}

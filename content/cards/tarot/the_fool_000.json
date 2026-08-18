@@ -1,0 +1,14 @@
+{
+  "id": "000",
+  "name": "The Fool",
+  "sub": "Resonance: High-Beta Volatility",
+  "type": "void",
+  "stats": {
+    "atk": 10,
+    "def": 10,
+    "spd": 99
+  },
+  "desc": "A blank slate stepping off the cliff into pure gacha bliss. 2x Casino payout ceiling, +100% Degen gain, -10% INT.",
+  "image": "text-indigo-400",
+  "icon": "Sparkles"
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stickhrpg.zenos/schemas/companion_card.schema.json",
+  "title": "CompanionCard",
+  "type": "object",
+  "required": ["id", "name", "title", "element", "rarity", "affinity_level", "bio", "passive_perk"],
+  "properties": {
+    "id": { "type": "string" },
+    "name": { "type": "string" },
+    "title": { "type": "string" },
+    "element": { "type": "string", "enum": ["void", "fire", "water", "aether"] },
+    "rarity": { "type": "string", "enum": ["SR", "SSR", "UR"] },
+    "affinity_level": { "type": "integer", "minimum": 0, "maximum": 1000 },
+    "bio": { "type": "string" },
+    "passive_perk": {
+      "type": "object",
+      "required": ["name", "payout_multiplier", "xp_multiplier", "energy_reduction"],
+      "properties": {
+        "name": { "type": "string" },
+        "payout_multiplier": { "type": "number", "minimum": 1.0 },
+        "xp_multiplier": { "type": "number", "minimum": 1.0 },
+        "energy_reduction": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

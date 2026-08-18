@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stickhrpg.zenos/schemas/sysex_delta_packet.schema.json",
+  "title": "SysExDeltaPacket",
+  "type": "object",
+  "required": ["header", "bitmask", "timestamp", "payload"],
+  "properties": {
+    "header": { "type": "string", "enum": ["0xF0", "0xF7"] },
+    "bitmask": { "type": "integer", "minimum": 0 },
+    "timestamp": { "type": "integer" },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "cash": { "type": "integer" },
+        "crypto": { "type": "integer" },
+        "energy": { "type": "integer" },
+        "str_xp": { "type": "integer" },
+        "int_xp": { "type": "integer" },
+        "chm_xp": { "type": "integer" },
+        "dgn": { "type": "integer" },
+        "hour": { "type": "integer" },
+        "active_tarot_buffs": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

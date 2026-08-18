@@ -1,0 +1,15 @@
+{
+  "id": "outfit_cyber_bunny",
+  "name": "Neon Cyber-Bunny Rig",
+  "rarity": "SR",
+  "element": "void",
+  "desc": "High-frequency RGB ears and carbon-fiber thigh-highs optimized for casino runs.",
+  "icon": "Zap",
+  "multipliers": {
+    "str_buff": 1.1,
+    "int_buff": 1.15,
+    "chm_buff": 1.5,
+    "payout_buff": 1.2,
+    "degen_buff": 1.6
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "id": "002",
+  "name": "High Priestess",
+  "sub": "Resonance: Subconscious Rizz",
+  "type": "water",
+  "stats": {
+    "atk": 45,
+    "def": 95,
+    "spd": 67
+  },
+  "desc": "The mystery behind the dating sim dialogue choice. +30% Charm, 2x companion affinity gain.",
+  "image": "text-blue-400",
+  "icon": "Droplets"
+}

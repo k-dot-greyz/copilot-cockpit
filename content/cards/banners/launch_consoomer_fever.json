@@ -1,0 +1,9 @@
+{
+  "id": "banner_consoomer_fever",
+  "title": "Consoomer Fever & Maid Ascendancy",
+  "cost_per_pull": 100,
+  "featured_ssr_id": "outfit_maid_tuxedo",
+  "pool_ssr_ids": ["outfit_maid_tuxedo", "companion_tech_senpai"],
+  "pool_sr_ids": ["outfit_cyber_bunny", "companion_yandere_crypto"],
+  "pool_r_ids": ["outfit_tracksuit"]
+}
