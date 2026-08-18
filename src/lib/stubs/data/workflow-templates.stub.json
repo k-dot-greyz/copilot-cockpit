@@ -1,0 +1,25 @@
+{
+  "_stub": true,
+  "_module": "MOD-DATA-STATIC",
+  "workflows": {
+    "bug-fix": {
+      "id": "bug-fix",
+      "title": "Bug Fix Pipeline",
+      "steps": [
+        { "label": "Diagnose", "command": null },
+        { "label": "Assign @copilot", "command": "gh issue comment {issue} --body '@copilot'" },
+        { "label": "Review diff", "command": null },
+        { "label": "Bouncer verdict", "command": null }
+      ]
+    },
+    "release-prep": {
+      "id": "release-prep",
+      "title": "Release Prep",
+      "steps": [
+        { "label": "Branch audit", "command": null },
+        { "label": "Quality gates (8)", "command": null },
+        { "label": "Tag + release", "command": "gh release create v{version}" }
+      ]
+    }
+  }
+}

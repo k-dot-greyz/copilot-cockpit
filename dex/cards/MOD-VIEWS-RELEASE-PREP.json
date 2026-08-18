@@ -1,0 +1,12 @@
+{
+  "dex_id": "0x7D:0x12:MOD-VIEWS-RELEASE-PREP",
+  "dex_type": "task",
+  "status": "planning",
+  "module_id": "MOD-VIEWS-RELEASE-PREP",
+  "title": "Release Prep view (keyboard 4)",
+  "tags": ["ui", "views", "workflow"],
+  "depends_on": ["MOD-INTERFACES", "MOD-DATA-STATIC"],
+  "tier": 2,
+  "acceptance": ["Keyboard 4 navigates to Release Prep", "8 quality gates surfaced"],
+  "files": ["src/lib/stubs/views/ReleasePrepView.stub.ts"]
+}

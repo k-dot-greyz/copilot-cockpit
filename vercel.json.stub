@@ -1,0 +1,7 @@
+{
+  "_stub": true,
+  "_module": "MOD-DEPLOY-VERCEL",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "astro"
+}

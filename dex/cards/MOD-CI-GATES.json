@@ -1,0 +1,17 @@
+{
+  "dex_id": "0x7D:0x12:MOD-CI-GATES",
+  "dex_type": "task",
+  "status": "planning",
+  "module_id": "MOD-CI-GATES",
+  "title": "CI workflow with agent quickstart",
+  "description": "GitHub Actions: checkout, quickstart:agent, test, optional build. Stub at .github/workflows/ci.stub.yml.",
+  "tags": ["ci", "dev-dx"],
+  "depends_on": ["MOD-QUICKSTART-AGENTIC", "MOD-ENV-SECURE"],
+  "tier": 1,
+  "acceptance": [
+    ".github/workflows/ci.yml replaces stub",
+    "Runs on push and pull_request",
+    "Uses npm run quickstart:agent"
+  ],
+  "files": [".github/workflows/ci.stub.yml"]
+}

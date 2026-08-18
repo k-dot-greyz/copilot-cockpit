@@ -1,0 +1,17 @@
+{
+  "dex_id": "0x7D:0x12:MOD-ENV-SECURE",
+  "dex_type": "task",
+  "status": "planning",
+  "module_id": "MOD-ENV-SECURE",
+  "title": "Secure env validation and .env.example",
+  "description": "env-check.sh validates Node version, gitignored .env, no staged secrets. .env.example documents COCKPIT_ vars.",
+  "tags": ["dev-dx", "security", "env"],
+  "depends_on": [],
+  "tier": 0,
+  "acceptance": [
+    "scripts/lib/env-check.sh passes on clean clone",
+    ".env.example has no real secrets",
+    ".env gitignored"
+  ],
+  "files": [".env.example", "scripts/lib/env-check.sh"]
+}

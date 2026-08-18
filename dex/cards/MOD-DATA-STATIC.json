@@ -1,0 +1,17 @@
+{
+  "dex_id": "0x7D:0x12:MOD-DATA-STATIC",
+  "dex_type": "entity",
+  "status": "planning",
+  "module_id": "MOD-DATA-STATIC",
+  "title": "Static JSON data catalog",
+  "description": "Agent matrix and workflow templates in src/data/ with schema validation.",
+  "tags": ["data", "static"],
+  "depends_on": [],
+  "tier": 1,
+  "acceptance": [
+    "src/data/agent-matrix.json validated",
+    "src/data/workflow-templates.json validated",
+    "Golden fixtures for tests"
+  ],
+  "files": ["src/lib/stubs/data/"]
+}

@@ -1,0 +1,17 @@
+{
+  "dex_id": "0x7D:0x12:MOD-INTERFACES",
+  "dex_type": "entity",
+  "status": "planning",
+  "module_id": "MOD-INTERFACES",
+  "title": "Polymorphic view interfaces",
+  "description": "IAgentSurface, IIssueSource, ICommandGenerator, IWorkflowCard — move from stubs to src/lib/interfaces/.",
+  "tags": ["architecture", "interfaces"],
+  "depends_on": [],
+  "tier": 1,
+  "acceptance": [
+    "src/lib/interfaces/ exports all contracts",
+    "No throw stubs in production path",
+    "CONTRIBUTING.md layout satisfied"
+  ],
+  "files": ["src/lib/stubs/interfaces/"]
+}

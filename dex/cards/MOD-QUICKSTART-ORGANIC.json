@@ -1,0 +1,19 @@
+{
+  "dex_id": "0x7D:0x12:MOD-QUICKSTART-ORGANIC",
+  "dex_type": "task",
+  "status": "planning",
+  "module_id": "MOD-QUICKSTART-ORGANIC",
+  "title": "Interactive dev bootstrap (organic)",
+  "description": "scripts/quickstart.sh for human developers: env check, .env copy, npm ci, test smoke.",
+  "tags": ["dev-dx", "quickstart", "organic"],
+  "depends_on": ["MOD-ENV-SECURE"],
+  "tier": 0,
+  "acceptance": [
+    "npm run quickstart works",
+    "Documented in docs/stubs/dev-dx/QUICKSTART.md"
+  ],
+  "links": [
+    { "rel": "doc", "href": "docs/stubs/issues/MOD-QUICKSTART-ORGANIC.md", "label": "Issue template" }
+  ],
+  "files": ["scripts/quickstart.sh", "package.json"]
+}

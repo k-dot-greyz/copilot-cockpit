@@ -1,0 +1,49 @@
+{
+  "dex_id": "0x7D:0x12",
+  "dex_type": "tool",
+  "status": "planning",
+  "title": "Follow-Up Stub Tree — Module Index",
+  "description": "Scaffolded index of missing implementations for out-of-band issue/PR creation. Parent of COCKPIT-PIPELINE-002 cards.",
+  "tags": ["stubs", "follow-up", "index", "rep-mgmt", "dev-dx"],
+  "parent": "0x7D:0x11",
+  "spec": "docs/stubs/INDEX.md",
+  "tree": "docs/stubs/TREE.md",
+  "pipeline_cards": [
+    "MOD-TEST-NITPICK",
+    "MOD-KBD-GUARDS",
+    "MOD-PLAYWRIGHT-MIGRATE",
+    "MOD-JOINT-ENTITIES",
+    "MOD-PLAYWRIGHT-CONFIG",
+    "MOD-PIPE-HYDRATE",
+    "MOD-PIPE-SANITIZE",
+    "MOD-PLAYWRIGHT-E2E",
+    "MOD-PIPE-DEX",
+    "MOD-DUPLICATES-UI",
+    "MOD-PR-PARITY-SYNC"
+  ],
+  "follow_up_cards": [
+    "MOD-ENV-SECURE",
+    "MOD-QUICKSTART-ORGANIC",
+    "MOD-QUICKSTART-AGENTIC",
+    "MOD-REP-MGMT-REVIEW",
+    "MOD-WIRE-PIPE-HYDRATE",
+    "MOD-CI-GATES",
+    "MOD-INTERFACES",
+    "MOD-STATE-HYDRATION",
+    "MOD-VIEWS-AGENT-MATRIX",
+    "MOD-VIEWS-ISSUE-TRIAGE",
+    "MOD-VIEWS-BUG-FIX",
+    "MOD-VIEWS-RELEASE-PREP",
+    "MOD-DATA-STATIC",
+    "MOD-LEGACY-RESCUE",
+    "MOD-DEPLOY-VERCEL",
+    "MOD-OAUTH-SERVERLESS"
+  ],
+  "links": [
+    { "rel": "parent", "href": "dex/cards/index.json", "label": "COCKPIT-PIPELINE-002 0x7D:0x11" },
+    { "rel": "doc", "href": "docs/stubs/INDEX.md", "label": "Stub index" },
+    { "rel": "doc", "href": "docs/stubs/rep-mgmt/REVIEW.md", "label": "Rep mgmt review" },
+    { "rel": "doc", "href": "docs/stubs/dev-dx/QUICKSTART.md", "label": "Dev DX quickstart" },
+    { "rel": "pr", "href": "https://github.com/k-dot-greyz/copilot-cockpit/pull/13", "label": "PR #13" }
+  ]
+}

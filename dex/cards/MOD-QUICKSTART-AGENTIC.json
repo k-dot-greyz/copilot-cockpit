@@ -1,0 +1,19 @@
+{
+  "dex_id": "0x7D:0x12:MOD-QUICKSTART-AGENTIC",
+  "dex_type": "task",
+  "status": "planning",
+  "module_id": "MOD-QUICKSTART-AGENTIC",
+  "title": "Non-interactive agent bootstrap",
+  "description": "scripts/quickstart-agent.sh for cloud agents: no prompts, env vars only, structured exit codes.",
+  "tags": ["dev-dx", "quickstart", "agentic", "ci"],
+  "depends_on": ["MOD-ENV-SECURE"],
+  "tier": 0,
+  "acceptance": [
+    "npm run quickstart:agent passes in cloud VM",
+    "GITHUB_TOKEN never logged"
+  ],
+  "links": [
+    { "rel": "doc", "href": "docs/stubs/issues/MOD-QUICKSTART-AGENTIC.md", "label": "Issue template" }
+  ],
+  "files": ["scripts/quickstart-agent.sh", "package.json"]
+}

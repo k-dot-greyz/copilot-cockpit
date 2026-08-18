@@ -1,0 +1,17 @@
+{
+  "dex_id": "0x7D:0x12:MOD-WIRE-PIPE-HYDRATE",
+  "dex_type": "task",
+  "status": "planning",
+  "module_id": "MOD-WIRE-PIPE-HYDRATE",
+  "title": "Wire hydratePRCard into github.ts",
+  "description": "Replace duplicate mapPR logic with hydratePRCard from src/lib/pipes/. Single hydration path.",
+  "tags": ["pipe", "hydration", "refactor"],
+  "depends_on": ["MOD-JOINT-ENTITIES", "MOD-PIPE-HYDRATE"],
+  "tier": 1,
+  "acceptance": [
+    "fetchOpenPRs uses hydratePRCard",
+    "mapPR removed or delegates to pipe",
+    "All github.test.ts pass"
+  ],
+  "files": ["src/lib/github.ts", "src/lib/stubs/github/wire-hydrate-pipe.stub.ts"]
+}

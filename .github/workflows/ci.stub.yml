@@ -1,0 +1,9 @@
+# MOD-CI-GATES stub — implement in follow-up PR
+# name: ci
+# on: [push, pull_request]
+# jobs:
+#   test:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#       - run: npm run quickstart:agent

@@ -1,0 +1,17 @@
+{
+  "dex_id": "0x7D:0x12:MOD-STATE-HYDRATION",
+  "dex_type": "pipe",
+  "status": "planning",
+  "module_id": "MOD-STATE-HYDRATION",
+  "title": "exportState / loadState for deep links",
+  "description": "Serializable TriageViewEntity persistence with schema validation on load.",
+  "tags": ["hydration", "state"],
+  "depends_on": ["MOD-JOINT-ENTITIES"],
+  "tier": 2,
+  "acceptance": [
+    "exportState/loadState round-trip tested",
+    "loadState validates schema before parse",
+    "No opaque closures holding API data"
+  ],
+  "files": ["src/lib/stubs/state/"]
+}

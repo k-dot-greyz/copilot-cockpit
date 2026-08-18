@@ -1,0 +1,20 @@
+{
+  "dex_id": "0x7D:0x12:MOD-OAUTH-SERVERLESS",
+  "dex_type": "task",
+  "status": "planning",
+  "module_id": "MOD-OAUTH-SERVERLESS",
+  "title": "OAuth serverless token exchange",
+  "description": "api/auth/token.ts from PR #8 — server-side only, never client secret in bundle.",
+  "tags": ["auth", "oauth", "serverless"],
+  "depends_on": ["MOD-ENV-SECURE", "MOD-PR-PARITY-SYNC"],
+  "tier": 3,
+  "acceptance": [
+    "api/auth/token.ts implements code exchange",
+    "Client secret only in Vercel env",
+    "Unit tests with mocked fetch"
+  ],
+  "links": [
+    { "rel": "pr", "href": "https://github.com/k-dot-greyz/copilot-cockpit/pull/8", "label": "PR #8" }
+  ],
+  "files": ["api/auth/token.stub.ts"]
+}

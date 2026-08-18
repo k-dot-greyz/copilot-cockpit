@@ -12,7 +12,10 @@
     "astro": "astro",
     "test": "vitest run",
     "test:unit": "vitest run",
-    "test:ux": "playwright test"
+    "test:ux": "playwright test",
+    "quickstart": "bash scripts/quickstart.sh",
+    "quickstart:agent": "bash scripts/quickstart-agent.sh",
+    "env:check": "bash scripts/lib/env-check.sh"
   },
   "dependencies": {
     "@astrojs/react": "^5.0.7",

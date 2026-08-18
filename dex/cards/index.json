@@ -18,11 +18,14 @@
     "MOD-DUPLICATES-UI",
     "MOD-PR-PARITY-SYNC"
   ],
+  "child_index": "dex/cards/stub-index.json",
   "links": [
     { "rel": "parent", "href": "dex-entry.md", "label": "Copilot Cockpit 0x7D:0x10" },
     { "rel": "doc", "href": "docs/epics/COCKPIT-PIPELINE-002.md", "label": "Epic spec" },
+    { "rel": "doc", "href": "docs/stubs/INDEX.md", "label": "Follow-up stub index (0x7D:0x12)" },
     { "rel": "pr", "href": "https://github.com/k-dot-greyz/copilot-cockpit/pull/7", "label": "PR #7" },
     { "rel": "pr", "href": "https://github.com/k-dot-greyz/copilot-cockpit/pull/8", "label": "PR #8" },
-    { "rel": "pr", "href": "https://github.com/k-dot-greyz/copilot-cockpit/pull/10", "label": "PR #10" }
+    { "rel": "pr", "href": "https://github.com/k-dot-greyz/copilot-cockpit/pull/10", "label": "PR #10" },
+    { "rel": "pr", "href": "https://github.com/k-dot-greyz/copilot-cockpit/pull/13", "label": "PR #13" }
   ]
 }

@@ -1,0 +1,12 @@
+{
+  "dex_id": "0x7D:0x12:MOD-VIEWS-AGENT-MATRIX",
+  "dex_type": "task",
+  "status": "planning",
+  "module_id": "MOD-VIEWS-AGENT-MATRIX",
+  "title": "Agent Matrix view (keyboard 1)",
+  "tags": ["ui", "views"],
+  "depends_on": ["MOD-INTERFACES", "MOD-DATA-STATIC"],
+  "tier": 2,
+  "acceptance": ["Keyboard 1 navigates to Agent Matrix", "Data from agent-matrix.json"],
+  "files": ["src/lib/stubs/views/AgentMatrixView.stub.ts"]
+}

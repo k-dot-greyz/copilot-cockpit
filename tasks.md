@@ -70,6 +70,34 @@ Follow-up to merged [#7](https://github.com/k-dot-greyz/copilot-cockpit/pull/7).
 
 ---
 
+## Epic: COCKPIT-STUB-INDEX-001 — Follow-up stub tree (`dex_id: 0x7D:0x12`)
+
+**Index:** `docs/stubs/INDEX.md` · **Tree:** `docs/stubs/TREE.md` · **Cards:** `dex/cards/stub-index.json`
+
+Scaffolded stubs for out-of-band issue/PR creation. Not implemented in #13 — each card is an independent follow-up.
+
+### Dev DX & secure env (Tier 0)
+
+- [ ] **MOD-ENV-SECURE** — `.env.example` + `scripts/lib/env-check.sh`
+- [ ] **MOD-QUICKSTART-ORGANIC** — `npm run quickstart` interactive bootstrap
+- [ ] **MOD-QUICKSTART-AGENTIC** — `npm run quickstart:agent` for cloud agents
+
+### Rep management (Tier 0)
+
+- [ ] **MOD-REP-MGMT-REVIEW** — Open PR merge-order + `hydratePRReviewCards` → `docs/stubs/rep-mgmt/REVIEW.md`
+
+### Wiring & architecture (Tier 1–3)
+
+- [ ] **MOD-WIRE-PIPE-HYDRATE** — Replace `mapPR` with `hydratePRCard`
+- [ ] **MOD-CI-GATES** — `.github/workflows/ci.yml` from stub
+- [ ] **MOD-INTERFACES** — `IAgentSurface`, `IIssueSource`, etc.
+- [ ] **MOD-STATE-HYDRATION** — `exportState` / `loadState`
+- [ ] **MOD-VIEWS-*** — Agent Matrix, Issue Triage, Bug Fix, Release Prep (keyboard 1–4)
+- [ ] **MOD-DATA-STATIC** — `src/data/` JSON catalog
+- [ ] **MOD-DEPLOY-VERCEL** / **MOD-OAUTH-SERVERLESS** / **MOD-LEGACY-RESCUE**
+
+---
+
 ## Epic: COCKPIT-RESCUE-001 — Recover Perplexity Computer build
 
 - [ ] Export HTML/CSS/JS from Perplexity Computer deployment

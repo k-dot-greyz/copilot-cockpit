@@ -1,0 +1,16 @@
+{
+  "dex_id": "0x7D:0x12:MOD-DEPLOY-VERCEL",
+  "dex_type": "task",
+  "status": "planning",
+  "module_id": "MOD-DEPLOY-VERCEL",
+  "title": "Vercel deployment config",
+  "tags": ["deploy", "vercel"],
+  "depends_on": ["MOD-CI-GATES"],
+  "tier": 3,
+  "acceptance": [
+    "vercel.json replaces stub",
+    "astro build deploys from main",
+    "No secrets in client bundle"
+  ],
+  "files": ["vercel.json.stub"]
+}

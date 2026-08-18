@@ -1,0 +1,15 @@
+{
+  "dex_id": "0x7D:0x12:MOD-LEGACY-RESCUE",
+  "dex_type": "task",
+  "status": "planning",
+  "module_id": "MOD-LEGACY-RESCUE",
+  "title": "Archive Perplexity Computer export",
+  "tags": ["legacy", "rescue"],
+  "depends_on": [],
+  "tier": 0,
+  "acceptance": [
+    "src/legacy/ contains exported build",
+    "README documents live vs scaffolded"
+  ],
+  "files": ["src/legacy/"]
+}

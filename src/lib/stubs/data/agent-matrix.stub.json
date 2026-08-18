@@ -1,0 +1,10 @@
+{
+  "_stub": true,
+  "_module": "MOD-DATA-STATIC",
+  "surfaces": [
+    { "id": "cli", "name": "Copilot CLI", "tier": "free", "capability": "gh copilot suggest/explain" },
+    { "id": "agent-mode", "name": "Agent Mode", "tier": "pro", "capability": "Multi-file edits in-editor" },
+    { "id": "coding-agent", "name": "Coding Agent", "tier": "pro+", "capability": "Issues → PRs autonomously" },
+    { "id": "code-review", "name": "Code Review", "tier": "pro", "capability": "Agentic PR review" }
+  ]
+}

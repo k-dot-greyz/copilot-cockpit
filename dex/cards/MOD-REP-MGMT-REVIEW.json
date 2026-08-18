@@ -1,0 +1,25 @@
+{
+  "dex_id": "0x7D:0x12:MOD-REP-MGMT-REVIEW",
+  "dex_type": "task",
+  "status": "planning",
+  "module_id": "MOD-REP-MGMT-REVIEW",
+  "title": "Open PR reconciliation and merge-order review",
+  "description": "Rep mgmt checklist for #8/#10/#11, entity conflict zones, hydratePRReviewCards for dex pipeline.",
+  "tags": ["rep-mgmt", "review", "merge-order"],
+  "depends_on": [],
+  "tier": 0,
+  "acceptance": [
+    "docs/stubs/rep-mgmt/REVIEW.md current",
+    "hydratePRReviewCards unit tested",
+    "PR #10 closed after superseding fixes land"
+  ],
+  "links": [
+    { "rel": "pr", "href": "https://github.com/k-dot-greyz/copilot-cockpit/pull/8", "label": "PR #8" },
+    { "rel": "pr", "href": "https://github.com/k-dot-greyz/copilot-cockpit/pull/10", "label": "PR #10" },
+    { "rel": "doc", "href": "docs/stubs/issues/MOD-REP-MGMT-REVIEW.md", "label": "Issue template" }
+  ],
+  "files": [
+    "docs/stubs/rep-mgmt/REVIEW.md",
+    "src/lib/stubs/rep-mgmt/pr-hydration-review.stub.ts"
+  ]
+}

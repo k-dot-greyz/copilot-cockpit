@@ -1,0 +1,12 @@
+{
+  "dex_id": "0x7D:0x12:MOD-VIEWS-BUG-FIX",
+  "dex_type": "task",
+  "status": "planning",
+  "module_id": "MOD-VIEWS-BUG-FIX",
+  "title": "Bug Fix pipeline view (keyboard 3)",
+  "tags": ["ui", "views", "workflow"],
+  "depends_on": ["MOD-INTERFACES", "MOD-DATA-STATIC"],
+  "tier": 2,
+  "acceptance": ["Keyboard 3 navigates to Bug Fix", "Workflow steps from templates"],
+  "files": ["src/lib/stubs/views/BugFixPipelineView.stub.ts"]
+}

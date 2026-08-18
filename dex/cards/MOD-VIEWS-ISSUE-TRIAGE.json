@@ -1,0 +1,12 @@
+{
+  "dex_id": "0x7D:0x12:MOD-VIEWS-ISSUE-TRIAGE",
+  "dex_type": "task",
+  "status": "planning",
+  "module_id": "MOD-VIEWS-ISSUE-TRIAGE",
+  "title": "Issue Triage view (keyboard 2)",
+  "tags": ["ui", "views", "github-api"],
+  "depends_on": ["MOD-INTERFACES"],
+  "tier": 2,
+  "acceptance": ["Keyboard 2 navigates to Issue Triage", "Live GitHub issues with severity rank"],
+  "files": ["src/lib/stubs/views/IssueTriageView.stub.ts"]
+}
