@@ -1,0 +1,3 @@
+[submodule "vendor/env-doctor"]
+	path = vendor/env-doctor
+	url = https://github.com/k-dot-greyz/env-doctor.git
