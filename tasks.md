@@ -8,7 +8,7 @@
 
 | Step | Actor action | System response |
 |------|--------------|-----------------|
-| 1 | Open dashboard (no stored token) | Token modal — PAT with `repo` scope, stored in `localStorage` only |
+| 1 | Open dashboard (no stored token) | Token modal — PAT with `repo` scope, stored in `sessionStorage` only |
 | 2 | Click **Connect** | `validateToken` → modal closes, `@username` in header |
 | 3 | — (automatic) | Paginated fetch of open PRs from `k-dot-greyz/dev-master` with progress bar |
 | 4 | Scan stat bar | Total · Ready · Drafts · Human · Bot · 🚨 Flood (if any) |
@@ -64,6 +64,15 @@
 
 ## Epic: COCKPIT-DEPLOY-001 — Vercel
 
-- [ ] vercel.json config
+- [x] vercel.json config
 - [ ] Deploy from main branch
 - [ ] Custom domain (TBD: cockpit.glitchworks.tech?)
+
+---
+
+## Epic: COCKPIT-REVIEW-FOLLOWUP-003 — Review Hardening Follow-up
+
+- [x] Avatar URL sanitization (`sanitizeGithubAvatarUrl` — restrict to `avatars.githubusercontent.com`)
+- [x] Pin GitHub Actions to commit SHAs in CI workflow
+- [x] Document OAuth login flow, PR filters, and Inspect drawer in README
+- [x] Update dex-entry tags (`oauth`, `graphql`, `pr-triage`)
