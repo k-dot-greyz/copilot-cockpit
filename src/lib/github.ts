@@ -1,7 +1,9 @@
 // GitHub API client for copilot-cockpit
 // Client-side only — uses token from sessionStorage
 
+import { classifyAuthor } from './validation/author-classification';
 import { sanitizePrUrl } from './validation/pr-url';
+import { validateAndMapGraphQLPR, validateAndMapGraphQLPRDetail } from './validation/graphql';
 
 export interface PR {
   number: number;
@@ -15,6 +17,63 @@ export interface PR {
   reviewDecision: string | null;
   labels: string[];
   url: string;
+  checksStatus: 'success' | 'failure' | 'pending' | 'none';
+  mergeable: 'MERGEABLE' | 'CONFLICTING' | 'UNKNOWN';
+  state: 'OPEN' | 'CLOSED' | 'MERGED';
+  commentsCount: number;
+  additions: number;
+  deletions: number;
+}
+
+export interface CommitInfo {
+  oid: string;
+  abbreviatedOid: string;
+  message: string;
+  committedDate: string;
+  authorName: string;
+}
+
+export interface FileInfo {
+  path: string;
+  additions: number;
+  deletions: number;
+}
+
+export interface ReviewInfo {
+  author: string;
+  state: 'APPROVED' | 'CHANGES_REQUESTED' | 'COMMENTED' | 'DISMISSED' | 'PENDING';
+  body: string;
+  submittedAt: string;
+}
+
+export interface LinkedIssueInfo {
+  number: number;
+  title: string;
+  url: string;
+}
+
+export interface PRDetail {
+  number: number;
+  title: string;
+  body: string;
+  state: 'OPEN' | 'CLOSED' | 'MERGED';
+  draft: boolean;
+  createdAt: string;
+  updatedAt: string;
+  url: string;
+  headRefName: string;
+  baseRefName: string;
+  additions: number;
+  deletions: number;
+  changedFiles: number;
+  mergeable: 'MERGEABLE' | 'CONFLICTING' | 'UNKNOWN';
+  reviewDecision: string | null;
+  author: string;
+  authorAvatarUrl: string;
+  commits: CommitInfo[];
+  files: FileInfo[];
+  reviews: ReviewInfo[];
+  linkedIssues: LinkedIssueInfo[];
 }
 
 export interface PRApiResponse {
@@ -48,23 +107,6 @@ function getHeaders(token: string): HeadersInit {
 }
 
 /**
- * Classifies a GitHub account login and account type as 'bot', 'human', or 'external'.
- *
- * @returns `'bot'` if the account is identified as a bot, `'human'` if the login matches the internal allowlist, `'external'` otherwise.
- */
-function classifyAuthor(login: string, type: string): PR['authorType'] {
-  if (type === 'Bot' || login.startsWith('app/') || login.includes('[bot]')) {
-    return 'bot';
-  }
-  // Add your own username(s) here
-  const knownHumans = ['k-dot-greyz', 'kasparsgreizis'];
-  if (knownHumans.includes(login)) {
-    return 'human';
-  }
-  return 'external';
-}
-
-/**
  * Converts a GitHub REST pull request response into the normalized `PR` shape.
  *
  * @param raw - The raw pull request object returned by the GitHub REST API
@@ -89,6 +131,12 @@ function mapPR(raw: PRApiResponse): PR {
     reviewDecision: null, // REST API doesn't return this directly
     labels,
     url: sanitizePrUrl(raw.html_url),
+    checksStatus: 'none',
+    mergeable: 'UNKNOWN',
+    state: 'OPEN',
+    commentsCount: 0,
+    additions: 0,
+    deletions: 0,
   };
 }
 
@@ -252,3 +300,226 @@ export async function validateToken(token: string): Promise<string | null> {
     return null;
   }
 }
+
+const GRAPHQL_QUERY = `
+  query ($owner: String!, $name: String!, $states: [PullRequestState!], $first: Int!, $after: String) {
+    repository(owner: $owner, name: $name) {
+      pullRequests(states: $states, first: $first, after: $after, orderBy: {field: CREATED_AT, direction: DESC}) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        totalCount
+        nodes {
+          number
+          title
+          state
+          draft
+          createdAt
+          updatedAt
+          url
+          headRefName
+          mergeable
+          reviewDecision
+          additions
+          deletions
+          author {
+            login
+            __typename
+          }
+          comments {
+            totalCount
+          }
+          labels(first: 100) {
+            nodes {
+              name
+            }
+          }
+          headRef {
+            target {
+              ... on Commit {
+                statusCheckRollup {
+                  state
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export async function fetchPRs(
+  owner: string,
+  repo: string,
+  token: string,
+  options?: {
+    states?: ('OPEN' | 'CLOSED' | 'MERGED')[];
+    onProgress?: (loaded: number, estimatedTotal: number) => void;
+  }
+): Promise<PR[]> {
+  const states = options?.states || ['OPEN'];
+  const allPRs: PR[] = [];
+  let hasNextPage = true;
+  let after: string | null = null;
+
+  while (hasNextPage) {
+    const res = await fetch('https://api.github.com/graphql', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: GRAPHQL_QUERY,
+        variables: {
+          owner,
+          name: repo,
+          states,
+          first: PER_PAGE,
+          after,
+        },
+      }),
+    });
+
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`GitHub GraphQL API error ${res.status}: ${body}`);
+    }
+
+    const json = await res.json();
+    if (json.errors) {
+      throw new Error(`GitHub GraphQL API error: ${JSON.stringify(json.errors)}`);
+    }
+
+    const pullRequests = json.data?.repository?.pullRequests;
+    if (!pullRequests) {
+      break;
+    }
+
+    const nodes = pullRequests.nodes || [];
+    const mapped = nodes.map(validateAndMapGraphQLPR);
+    allPRs.push(...mapped);
+
+    const totalCount = typeof pullRequests.totalCount === 'number' ? pullRequests.totalCount : allPRs.length;
+    options?.onProgress?.(allPRs.length, totalCount);
+
+    const pageInfo = pullRequests.pageInfo;
+    hasNextPage = pageInfo?.hasNextPage || false;
+    after = pageInfo?.endCursor || null;
+
+    if (hasNextPage) {
+      await new Promise((r) => setTimeout(r, 100));
+    }
+  }
+
+  return allPRs;
+}
+
+const DETAIL_GRAPHQL_QUERY = `
+  query ($owner: String!, $name: String!, $number: Int!) {
+    repository(owner: $owner, name: $name) {
+      pullRequest(number: $number) {
+        number
+        title
+        body
+        state
+        draft
+        createdAt
+        updatedAt
+        url
+        headRefName
+        baseRefName
+        additions
+        deletions
+        changedFiles
+        mergeable
+        reviewDecision
+        author {
+          login
+          avatarUrl
+        }
+        commits(first: 100) {
+          nodes {
+            commit {
+              oid
+              message
+              abbreviatedOid
+              committedDate
+              author {
+                name
+              }
+            }
+          }
+        }
+        files(first: 100) {
+          nodes {
+            path
+            additions
+            deletions
+          }
+        }
+        reviews(first: 100) {
+          nodes {
+            author {
+              login
+            }
+            state
+            body
+            submittedAt
+          }
+        }
+        closingIssuesReferences(first: 10) {
+          nodes {
+            number
+            title
+            url
+          }
+        }
+      }
+    }
+  }
+`;
+
+export async function fetchPRDetail(
+  owner: string,
+  repo: string,
+  number: number,
+  token: string
+): Promise<PRDetail> {
+  const res = await fetch('https://api.github.com/graphql', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: DETAIL_GRAPHQL_QUERY,
+      variables: {
+        owner,
+        name: repo,
+        number,
+      },
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`GitHub GraphQL API error ${res.status}: ${body}`);
+  }
+
+  const json = await res.json();
+  if (json.errors) {
+    throw new Error(`GitHub GraphQL API error: ${JSON.stringify(json.errors)}`);
+  }
+
+  const pullRequest = json.data?.repository?.pullRequest;
+  if (!pullRequest) {
+    throw new Error(`PR #${number} not found`);
+  }
+
+  return validateAndMapGraphQLPRDetail(pullRequest);
+}
+
+
