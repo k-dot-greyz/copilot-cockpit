@@ -1,0 +1,25 @@
+{
+  "dex_id": "0x7D:0x11:MOD-TEST-NITPICK",
+  "dex_type": "task",
+  "status": "planning",
+  "module_id": "MOD-TEST-NITPICK",
+  "title": "Fix #7 review nitpicks",
+  "description": "Address CodeRabbit nitpicks from merged PR #7: draft coercion test uses non-boolean truthy value; happy-path test exercises multi-page pagination with two fetch responses.",
+  "tags": ["test", "vitest", "nitpick"],
+  "depends_on": [],
+  "inputs": [],
+  "outputs": ["green-test-suite"],
+  "tier": 0,
+  "acceptance": [
+    "github.test.ts draft test uses draft: 1 (or 'yes') and asserts isDraft === true",
+    "happy-path.test.ts mocks two fetch pages (PER_PAGE + remainder) and asserts fetch called twice",
+    "npm run test passes"
+  ],
+  "links": [
+    { "rel": "pr", "href": "https://github.com/k-dot-greyz/copilot-cockpit/pull/7", "label": "PR #7 (merged)" }
+  ],
+  "files": [
+    "src/lib/github.test.ts",
+    "src/lib/happy-path.test.ts"
+  ]
+}

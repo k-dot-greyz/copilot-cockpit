@@ -1,0 +1,23 @@
+{
+  "dex_id": "0x7D:0x11:MOD-PIPE-HYDRATE",
+  "dex_type": "pipe",
+  "status": "active",
+  "module_id": "MOD-PIPE-HYDRATE",
+  "title": "API → PRCardEntity hydration pipe",
+  "description": "Pure hydratePRCard transform: hostile GitHub REST payload → sanitized PRCardEntity with issueRefs extracted.",
+  "tags": ["pipe", "hydration", "security"],
+  "depends_on": ["MOD-JOINT-ENTITIES"],
+  "inputs": ["PRApiResponse"],
+  "outputs": ["PRCardEntity"],
+  "tier": 1,
+  "acceptance": [
+    "hydratePRCard is idempotent",
+    "url always passes through sanitizePrUrl",
+    "issueRefs extracted via extractIssueRefs",
+    "Unit tests cover missing/malformed fields"
+  ],
+  "links": [
+    { "rel": "pr", "href": "https://github.com/k-dot-greyz/copilot-cockpit/pull/7", "label": "PR #7 (merged)" }
+  ],
+  "files": ["src/lib/pipes/hydrate-pr.ts"]
+}

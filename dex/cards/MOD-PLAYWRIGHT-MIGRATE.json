@@ -1,0 +1,27 @@
+{
+  "dex_id": "0x7D:0x11:MOD-PLAYWRIGHT-MIGRATE",
+  "dex_type": "task",
+  "status": "planning",
+  "module_id": "MOD-PLAYWRIGHT-MIGRATE",
+  "title": "Migrate pure-fn tests from Playwright to Vitest",
+  "description": "Move tests/security.spec.ts and tests/ux-user-story.spec.ts pure-function coverage into src/lib/**/*.test.ts. Playwright should only run true browser E2E.",
+  "tags": ["test", "refactor", "vitest", "playwright"],
+  "depends_on": [],
+  "inputs": [],
+  "outputs": ["vitest-specs"],
+  "tier": 0,
+  "acceptance": [
+    "security.spec.ts and ux-user-story.spec.ts logic exists in Vitest files",
+    "Playwright testDir contains only browser-interaction specs (or is empty pending E2E)",
+    "npm run test passes with same or greater coverage"
+  ],
+  "links": [
+    { "rel": "pr", "href": "https://github.com/k-dot-greyz/copilot-cockpit/pull/7", "label": "PR #7 (merged)" }
+  ],
+  "files": [
+    "tests/security.spec.ts",
+    "tests/ux-user-story.spec.ts",
+    "src/lib/validation/pr-url.test.ts",
+    "src/lib/triage.test.ts"
+  ]
+}

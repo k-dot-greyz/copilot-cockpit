@@ -1,0 +1,23 @@
+{
+  "dex_id": "0x7D:0x11:MOD-PIPE-DEX",
+  "dex_type": "pipe",
+  "status": "active",
+  "module_id": "MOD-PIPE-DEX",
+  "title": "Entity → DexAssetCard transform pipe",
+  "description": "toDexCard emits dex-indexable asset cards from TriageViewEntity snapshots for the dex asset pipeline.",
+  "tags": ["pipe", "dex", "hydration"],
+  "depends_on": ["MOD-JOINT-ENTITIES", "MOD-PIPE-HYDRATE"],
+  "inputs": ["TriageViewEntity", "DexCardTemplate"],
+  "outputs": ["DexAssetCard"],
+  "tier": 2,
+  "acceptance": [
+    "toDexCard is idempotent",
+    "dex_id format: 0x7D:0x11:<module_id>",
+    "metadata.laneCounts matches source categories",
+    "Unit test round-trips TriageViewEntity → DexAssetCard"
+  ],
+  "links": [
+    { "rel": "parent", "href": "dex-entry.md", "label": "Copilot Cockpit 0x7D:0x10" }
+  ],
+  "files": ["src/lib/pipes/to-dex-card.ts"]
+}

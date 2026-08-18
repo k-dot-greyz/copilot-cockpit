@@ -1,0 +1,26 @@
+{
+  "dex_id": "0x7D:0x11:MOD-PR-PARITY-SYNC",
+  "dex_type": "task",
+  "status": "planning",
+  "module_id": "MOD-PR-PARITY-SYNC",
+  "title": "Reconcile joint entities with #8 GraphQL model",
+  "description": "Merge strategy for feat/pr-read-parity: extend PRCardEntity with GraphQL fields (checks, reviews, files) without breaking REST hydrate pipe.",
+  "tags": ["integration", "graphql", "merge"],
+  "depends_on": ["MOD-JOINT-ENTITIES", "MOD-PIPE-HYDRATE"],
+  "inputs": ["PRCardEntity", "GraphQLPRDetail"],
+  "outputs": ["PRCardEntity (extended)"],
+  "tier": 3,
+  "acceptance": [
+    "PRCardEntity extended with optional checks/reviews/files fields",
+    "hydratePRCard (REST) and hydratePRGraphQL (new) both emit PRCardEntity",
+    "Merge plan documented; no duplicate type definitions between #8 and entities/",
+    "npm run test green after #8 merge"
+  ],
+  "links": [
+    { "rel": "pr", "href": "https://github.com/k-dot-greyz/copilot-cockpit/pull/8", "label": "PR #8 (read parity)" }
+  ],
+  "files": [
+    "src/lib/entities/pr-card.ts",
+    "src/lib/pipes/hydrate-pr.ts"
+  ]
+}

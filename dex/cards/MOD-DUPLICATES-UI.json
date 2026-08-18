@@ -1,0 +1,25 @@
+{
+  "dex_id": "0x7D:0x11:MOD-DUPLICATES-UI",
+  "dex_type": "task",
+  "status": "planning",
+  "module_id": "MOD-DUPLICATES-UI",
+  "title": "Wire findDuplicates to dashboard UI",
+  "description": "Surface duplicate title groups in the triage dashboard. findDuplicates is tested but not yet rendered.",
+  "tags": ["ui", "triage", "duplicates"],
+  "depends_on": ["MOD-JOINT-ENTITIES"],
+  "inputs": ["PRCardEntity[]"],
+  "outputs": ["DuplicateGroupEntity[]"],
+  "tier": 2,
+  "acceptance": [
+    "Dashboard shows duplicate alert when findDuplicates returns groups",
+    "Duplicate PRs link to their PR cards",
+    "Keyboard and bulk-close guards still work during duplicate review"
+  ],
+  "links": [
+    { "rel": "doc", "href": "tasks.md", "label": "COCKPIT-TRIAGE-001 findDuplicates criterion" }
+  ],
+  "files": [
+    "src/components/PRDashboard.tsx",
+    "src/lib/triage.ts"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "dex_id": "0x7D:0x11:MOD-PLAYWRIGHT-CONFIG",
+  "dex_type": "task",
+  "status": "planning",
+  "module_id": "MOD-PLAYWRIGHT-CONFIG",
+  "title": "Playwright browser project config",
+  "description": "Fix contradictory fullyParallel/workers config. Add chromium project + baseURL for real E2E. Absorb PR #10 playwright.config.ts changes.",
+  "tags": ["test", "e2e", "playwright"],
+  "depends_on": ["MOD-PLAYWRIGHT-MIGRATE"],
+  "inputs": [],
+  "outputs": ["playwright.config.ts"],
+  "tier": 1,
+  "acceptance": [
+    "fullyParallel and workers are consistent (serial: false + workers 1, or parallel: true + default workers)",
+    "projects includes chromium with Desktop Chrome device",
+    "use.baseURL points to astro dev server port"
+  ],
+  "links": [
+    { "rel": "pr", "href": "https://github.com/k-dot-greyz/copilot-cockpit/pull/10", "label": "PR #10 (autofix — absorb)" }
+  ],
+  "files": ["playwright.config.ts"]
+}
