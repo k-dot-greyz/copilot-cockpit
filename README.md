@@ -32,6 +32,7 @@ npm run test       # Run Vitest test suite
 | [`docs/TESTIDS.md`](docs/TESTIDS.md) | **Canonical data-testid Registry for Accessible E2E & RTL Testing** |
 | [`docs/QUICKSTART-PROMPT-CHAIN.md`](docs/QUICKSTART-PROMPT-CHAIN.md) | **Prompt Chain for AI-driven Card Generation & Fork Hydration** |
 | [`docs/SYNC-ARCHITECTURE.md`](docs/SYNC-ARCHITECTURE.md) | **Local & Cloud Sync (vivgdrive / Object Store / SysEx) Architecture** |
+| [`docs/CARD-MANIFEST-SHELL-CONTAINER.md`](docs/CARD-MANIFEST-SHELL-CONTAINER.md) | **Master Markdown Shell Container for Issue Manifests & Playwright Tests** |
 | [`docs/mechanics/`](docs/mechanics/) | **Per-Mechanic Planning Specs with Embedded JSON Manifest Schemas** |
 
 ---

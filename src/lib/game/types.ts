@@ -84,6 +84,32 @@ export interface CompanionCard {
   };
 }
 
+export interface EncounterChoice {
+  text: string;
+  requirements: {
+    chm?: number;
+    krm?: number;
+    dgn?: number;
+  };
+  outcomes: {
+    cash_delta?: number;
+    energy_delta?: number;
+    chm_xp?: number;
+    krm_delta?: number;
+    dgn_delta?: number;
+    affinity_companion_id?: string;
+    affinity_gain?: number;
+  };
+}
+
+export interface EncounterCard {
+  id: string;
+  title: string;
+  speaker: string;
+  narrative: string;
+  choices: EncounterChoice[];
+}
+
 export interface TarotCard {
   id: string;
   name: string;

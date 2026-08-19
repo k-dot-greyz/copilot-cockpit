@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import type { PlayerState, JobCard, OutfitCard, CompanionCard, TarotCard } from '../lib/game/types';
+import type { PlayerState, JobCard, OutfitCard, CompanionCard, TarotCard, EncounterCard } from '../lib/game/types';
 import { INITIAL_PLAYER_STATE } from '../lib/game/types';
 import { calculateShiftPayout, addStatXP } from '../lib/game/engine';
 import { StatBar } from './StatBar';
@@ -8,6 +8,7 @@ import { DexView } from './views/DexView';
 import { OracleView } from './views/OracleView';
 import { ForgeView } from './views/ForgeView';
 import { CasinoMiniGame } from './CasinoMiniGame';
+import { EncounterModal } from './EncounterModal';
 
 // Seed Fixtures
 import fastFoodJob from '../../content/cards/jobs/fast_food_flipper.json';
@@ -21,11 +22,14 @@ import yandereCrypto from '../../content/cards/companions/yandere_crypto_bro.jso
 import foolTarot from '../../content/cards/tarot/the_fool_000.json';
 import magicianTarot from '../../content/cards/tarot/the_magician_001.json';
 import priestessTarot from '../../content/cards/tarot/high_priestess_002.json';
+import watercoolerEncounter from '../../content/cards/encounters/awkward_watercooler.json';
+import alleyEncounter from '../../content/cards/encounters/back_alley_deal.json';
 
 const JOBS_DATA: JobCard[] = [fastFoodJob as JobCard, promptJob as JobCard, shadowJob as JobCard];
 const OUTFITS_DATA: OutfitCard[] = [maidOutfit as OutfitCard, cyberBunnyOutfit as OutfitCard, tracksuitOutfit as OutfitCard];
 const COMPANIONS_DATA: CompanionCard[] = [techSenpai as CompanionCard, yandereCrypto as CompanionCard];
 const TAROT_DATA: TarotCard[] = [foolTarot as TarotCard, magicianTarot as TarotCard, priestessTarot as TarotCard];
+const ENCOUNTERS_DATA: EncounterCard[] = [watercoolerEncounter as EncounterCard, alleyEncounter as EncounterCard];
 
 export function GameShell() {
   const [state, setState] = useState<PlayerState>(() => {
@@ -39,6 +43,7 @@ export function GameShell() {
   });
 
   const [activeTab, setActiveTab] = useState<'dex' | 'arena' | 'oracle' | 'forge'>('arena');
+  const [activeEncounter, setActiveEncounter] = useState<EncounterCard | null>(null);
 
   // Auto-save
   useEffect(() => {
@@ -57,12 +62,18 @@ export function GameShell() {
     if (e.key === '3') setActiveTab('oracle');
     if (e.key === '4') setActiveTab('forge');
     if (e.key === 'r' || e.key === 'R') handleSleep();
+    if (e.key === 'e' || e.key === 'E') triggerRandomEncounter();
   }, [state]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
+
+  const triggerRandomEncounter = () => {
+    const enc = ENCOUNTERS_DATA[Math.floor(Math.random() * ENCOUNTERS_DATA.length)];
+    setActiveEncounter(enc);
+  };
 
   const handleSleep = () => {
     setState((prev) => ({
@@ -97,6 +108,41 @@ export function GameShell() {
         stats: statUpdate,
       };
     });
+
+    // 40% chance of triggering random visual novel dialogue encounter after shift
+    if (Math.random() < 0.4) {
+      triggerRandomEncounter();
+    }
+  };
+
+  const handleSelectChoice = (encounter: EncounterCard, choiceIndex: number) => {
+    const choice = encounter.choices[choiceIndex];
+    if (!choice) return;
+
+    setState((prev) => {
+      const outcomes = choice.outcomes;
+      const cashDelta = outcomes.cash_delta || 0;
+      const energyDelta = outcomes.energy_delta || 0;
+      const krmDelta = outcomes.krm_delta || 0;
+      const dgnDelta = outcomes.dgn_delta || 0;
+      const chmXp = outcomes.chm_xp || 0;
+
+      let statUpdate = { ...prev.stats };
+      if (chmXp > 0) {
+        statUpdate = addStatXP(statUpdate, 'chm', chmXp).stats;
+      }
+      statUpdate.krm = Math.max(-100, Math.min(100, statUpdate.krm + krmDelta));
+      statUpdate.dgn = Math.max(0, Math.min(10000, statUpdate.dgn + dgnDelta));
+
+      return {
+        ...prev,
+        cash: Math.max(0, prev.cash + cashDelta),
+        energy: Math.max(0, Math.min(100, prev.energy + energyDelta)),
+        stats: statUpdate,
+      };
+    });
+
+    setActiveEncounter(null);
   };
 
   const handleTrain = (statType: 'str' | 'int' | 'chm', xpGain: number, energyCost: number) => {
@@ -272,6 +318,16 @@ export function GameShell() {
       )}
       {activeTab === 'forge' && (
         <ForgeView state={state} onTrain={handleTrain} />
+      )}
+
+      {/* Visual Novel Encounter Dialog Modal */}
+      {activeEncounter && (
+        <EncounterModal
+          encounter={activeEncounter}
+          state={state}
+          onSelectChoice={handleSelectChoice}
+          onClose={() => setActiveEncounter(null)}
+        />
       )}
 
       {/* Footer */}

@@ -70,8 +70,9 @@ Follow-up to merged [#7](https://github.com/k-dot-greyz/copilot-cockpit/pull/7).
 - [ ] Real-time high-roller Degen leaderboard in Dex view
 
 ## Epic: STICKHRPG-OTOME-003 — Visual Novel Dialogue & Affinity Trees
-- [ ] **TASK-VN-003**: Interactive visual novel dialogue engine with branching choice trees and affinity checks
-- [ ] Schema `schemas/encounter_card.schema.json` and narrative encounter fixtures
+- [x] **TASK-VN-003**: Interactive visual novel dialogue engine with branching choice trees and affinity checks
+- [x] Schema `schemas/encounter_card.schema.json` and narrative encounter fixtures
+- [x] Reusable `EncounterModal.tsx` dialogue component wired to GameShell
 - [ ] Dynamic companion romance milestones and passive perk unlocking
 
 ## Epic: STICKHRPG-COMBAT-004 — Underground Fight Pit & Turn-Based Combat

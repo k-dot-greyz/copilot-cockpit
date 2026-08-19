@@ -19,11 +19,12 @@
     "MOD-PR-PARITY-SYNC"
   ],
   "stickhrpg_asset_pipes": [
-    "DEX-ASSET-JOBS",
-    "DEX-ASSET-OUTFITS",
-    "DEX-ASSET-TAROT",
-    "DEX-ASSET-COMPANIONS",
-    "DEX-ASSET-ENCOUNTERS"
+    { "id": "TASK-VN-003", "title": "Visual novel dialogue engine with branching choice trees and affinity checks", "status": "completed", "priority": "P1", "epic": "STICKHRPG-OTOME-003" },
+    { "id": "TASK-WASM-001", "title": "Compile stick-core to WebAssembly via wasm-bindgen and integrate with Astro client island", "status": "pending", "priority": "P1", "epic": "STICKHRPG-WASM-001" },
+    { "id": "TASK-A11Y-006", "title": "WCAG 2.2 AAA accessibility control panel & neurodivergent sensory settings", "status": "pending", "priority": "P1", "epic": "STICKHRPG-A11Y-006" },
+    { "id": "TASK-COMBAT-004", "title": "Underground Fight Pit turn-based brawler mini-game with outfit/tarot elemental damage", "status": "pending", "priority": "P2", "epic": "STICKHRPG-COMBAT-004" },
+    { "id": "TASK-CASINO-005", "title": "Crypto liquidation roulette & dynamic rugpull market simulator", "status": "pending", "priority": "P2", "epic": "STICKHRPG-CASINO-005" },
+    { "id": "TASK-SYSEX-002", "title": "WebSocket live MIDI 2.0 / SysEx state sync channel and multiplayer ghost leaderboard", "status": "pending", "priority": "P2", "epic": "STICKHRPG-SYNC-002" }
   ],
   "links": [
     { "rel": "parent", "href": "dex-entry.md", "label": "StickHRPG / Cockpit 0x7D:0x20" },
