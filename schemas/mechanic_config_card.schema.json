@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stickhrpg.zenos/schemas/mechanic_config_card.schema.json",
+  "title": "MechanicConfigCard",
+  "description": "Global game engine tuning parameters, economy multipliers, pity caps, and sync thresholds manifest.",
+  "type": "object",
+  "allOf": [
+    { "$ref": "base_entity_card.schema.json" }
+  ],
+  "properties": {
+    "card_type": { "const": "mechanic" },
+    "params": {
+      "type": "object",
+      "required": [
+        "mechanic_id",
+        "economy",
+        "gacha_math",
+        "progression",
+        "casino_edging",
+        "sysex_sync_rates"
+      ],
+      "properties": {
+        "mechanic_id": { "type": "string" },
+        "economy": {
+          "type": "object",
+          "required": [
+            "daily_base_rent",
+            "bank_daily_interest_rate",
+            "crypto_volatility_sigma",
+            "inflation_decay_coefficient"
+          ],
+          "properties": {
+            "daily_base_rent": { "type": "integer", "minimum": 0, "maximum": 1000 },
+            "bank_daily_interest_rate": { "type": "number", "minimum": 0.0, "maximum": 0.2 },
+            "crypto_volatility_sigma": { "type": "number", "minimum": 0.01, "maximum": 2.0 },
+            "inflation_decay_coefficient": { "type": "number", "minimum": 0.0, "maximum": 0.1 }
+          },
+          "additionalProperties": false
+        },
+        "gacha_math": {
+          "type": "object",
+          "required": [
+            "base_ssr_rate",
+            "base_sr_rate",
+            "base_r_rate",
+            "soft_pity_start_pull",
+            "soft_pity_increment",
+            "hard_pity_pull_cap",
+            "rate_up_50_50_enabled"
+          ],
+          "properties": {
+            "base_ssr_rate": { "type": "number", "minimum": 0.001, "maximum": 0.1, "default": 0.015 },
+            "base_sr_rate": { "type": "number", "minimum": 0.05, "maximum": 0.5, "default": 0.285 },
+            "base_r_rate": { "type": "number", "minimum": 0.4, "maximum": 0.95, "default": 0.700 },
+            "soft_pity_start_pull": { "type": "integer", "minimum": 30, "maximum": 85, "default": 70 },
+            "soft_pity_increment": { "type": "number", "minimum": 0.01, "maximum": 0.1, "default": 0.05 },
+            "hard_pity_pull_cap": { "type": "integer", "minimum": 50, "maximum": 100, "default": 90 },
+            "rate_up_50_50_enabled": { "type": "boolean", "default": true }
+          },
+          "additionalProperties": false
+        },
+        "progression": {
+          "type": "object",
+          "required": [
+            "xp_exponent",
+            "xp_linear_coeff",
+            "max_attribute_level",
+            "fatigue_recovery_rate_per_sleep"
+          ],
+          "properties": {
+            "xp_exponent": { "type": "number", "minimum": 1.0, "maximum": 2.5, "default": 1.65 },
+            "xp_linear_coeff": { "type": "number", "minimum": 10.0, "maximum": 200.0, "default": 50.0 },
+            "max_attribute_level": { "type": "integer", "minimum": 10, "maximum": 100, "default": 99 },
+            "fatigue_recovery_rate_per_sleep": { "type": "integer", "minimum": 50, "maximum": 100, "default": 100 }
+          },
+          "additionalProperties": false
+        },
+        "casino_edging": {
+          "type": "object",
+          "required": [
+            "base_bust_probability",
+            "bust_increment_per_round",
+            "max_bust_probability_cap",
+            "existential_dread_int_penalty",
+            "existential_dread_duration_hours"
+          ],
+          "properties": {
+            "base_bust_probability": { "type": "number", "minimum": 0.05, "maximum": 0.3, "default": 0.15 },
+            "bust_increment_per_round": { "type": "number", "minimum": 0.01, "maximum": 0.15, "default": 0.08 },
+            "max_bust_probability_cap": { "type": "number", "minimum": 0.5, "maximum": 0.99, "default": 0.85 },
+            "existential_dread_int_penalty": { "type": "number", "minimum": 0.05, "maximum": 0.5, "default": 0.20 },
+            "existential_dread_duration_hours": { "type": "integer", "minimum": 6, "maximum": 72, "default": 24 }
+          },
+          "additionalProperties": false
+        },
+        "sysex_sync_rates": {
+          "type": "object",
+          "required": [
+            "heartbeat_interval_ms",
+            "max_buffered_delta_packets",
+            "enable_lossless_bitmask_compression"
+          ],
+          "properties": {
+            "heartbeat_interval_ms": { "type": "integer", "minimum": 100, "maximum": 5000, "default": 1000 },
+            "max_buffered_delta_packets": { "type": "integer", "minimum": 10, "maximum": 1000, "default": 128 },
+            "enable_lossless_bitmask_compression": { "type": "boolean", "default": true }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

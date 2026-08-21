@@ -1,0 +1,16 @@
+{
+  "id": "job_prompt_engineer",
+  "title": "Junior Prompt Synthesizer",
+  "track": "tech",
+  "tier": 2,
+  "base_payout": 140,
+  "energy_cost": 20,
+  "hours": 4,
+  "description": "Begging the neural network to output valid JSON while sipping lukewarm matcha.",
+  "requirements": {
+    "str": 1,
+    "int": 3,
+    "chm": 2,
+    "krm": 0
+  }
+}

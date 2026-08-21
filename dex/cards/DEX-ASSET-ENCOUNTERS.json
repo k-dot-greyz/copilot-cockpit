@@ -1,0 +1,21 @@
+{
+  "dex_id": "0x7D:0x21:DEX-ASSET-ENCOUNTERS",
+  "dex_type": "pipe",
+  "status": "active",
+  "module_id": "DEX-ASSET-ENCOUNTERS",
+  "title": "Encounter Cards → Dex Narrative Tree Pipe",
+  "description": "Compiles visual novel narrative encounters and branching dialogue trees into executable Dex story cards.",
+  "tags": ["pipe", "dex", "encounters", "visual-novel", "dialogue", "story"],
+  "inputs": ["content/cards/encounters/*.json", "schemas/encounter_card.schema.json"],
+  "outputs": ["DexAssetCard", "EncounterCardEntity"],
+  "tier": 1,
+  "acceptance": [
+    "Validates all encounter cards against schemas/encounter_card.schema.json",
+    "Ensures all choices have stat requirements (CHM, KRM, DGN) and outcomes",
+    "Integrates with companion affinity deltas"
+  ],
+  "links": [
+    { "rel": "parent", "href": "dex-entry.md", "label": "StickHRPG 0x7D:0x20" }
+  ],
+  "files": ["content/cards/encounters/", "schemas/encounter_card.schema.json"]
+}

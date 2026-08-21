@@ -854,6 +854,13 @@ export default function PRDashboard() {
           )}
         </div>
         <div className="header-right">
+          <a
+            className="btn btn--sm btn--primary"
+            href="/game"
+            style={{ textDecoration: 'none' }}
+          >
+            🕹️ Play StickHRPG
+          </a>
           {lastFetched && (
             <span
               style={{

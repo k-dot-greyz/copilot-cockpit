@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stickhrpg.zenos/schemas/job_card.schema.json",
+  "title": "JobCard",
+  "type": "object",
+  "required": ["id", "title", "track", "tier", "base_payout", "energy_cost", "hours", "description", "requirements"],
+  "properties": {
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "track": { "type": "string", "enum": ["fast_food", "tech", "finance", "crime"] },
+    "tier": { "type": "integer", "minimum": 1, "maximum": 5 },
+    "base_payout": { "type": "integer", "minimum": 1 },
+    "energy_cost": { "type": "integer", "minimum": 5, "maximum": 50 },
+    "hours": { "type": "integer", "minimum": 1, "maximum": 12 },
+    "description": { "type": "string" },
+    "requirements": {
+      "type": "object",
+      "required": ["str", "int", "chm", "krm"],
+      "properties": {
+        "str": { "type": "integer", "minimum": 1 },
+        "int": { "type": "integer", "minimum": 1 },
+        "chm": { "type": "integer", "minimum": 1 },
+        "krm": { "type": "integer" }
+      }
+    }
+  }
+}

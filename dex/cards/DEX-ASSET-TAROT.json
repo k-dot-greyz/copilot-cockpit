@@ -1,0 +1,21 @@
+{
+  "dex_id": "0x7D:0x21:DEX-ASSET-TAROT",
+  "dex_type": "pipe",
+  "status": "active",
+  "module_id": "DEX-ASSET-TAROT",
+  "title": "Tarot Cards → Dex Divination Pipe",
+  "description": "Compiles cyber-mystic tarot cards from content/cards/tarot/ into Dex divination modifiers and spread buffs.",
+  "tags": ["pipe", "dex", "tarot", "divination", "glitchworks", "oracle"],
+  "inputs": ["content/cards/tarot/*.json", "schemas/tarot_card.schema.json"],
+  "outputs": ["DexAssetCard", "TarotCardEntity"],
+  "tier": 1,
+  "acceptance": [
+    "Validates all tarot cards against schemas/tarot_card.schema.json",
+    "Preserves Glitchworks tarot archetype IDs (000 The Fool, 001 The Magician, 002 High Priestess)",
+    "Binds daily spread multipliers to player state"
+  ],
+  "links": [
+    { "rel": "parent", "href": "dex-entry.md", "label": "StickHRPG 0x7D:0x20" }
+  ],
+  "files": ["content/cards/tarot/", "schemas/tarot_card.schema.json", "src/components/views/OracleView.tsx"]
+}

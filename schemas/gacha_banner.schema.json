@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stickhrpg.zenos/schemas/gacha_banner.schema.json",
+  "title": "GachaBanner",
+  "type": "object",
+  "required": ["id", "title", "cost_per_pull", "featured_ssr_id", "pool_ssr_ids", "pool_sr_ids", "pool_r_ids"],
+  "properties": {
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "cost_per_pull": { "type": "integer", "minimum": 10 },
+    "featured_ssr_id": { "type": "string" },
+    "pool_ssr_ids": { "type": "array", "items": { "type": "string" } },
+    "pool_sr_ids": { "type": "array", "items": { "type": "string" } },
+    "pool_r_ids": { "type": "array", "items": { "type": "string" } }
+  }
+}

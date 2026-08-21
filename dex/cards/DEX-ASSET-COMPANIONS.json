@@ -1,0 +1,21 @@
+{
+  "dex_id": "0x7D:0x21:DEX-ASSET-COMPANIONS",
+  "dex_type": "pipe",
+  "status": "active",
+  "module_id": "DEX-ASSET-COMPANIONS",
+  "title": "Companion Cards → Dex Otome Pipe",
+  "description": "Ingests harem/otome waifu & husbando companion cards from content/cards/companions/ into Dex relationship registers.",
+  "tags": ["pipe", "dex", "companions", "otome", "harem", "affinity"],
+  "inputs": ["content/cards/companions/*.json", "schemas/companion_card.schema.json"],
+  "outputs": ["DexAssetCard", "CompanionCardEntity"],
+  "tier": 1,
+  "acceptance": [
+    "Validates all companion cards against schemas/companion_card.schema.json",
+    "Tracks affinity levels (0-1000) and passive perk scaling",
+    "Links with EncounterModal dialogue events"
+  ],
+  "links": [
+    { "rel": "parent", "href": "dex-entry.md", "label": "StickHRPG 0x7D:0x20" }
+  ],
+  "files": ["content/cards/companions/", "schemas/companion_card.schema.json", "src/components/views/DexView.tsx"]
+}

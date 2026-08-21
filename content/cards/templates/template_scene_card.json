@@ -1,0 +1,62 @@
+{
+  "card_id": "scene:downtown_slums",
+  "schema_version": "2026-08.1-mvp++",
+  "dex_id": "0x7D:0x21:DEX-SCENE-SLUMS",
+  "card_type": "scene",
+  "slug": "downtown_slums",
+  "title": "Downtown Neon Slums",
+  "status": "active",
+  "tier": 1,
+  "element": "void",
+  "rarity": "COMMON",
+  "tags": ["slums", "starter", "low_security", "neon", "alley"],
+  "meta": {
+    "author": "atelier-scaffold",
+    "created_at": "2026-08-18T15:25:00Z",
+    "sync_hash": "sha256:4f8a92b0c1e8d7a123f4b",
+    "flags": {
+      "is_gacha_pullable": false,
+      "is_story_locked": false,
+      "is_tradeable": false,
+      "is_consumable": false,
+      "is_unique": false
+    }
+  },
+  "params": {
+    "district": "downtown_slums",
+    "bg_style": {
+      "css_gradient": "linear-gradient(180deg, #0a0a0f 0%, #1a0b2e 100%)",
+      "crt_flicker_intensity": 0.35,
+      "noise_opacity": 0.08,
+      "sprite_backdrop": null
+    },
+    "audio_theme": {
+      "bgm_track_id": "bgm_slums_dusk",
+      "ambient_loop": "sfx_distant_sirens_rain",
+      "bpm": 85
+    },
+    "lighting": "neon_dusk",
+    "entry_requirements": {
+      "min_hour": 0,
+      "max_hour": 23,
+      "min_krm": -100,
+      "max_krm": 100,
+      "min_dgn": 0,
+      "required_item_ids": []
+    },
+    "connected_scene_ids": ["scene:office_park", "scene:subway_terminal"],
+    "spawn_table": [
+      {
+        "entity_card_id": "encounter:back_alley_deal",
+        "weight": 0.45,
+        "time_window": { "start_hour": 18, "end_hour": 4 }
+      }
+    ],
+    "ambient_modifiers": {
+      "energy_drain_rate": 1.0,
+      "xp_bonus_type": "str",
+      "xp_bonus_multiplier": 1.1,
+      "danger_level": 3
+    }
+  }
+}

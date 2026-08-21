@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stickhrpg.zenos/schemas/base_entity_card.schema.json",
+  "title": "BaseEntityCard",
+  "description": "Universal header and foundational schema shared by all StickHRPG & Atelier game object entity cards.",
+  "type": "object",
+  "required": [
+    "card_id",
+    "schema_version",
+    "dex_id",
+    "card_type",
+    "slug",
+    "title",
+    "status",
+    "tier",
+    "element",
+    "rarity",
+    "tags",
+    "meta",
+    "params"
+  ],
+  "properties": {
+    "card_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]+:[a-z0-9_.-]+$",
+      "description": "Namespaced unique identifier (e.g., 'entity:outfit_maid_tuxedo', 'scene:downtown_slums')."
+    },
+    "schema_version": {
+      "type": "string",
+      "enum": ["2026-08.1-mvp++", "1.0.0"],
+      "default": "2026-08.1-mvp++"
+    },
+    "dex_id": {
+      "type": "string",
+      "pattern": "^0x[0-9A-Fa-f]{2}:0x[0-9A-Fa-f]{2}(:[a-zA-Z0-9_-]+)?$",
+      "description": "zenOS dex register mapping (e.g., '0x7D:0x21:DEX-ASSET-OUTFITS')."
+    },
+    "card_type": {
+      "type": "string",
+      "enum": [
+        "game_object",
+        "scene",
+        "action",
+        "mechanic",
+        "job",
+        "outfit",
+        "companion",
+        "tarot",
+        "encounter",
+        "relic",
+        "config"
+      ]
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "deprecated", "locked", "unlocked", "experimental"],
+      "default": "active"
+    },
+    "tier": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5,
+      "default": 1
+    },
+    "element": {
+      "type": "string",
+      "enum": ["neutral", "void", "fire", "water", "aether"],
+      "default": "neutral"
+    },
+    "rarity": {
+      "type": "string",
+      "enum": ["COMMON", "R", "SR", "SSR", "UR"],
+      "default": "COMMON"
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "meta": {
+      "type": "object",
+      "required": ["author", "created_at", "sync_hash", "flags"],
+      "properties": {
+        "author": { "type": "string", "default": "atelier-engine" },
+        "created_at": { "type": "string" },
+        "sync_hash": { "type": "string" },
+        "flags": {
+          "type": "object",
+          "properties": {
+            "is_gacha_pullable": { "type": "boolean", "default": false },
+            "is_story_locked": { "type": "boolean", "default": false },
+            "is_tradeable": { "type": "boolean", "default": false },
+            "is_consumable": { "type": "boolean", "default": false },
+            "is_unique": { "type": "boolean", "default": false }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "params": {
+      "type": "object",
+      "description": "Type-specific tightly-scoped parameter payload."
+    }
+  }
+}

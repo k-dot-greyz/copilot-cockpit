@@ -1,0 +1,36 @@
+---
+// StickHRPG: Degenerate Horizon (Cultured Consoomer Edition)
+// dex_id: 0x7D:0x20 | GlitchWorks · dev-master · zenOS
+import '../styles/global.css';
+import { GameShell } from '../components/GameShell';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>StickHRPG: Degenerate Horizon</title>
+    <meta
+      name="description"
+      content="Satirical life-sim RPG combining Flash StickRPG grinds, otome/harem gacha mechanics, and cyber-mystic tarot divination."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      html { background: #0a0a0f; color-scheme: dark; }
+    </style>
+  </head>
+  <body>
+    <GameShell client:only="react" />
+    <noscript>
+      <div style="padding: 2rem; text-align: center; color: #e8e6f0; font-family: monospace;">
+        <h1>StickHRPG requires JavaScript</h1>
+        <p>Enable JavaScript to play the life-sim game.</p>
+      </div>
+    </noscript>
+  </body>
+</html>

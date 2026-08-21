@@ -1,0 +1,15 @@
+{
+  "id": "companion_yandere_crypto",
+  "name": "Valerie V.",
+  "title": "Yandere Crypto Bro",
+  "element": "void",
+  "rarity": "SR",
+  "affinity_level": 80,
+  "bio": "Refuses to let you sell the dip. Threatens to liquidate anyone who makes eye contact with you.",
+  "passive_perk": {
+    "name": "100x Margin Leverage Blessing",
+    "payout_multiplier": 1.25,
+    "xp_multiplier": 1.2,
+    "energy_reduction": 0
+  }
+}

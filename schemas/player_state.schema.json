@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stickhrpg.zenos/schemas/player_state.schema.json",
+  "title": "PlayerState",
+  "type": "object",
+  "required": ["id", "name", "day", "hour", "energy", "cash", "crypto", "stats", "inventory", "pity"],
+  "properties": {
+    "id": { "type": "string" },
+    "name": { "type": "string" },
+    "day": { "type": "integer", "minimum": 1 },
+    "hour": { "type": "integer", "minimum": 0, "maximum": 23 },
+    "energy": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "cash": { "type": "integer", "minimum": 0 },
+    "crypto": { "type": "integer", "minimum": 0 },
+    "stats": {
+      "type": "object",
+      "required": ["str", "str_xp", "int", "int_xp", "chm", "chm_xp", "krm", "dgn"],
+      "properties": {
+        "str": { "type": "integer", "minimum": 1 },
+        "str_xp": { "type": "integer", "minimum": 0 },
+        "int": { "type": "integer", "minimum": 1 },
+        "int_xp": { "type": "integer", "minimum": 0 },
+        "chm": { "type": "integer", "minimum": 1 },
+        "chm_xp": { "type": "integer", "minimum": 0 },
+        "krm": { "type": "integer", "minimum": -100, "maximum": 100 },
+        "dgn": { "type": "integer", "minimum": 0, "maximum": 10000 }
+      }
+    },
+    "inventory": {
+      "type": "object",
+      "required": ["outfit_ids", "companion_ids", "active_tarot_buffs"],
+      "properties": {
+        "outfit_ids": { "type": "array", "items": { "type": "string" } },
+        "equipped_outfit_id": { "type": ["string", "null"] },
+        "companion_ids": { "type": "array", "items": { "type": "string" } },
+        "active_companion_id": { "type": ["string", "null"] },
+        "active_tarot_buffs": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "pity": {
+      "type": "object",
+      "required": ["banner_pulls", "guaranteed_featured"],
+      "properties": {
+        "banner_pulls": { "type": "integer", "minimum": 0 },
+        "guaranteed_featured": { "type": "boolean" }
+      }
+    }
+  }
+}

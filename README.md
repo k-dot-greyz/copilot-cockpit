@@ -1,107 +1,59 @@
-# Copilot Cockpit 👨‍✈️
+# StickHRPG: Degenerate Horizon (Cultured Consoomer Edition) 🕹️
 
-> GitHub Copilot agent surface dashboard — interactive developer cockpit for GlitchWorks / zenOS
+> A satirical, hyper-addictive life-sim RPG marrying classic Flash **StickRPG** (top-down city grinds, day/night clock cycles, dead-end corporate wage-slaving, casino degeneracy, street fights) with modern **gacha / otome / harem outfit collection**, **cyber-mystic tarot divination**, and **SysEx-inspired delta streaming**.
 
-Originally built via **Perplexity Computer** on 2026-03-31. Now rescued to git.
-Hosted (preview): [Perplexity Computer deployment](https://www.perplexity.ai/computer/a/copilot-cockpit-glitchworks-de-rStGpl9TRXqgbKBH8lljmA)
-
----
-
-## Purpose
-
-Side-by-side interactive dashboard visualizing every GitHub Copilot agent surface and their integration into the GlitchWorks / zenOS development workflow.
-
-**Built to answer:** *“what can each agent actually do, and where does it fit in our pipeline?”*
+Part of **GlitchWorks / zenOS / dev-master** (`dex_id: 0x7D:0x20`).
 
 ---
 
-## 🚀 PR Triage Happy Path (Epic: COCKPIT-TRIAGE-001)
+## 🚀 Quick Launch
 
-The dashboard provides a dedicated, high-speed triage interface built specifically for maintainers to handle bot PR floods and prioritize human reviews in under two minutes.
+```bash
+npm install
+npm run dev        # Launch local Astro dev server
+```
+Navigate to `http://localhost:4321/game` to play the interactive MVP view!
 
-### The Happy Path Flow
-
-| Step | Actor Action | System Response |
-| :--- | :--- | :--- |
-| **1** | Open dashboard (no stored token) | Prompt with a secure Token Modal requesting a GitHub Personal Access Token (PAT) with `repo` scope. |
-| **2** | Input PAT and click **Connect** | `validateToken` runs. On success, the modal closes, storing the PAT in `sessionStorage` (never on disk) and displaying `@username` in the header. |
-| **3** | — *(automatic)* | Triggers a paginated fetch of open PRs from `k-dot-greyz/dev-master` with an active loading progress bar. |
-| **4** | Scan Stat Bar | Displays real-time counts: **Total PRs** · **Ready for Review** · **Drafts** · **Human Authors** · **Bot Authors** · **🚨 Flood Detected** (if any). |
-| **5a** | **Flood Path:** Click **☢ Nuke N PRs** on the flood alert | Triggers a confirmation dialog. Upon approval, sequentially closes all flood PRs and deletes their head branches with a progress bar, clearing the flood lane. |
-| **5b** | **Human Path:** Review **🔥 Your PRs — Ready for Review** | Renders prioritized PR cards sorted newest-first, complete with author badges, draft/ready state, relative timestamps, and direct **View** links. |
-| **6** | Optional: Checkbox-select PRs → **Close N selected** | Triggers confirmation, then bulk-closes selected PRs. Any partial failures are gracefully surfaced in a top-level error banner. |
-| **7** | Press **R** or click **↻ Refresh** | Re-fetches all open PRs. If the repository is clean, displays: *“No open PRs found. 🎉”* |
-
-### Priority Lane Order (Top → Bottom)
-
-1. **🔥 Human — Ready for Review** *(action first)*
-2. **📝 Human — Drafts**
-3. **🧪 Bot Test/Security Coverage**
-4. **🤖 Bot — Other**
-5. **🚨 Bot Flood (Duplicates)**
-6. **👥 External**
-
-### Automated Verification
-
-This happy path is fully verified by an end-to-end integration test in **Vitest**:
-- **Test File:** `src/lib/happy-path.test.ts`
-- **What it covers:** Token validation, paginated fetching, stat calculation, multi-lane categorization, and a full mock-nuke sequence (sequentially closing 12 flood PRs and deleting their branches) followed by post-nuke state verification.
-- **Run command:** `npm run test`
+To execute deterministic tests:
+```bash
+npm run test       # Run Vitest test suite
+```
 
 ---
 
-## What It Shows
+## 📚 Documentation Map & Reference Index
 
-### Agent Matrix
-
-| Surface | Tier | Key capability |
-|---|---|---|
-| Copilot CLI | Free | `gh copilot suggest/explain` — terminal command assist |
-| Agent Mode | Pro | Multi-file edits, terminal commands, in-editor iteration |
-| Coding Agent | Pro+ | Issues → PRs autonomously, GitHub Actions VM, async |
-| Code Review | Pro | Agentic PR review, “Implement suggestion” → Coding Agent |
-
-### Workflow Cards
-
-- **Issue Triage** — All open GlitchWorks issues, severity-ranked, Copilot assignment commands ready
-- **Bug Fix** — Full pipeline: diagnose → assign `@copilot` → agent flow → diff quality → Bouncer verdict
-- **Release Prep** — v2.4.5 → v2.5.0 pipeline: branch audit, 8 quality gates, tag + release commands
-
----
-
-## Stack (rebuild target)
-
-| Layer | Tech |
+| Document | Purpose |
 |---|---|
-| Framework | Astro + TypeScript |
-| Styling | CSS custom properties (zenOS theme) |
-| Data | Static JSON + GitHub API (live issues/PRs) |
-| Deploy | Vercel |
+| [`docs/reflibs.md`](docs/reflibs.md) | **Curated Index of Official Documentation URLs & Tech Stack Standards** |
+| [`docs/whitepaper_stick_rpg.md`](docs/whitepaper_stick_rpg.md) | **Full Product Vision & Game Mechanics Design Whitepaper** |
+| [`docs/SPEC.md`](docs/SPEC.md) | **Four-View Matrix (Dex/Arena/Oracle/Forge) Spec & Data Contracts** |
+| [`docs/TESTING.md`](docs/TESTING.md) | **Testing Methodology, Coverage & Quality Gates** |
+| [`docs/TESTIDS.md`](docs/TESTIDS.md) | **Canonical data-testid Registry for Accessible E2E & RTL Testing** |
+| [`docs/QUICKSTART-PROMPT-CHAIN.md`](docs/QUICKSTART-PROMPT-CHAIN.md) | **Prompt Chain for AI-driven Card Generation & Fork Hydration** |
+| [`docs/SYNC-ARCHITECTURE.md`](docs/SYNC-ARCHITECTURE.md) | **Local & Cloud Sync (vivgdrive / Object Store / SysEx) Architecture** |
+| [`docs/CARD-MANIFEST-SHELL-CONTAINER.md`](docs/CARD-MANIFEST-SHELL-CONTAINER.md) | **Master Markdown Shell Container for Issue Manifests & Playwright Tests** |
+| [`docs/mechanics/`](docs/mechanics/) | **Per-Mechanic Planning Specs with Embedded JSON Manifest Schemas** |
 
 ---
 
-## Keyboard Shortcuts
+## 🏗️ Technical Stack Harness
 
-| Key | View |
-|---|---|
-| `1` | Agent Matrix |
-| `2` | Issue Triage |
-| `3` | Bug Fix |
-| `4` | Release Prep |
-| Click code block | Copy to clipboard |
-
----
-
-## Integration Points
-
-- **GlitchWorks**: `AGENTS.md`, `.github/copilot-instructions.md`, `.github/agents/`
-- **dev-master**: `dex/08-projects/copilot-cockpit.md`
-- **zenOS**: CODE_REVIEW_PROTOCOL, bouncer.agent.md
-
-## Status
-
-`perplexity-computer-prototype` → `rescue-to-git` → `rebuild-in-astro`
+- **Frontend Core**: [Astro 6+](https://docs.astro.build/) + [React 19](https://react.dev/) client islands.
+- **Backend Game Engine**: Rust 2021+ deterministic engine (`packages/stick-core/`).
+- **Data Entities**: Declarative JSON cards validated against [JSON Schema Draft 2020-12](https://json-schema.org/draft/2020-12/release-notes).
+- **Streaming Protocol**: [MIDI 2.0 & SysEx-Inspired](https://www.midi.org/specifications/midi-2-0-specifications) sparse delta state synchronization.
+- **Accessibility**: High-contrast, neurodivergent-friendly, fully keyboard-navigable (`WASD`, `1-4`, `R`, `Space`), and [WCAG 2.2 AAA](https://www.w3.org/TR/WCAG22/) compliant.
+- **Verification**: [Vitest](https://vitest.dev/) unit/integration tests and [Playwright](https://playwright.dev/) E2E browser tests.
 
 ---
 
-*dex_id: `0x7D:0x10` | Hosted: GlitchWorks · dev-master · zenOS*
+## 🕹️ The Four-View Matrix (Keyboard Shortcuts)
+
+| Key | View | Action |
+|:---:|:---|:---|
+| `1` | **Dex** | Wardrobe & Companion Archive (Equip outfits, inspect waifu synergies) |
+| `2` | **Arena** | Career shifts, fight clubs, and wage-slave hustles |
+| `3` | **Oracle** | Gacha loot crate 10-pulls, pity counters & daily 3-card Tarot divination |
+| `4` | **Forge** | Gym stat grinds, prompt engineering bootcamps, and styling bars |
+| `R` | **Sleep** | Advance day clock, restore 100 Energy, pay daily rent, draw new Tarot spread |

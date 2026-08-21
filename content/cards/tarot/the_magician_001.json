@@ -1,0 +1,14 @@
+{
+  "id": "001",
+  "name": "The Magician",
+  "sub": "Resonance: Cognitive Synthesis",
+  "type": "fire",
+  "stats": {
+    "atk": 70,
+    "def": 40,
+    "spd": 82
+  },
+  "desc": "Converting prompt queries into cash flow. +50% INT XP gain, -10% Energy cost on Prompting shifts.",
+  "image": "text-red-400",
+  "icon": "Flame"
+}

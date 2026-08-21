@@ -1,0 +1,42 @@
+{
+  "id": "encounter_watercooler_01",
+  "title": "Awkward Tech-Lead Watercooler Standup",
+  "speaker": "Evelyn K. (Tech-Lead Senpai)",
+  "narrative": "You bump into Evelyn by the espresso machine. She has dark circles under her eyes and is furiously profiling an async lock on her tablet. 'Did you... did you actually write unit tests for that PR or did you just mock true?' she asks quietly.",
+  "choices": [
+    {
+      "text": "Show her a 100% mutation-tested coverage suite and offer an extra shot of espresso.",
+      "requirements": {
+        "chm": 2,
+        "krm": 0,
+        "dgn": 0
+      },
+      "outcomes": {
+        "cash_delta": 0,
+        "energy_delta": -5,
+        "chm_xp": 50,
+        "krm_delta": 5,
+        "dgn_delta": 0,
+        "affinity_companion_id": "companion_tech_senpai",
+        "affinity_gain": 25
+      }
+    },
+    {
+      "text": "Admit you pushed directly to main at 3 AM because CI was taking too long.",
+      "requirements": {
+        "chm": 1,
+        "krm": -5,
+        "dgn": 50
+      },
+      "outcomes": {
+        "cash_delta": 0,
+        "energy_delta": -15,
+        "chm_xp": 20,
+        "krm_delta": -10,
+        "dgn_delta": 30,
+        "affinity_companion_id": "companion_tech_senpai",
+        "affinity_gain": -10
+      }
+    }
+  ]
+}

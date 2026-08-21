@@ -1,0 +1,21 @@
+{
+  "dex_id": "0x7D:0x21:DEX-ASSET-OUTFITS",
+  "dex_type": "pipe",
+  "status": "active",
+  "module_id": "DEX-ASSET-OUTFITS",
+  "title": "Outfit Cards → Dex Asset Card Pipe",
+  "description": "Transforms outfit & cosmetic modifier JSON cards from content/cards/outfits/ into Dex wardobe assets with elemental affinity bindings.",
+  "tags": ["pipe", "dex", "outfits", "cosmetics", "gacha", "hydration"],
+  "inputs": ["content/cards/outfits/*.json", "schemas/outfit_card.schema.json"],
+  "outputs": ["DexAssetCard", "OutfitCardEntity"],
+  "tier": 1,
+  "acceptance": [
+    "Validates all outfit cards against schemas/outfit_card.schema.json",
+    "Maps elements (void, fire, water, aether) and rarity tiers (R, SR, SSR, UR)",
+    "Ensures multiplier curves are bounded and positive"
+  ],
+  "links": [
+    { "rel": "parent", "href": "dex-entry.md", "label": "StickHRPG 0x7D:0x20" }
+  ],
+  "files": ["content/cards/outfits/", "schemas/outfit_card.schema.json", "src/components/views/DexView.tsx"]
+}

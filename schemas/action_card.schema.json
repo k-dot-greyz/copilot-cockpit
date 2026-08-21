@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stickhrpg.zenos/schemas/action_card.schema.json",
+  "title": "ActionCard",
+  "description": "Discrete player interactive action, activity, or mini-game trigger manifest.",
+  "type": "object",
+  "allOf": [
+    { "$ref": "base_entity_card.schema.json" }
+  ],
+  "properties": {
+    "card_type": { "const": "action" },
+    "params": {
+      "type": "object",
+      "required": [
+        "action_category",
+        "cooldown_ticks",
+        "duration_hours",
+        "costs",
+        "stat_checks",
+        "payout_formula",
+        "xp_rewards",
+        "failure_consequences",
+        "animation_trigger"
+      ],
+      "properties": {
+        "action_category": {
+          "type": "string",
+          "enum": ["work", "training", "social_flirt", "crime_gamble", "rest_recover", "craft_synthesize"]
+        },
+        "cooldown_ticks": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1440
+        },
+        "duration_hours": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 12
+        },
+        "costs": {
+          "type": "object",
+          "required": ["energy", "cash", "crypto", "consumed_item_ids"],
+          "properties": {
+            "energy": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "cash": { "type": "integer", "minimum": 0 },
+            "crypto": { "type": "integer", "minimum": 0 },
+            "consumed_item_ids": { "type": "array", "items": { "type": "string" } }
+          },
+          "additionalProperties": false
+        },
+        "stat_checks": {
+          "type": "object",
+          "required": ["primary_stat", "threshold_base", "rng_variance", "critical_success_threshold"],
+          "properties": {
+            "primary_stat": { "type": "string", "enum": ["str", "int", "chm", "krm", "dgn", "none"] },
+            "threshold_base": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "rng_variance": { "type": "number", "minimum": 0.0, "maximum": 0.5 },
+            "critical_success_threshold": { "type": "number", "minimum": 0.8, "maximum": 1.0 }
+          },
+          "additionalProperties": false
+        },
+        "payout_formula": {
+          "type": "object",
+          "required": ["base_amount", "scaling_stat", "scaling_coefficient", "variance_range"],
+          "properties": {
+            "base_amount": { "type": "integer", "minimum": 0 },
+            "scaling_stat": { "type": "string", "enum": ["str", "int", "chm", "dgn", "none"] },
+            "scaling_coefficient": { "type": "number", "minimum": 0.0, "maximum": 5.0 },
+            "variance_range": {
+              "type": "array",
+              "items": { "type": "number" },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "additionalProperties": false
+        },
+        "xp_rewards": {
+          "type": "object",
+          "required": ["str_xp", "int_xp", "chm_xp", "dgn_xp", "krm_delta"],
+          "properties": {
+            "str_xp": { "type": "integer", "minimum": 0 },
+            "int_xp": { "type": "integer", "minimum": 0 },
+            "chm_xp": { "type": "integer", "minimum": 0 },
+            "dgn_xp": { "type": "integer", "minimum": 0 },
+            "krm_delta": { "type": "integer", "minimum": -100, "maximum": 100 }
+          },
+          "additionalProperties": false
+        },
+        "failure_consequences": {
+          "type": "object",
+          "required": ["energy_penalty", "cash_penalty", "inflicted_debuff", "debuff_duration_hours"],
+          "properties": {
+            "energy_penalty": { "type": "integer", "minimum": 0, "maximum": 50 },
+            "cash_penalty": { "type": "integer", "minimum": 0 },
+            "inflicted_debuff": { "type": ["string", "null"] },
+            "debuff_duration_hours": { "type": "integer", "minimum": 0, "maximum": 48 }
+          },
+          "additionalProperties": false
+        },
+        "animation_trigger": {
+          "type": "string",
+          "enum": ["punch_brawl", "typing_frenzy", "cocktail_shake", "dice_roll", "card_flip", "bed_snore"]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

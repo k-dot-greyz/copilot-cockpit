@@ -1,0 +1,62 @@
+{
+  "card_id": "action:prompt_sprint",
+  "schema_version": "2026-08.1-mvp++",
+  "dex_id": "0x7D:0x21:DEX-ACTION-PROMPT",
+  "card_type": "action",
+  "slug": "prompt_sprint",
+  "title": "High-Velocity Prompt Sprint",
+  "status": "active",
+  "tier": 2,
+  "element": "aether",
+  "rarity": "R",
+  "tags": ["tech", "prompting", "int_grind", "energy_cost"],
+  "meta": {
+    "author": "atelier-scaffold",
+    "created_at": "2026-08-18T15:25:00Z",
+    "sync_hash": "sha256:7c9e11a22f489b0981e",
+    "flags": {
+      "is_gacha_pullable": false,
+      "is_story_locked": false,
+      "is_tradeable": false,
+      "is_consumable": false,
+      "is_unique": false
+    }
+  },
+  "params": {
+    "action_category": "work",
+    "cooldown_ticks": 0,
+    "duration_hours": 3,
+    "costs": {
+      "energy": 20,
+      "cash": 0,
+      "crypto": 0,
+      "consumed_item_ids": []
+    },
+    "stat_checks": {
+      "primary_stat": "int",
+      "threshold_base": 3,
+      "rng_variance": 0.1,
+      "critical_success_threshold": 0.95
+    },
+    "payout_formula": {
+      "base_amount": 120,
+      "scaling_stat": "int",
+      "scaling_coefficient": 1.25,
+      "variance_range": [0.9, 1.2]
+    },
+    "xp_rewards": {
+      "str_xp": 0,
+      "int_xp": 45,
+      "chm_xp": 10,
+      "dgn_xp": 5,
+      "krm_delta": 0
+    },
+    "failure_consequences": {
+      "energy_penalty": 5,
+      "cash_penalty": 0,
+      "inflicted_debuff": null,
+      "debuff_duration_hours": 0
+    },
+    "animation_trigger": "typing_frenzy"
+  }
+}

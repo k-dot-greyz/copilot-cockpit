@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stickhrpg.zenos/schemas/outfit_card.schema.json",
+  "title": "OutfitCard",
+  "type": "object",
+  "required": ["id", "name", "rarity", "element", "desc", "multipliers"],
+  "properties": {
+    "id": { "type": "string" },
+    "name": { "type": "string" },
+    "rarity": { "type": "string", "enum": ["R", "SR", "SSR", "UR"] },
+    "element": { "type": "string", "enum": ["void", "fire", "water", "aether"] },
+    "desc": { "type": "string" },
+    "icon": { "type": "string" },
+    "multipliers": {
+      "type": "object",
+      "required": ["str_buff", "int_buff", "chm_buff", "payout_buff", "degen_buff"],
+      "properties": {
+        "str_buff": { "type": "number", "minimum": 0 },
+        "int_buff": { "type": "number", "minimum": 0 },
+        "chm_buff": { "type": "number", "minimum": 0 },
+        "payout_buff": { "type": "number", "minimum": 0 },
+        "degen_buff": { "type": "number", "minimum": 0 }
+      }
+    }
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "card_id": "mechanic:core_engine_tuning",
+  "schema_version": "2026-08.1-mvp++",
+  "dex_id": "0x7D:0x21:DEX-CONFIG-CORE",
+  "card_type": "mechanic",
+  "slug": "core_engine_tuning",
+  "title": "Core Engine Global Tuning & Economy Manifest",
+  "status": "active",
+  "tier": 0,
+  "element": "neutral",
+  "rarity": "COMMON",
+  "tags": ["config", "economy", "gacha", "pity", "sysex"],
+  "meta": {
+    "author": "atelier-scaffold",
+    "created_at": "2026-08-18T15:25:00Z",
+    "sync_hash": "sha256:99f81a0e8d7162bc5a",
+    "flags": {
+      "is_gacha_pullable": false,
+      "is_story_locked": false,
+      "is_tradeable": false,
+      "is_consumable": false,
+      "is_unique": true
+    }
+  },
+  "params": {
+    "mechanic_id": "core_engine_2026",
+    "economy": {
+      "daily_base_rent": 25,
+      "bank_daily_interest_rate": 0.02,
+      "crypto_volatility_sigma": 0.45,
+      "inflation_decay_coefficient": 0.005
+    },
+    "gacha_math": {
+      "base_ssr_rate": 0.015,
+      "base_sr_rate": 0.285,
+      "base_r_rate": 0.700,
+      "soft_pity_start_pull": 70,
+      "soft_pity_increment": 0.05,
+      "hard_pity_pull_cap": 90,
+      "rate_up_50_50_enabled": true
+    },
+    "progression": {
+      "xp_exponent": 1.65,
+      "xp_linear_coeff": 50.0,
+      "max_attribute_level": 99,
+      "fatigue_recovery_rate_per_sleep": 100
+    },
+    "casino_edging": {
+      "base_bust_probability": 0.15,
+      "bust_increment_per_round": 0.08,
+      "max_bust_probability_cap": 0.85,
+      "existential_dread_int_penalty": 0.20,
+      "existential_dread_duration_hours": 24
+    },
+    "sysex_sync_rates": {
+      "heartbeat_interval_ms": 1000,
+      "max_buffered_delta_packets": 128,
+      "enable_lossless_bitmask_compression": true
+    }
+  }
+}

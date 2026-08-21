@@ -1,0 +1,42 @@
+{
+  "id": "encounter_back_alley_01",
+  "title": "Back-Alley Liquidity Shakedown",
+  "speaker": "Valerie V. (Yandere Crypto Bro)",
+  "narrative": "A neon shadow steps out from behind the dumpster holding a cold-storage ledger. Valerie smiles with unhinged affection: 'Darling! Tell me you didn't sell our memecoins at the bottom. Tell me we're going 100x long together... right now.'",
+  "choices": [
+    {
+      "text": "Pledge allegiance to the 100x margin long and hand over your wallet seed phrase.",
+      "requirements": {
+        "chm": 3,
+        "krm": -10,
+        "dgn": 100
+      },
+      "outcomes": {
+        "cash_delta": 250,
+        "energy_delta": -10,
+        "chm_xp": 40,
+        "krm_delta": -15,
+        "dgn_delta": 150,
+        "affinity_companion_id": "companion_yandere_crypto",
+        "affinity_gain": 40
+      }
+    },
+    {
+      "text": "Try to explain risk management, stop-loss orders, and diversified index funds.",
+      "requirements": {
+        "chm": 1,
+        "krm": 5,
+        "dgn": 0
+      },
+      "outcomes": {
+        "cash_delta": -50,
+        "energy_delta": -25,
+        "chm_xp": 10,
+        "krm_delta": 5,
+        "dgn_delta": -20,
+        "affinity_companion_id": "companion_yandere_crypto",
+        "affinity_gain": -25
+      }
+    }
+  ]
+}

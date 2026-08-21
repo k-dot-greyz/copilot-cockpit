@@ -1,0 +1,16 @@
+{
+  "id": "job_shadow_ceo",
+  "title": "Shadow Syndicate CEO",
+  "track": "finance",
+  "tier": 5,
+  "base_payout": 1250,
+  "energy_cost": 30,
+  "hours": 6,
+  "description": "Orchestrating algorithmic liquidity sweeps and hostiles takeovers from the penthouse.",
+  "requirements": {
+    "str": 5,
+    "int": 10,
+    "chm": 10,
+    "krm": -20
+  }
+}

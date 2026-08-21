@@ -1,0 +1,15 @@
+{
+  "id": "outfit_maid_tuxedo",
+  "name": "Maid Tuxedo of Dominance",
+  "rarity": "SSR",
+  "element": "aether",
+  "desc": "Impeccably tailored frills lined with kevlar and corporate authority.",
+  "icon": "Sparkles",
+  "multipliers": {
+    "str_buff": 1.25,
+    "int_buff": 1.4,
+    "chm_buff": 1.8,
+    "payout_buff": 1.5,
+    "degen_buff": 1.3
+  }
+}

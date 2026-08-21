@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stickhrpg.zenos/schemas/encounter_card.schema.json",
+  "title": "EncounterCard",
+  "type": "object",
+  "required": ["id", "title", "speaker", "narrative", "choices"],
+  "properties": {
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "speaker": { "type": "string" },
+    "narrative": { "type": "string" },
+    "choices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["text", "requirements", "outcomes"],
+        "properties": {
+          "text": { "type": "string" },
+          "requirements": {
+            "type": "object",
+            "properties": {
+              "chm": { "type": "integer" },
+              "krm": { "type": "integer" },
+              "dgn": { "type": "integer" }
+            }
+          },
+          "outcomes": {
+            "type": "object",
+            "properties": {
+              "cash_delta": { "type": "integer" },
+              "energy_delta": { "type": "integer" },
+              "chm_xp": { "type": "integer" },
+              "krm_delta": { "type": "integer" },
+              "dgn_delta": { "type": "integer" },
+              "affinity_companion_id": { "type": "string" },
+              "affinity_gain": { "type": "integer" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

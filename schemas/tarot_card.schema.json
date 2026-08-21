@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stickhrpg.zenos/schemas/tarot_card.schema.json",
+  "title": "TarotCard",
+  "type": "object",
+  "required": ["id", "name", "sub", "type", "stats", "desc", "icon"],
+  "properties": {
+    "id": { "type": "string" },
+    "name": { "type": "string" },
+    "sub": { "type": "string" },
+    "type": { "type": "string", "enum": ["void", "fire", "water", "aether"] },
+    "stats": {
+      "type": "object",
+      "required": ["atk", "def", "spd"],
+      "properties": {
+        "atk": { "type": "integer", "minimum": 0 },
+        "def": { "type": "integer", "minimum": 0 },
+        "spd": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "desc": { "type": "string" },
+    "image": { "type": "string" },
+    "icon": { "type": "string" }
+  }
+}
