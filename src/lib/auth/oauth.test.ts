@@ -170,6 +170,35 @@ describe('exchangeCodeForToken', () => {
     );
   });
 
+  it('throws when server returns non-JSON body on error', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 502,
+        text: async () => 'upstream gateway failure',
+      })
+    );
+
+    await expect(exchangeCodeForToken('my-code')).rejects.toThrow(
+      'Failed to exchange code: 502 upstream gateway failure'
+    );
+  });
+
+  it('throws when server returns malformed JSON body', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        text: async () => 'not-json{{{',
+      })
+    );
+
+    await expect(exchangeCodeForToken('my-code')).rejects.toThrow(
+      'No access token returned from server'
+    );
+  });
+
   it('sends POST request to /api/auth/token with the code', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
