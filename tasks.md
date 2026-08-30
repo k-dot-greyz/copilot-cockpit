@@ -1,4 +1,4 @@
-# Copilot Cockpit — Tasks
+# Copilot Cockpit — Tasks & Follow-Up Epics
 
 ## Epic: COCKPIT-TRIAGE-001 — PR Triage Happy Path (MVP)
 
@@ -48,7 +48,7 @@ Follow-up to merged [#7](https://github.com/k-dot-greyz/copilot-cockpit/pull/7).
 ### Tier 0 — parallel, no deps
 
 - [ ] **MOD-TEST-NITPICK** — Fix #7 review nitpicks (draft coercion, pagination mock) `dex/cards/MOD-TEST-NITPICK.json`
-- [ ] **MOD-KBD-GUARDS** — Text-input-only keyboard guard `dex/cards/MOD-KBD-GUARDS.json`
+- [ ] **MOD-KBD-GUARDS** — Text-input-only keyboard guard (checkbox unblock) `dex/cards/MOD-KBD-GUARDS.json`
 - [ ] **MOD-PLAYWRIGHT-MIGRATE** — Move pure-fn Playwright specs to Vitest `dex/cards/MOD-PLAYWRIGHT-MIGRATE.json`
 - [x] **MOD-JOINT-ENTITIES** — Shared entity contracts (`src/lib/entities/`) `dex/cards/MOD-JOINT-ENTITIES.json`
 
@@ -57,6 +57,7 @@ Follow-up to merged [#7](https://github.com/k-dot-greyz/copilot-cockpit/pull/7).
 - [ ] **MOD-PLAYWRIGHT-CONFIG** — Browser project config `dex/cards/MOD-PLAYWRIGHT-CONFIG.json`
 - [x] **MOD-PIPE-HYDRATE** — API → PRCardEntity (`src/lib/pipes/hydrate-pr.ts`) `dex/cards/MOD-PIPE-HYDRATE.json`
 - [x] **MOD-PIPE-SANITIZE** — Metadata sanitization (`src/lib/pipes/sanitize-metadata.ts`) `dex/cards/MOD-PIPE-SANITIZE.json`
+- [ ] **MOD-OAUTH-RATE-RECOVERY** — OAuth rate-limit tracking and error toast `dex/cards/MOD-OAUTH-RATE-RECOVERY.json`
 
 ### Tier 2 — depends on Tier 1
 
@@ -67,3 +68,18 @@ Follow-up to merged [#7](https://github.com/k-dot-greyz/copilot-cockpit/pull/7).
 ### Tier 3 — integration
 
 - [ ] **MOD-PR-PARITY-SYNC** — Reconcile with GraphQL model `dex/cards/MOD-PR-PARITY-SYNC.json`
+
+---
+
+## Epic: COCKPIT-HARDENING-003 — Post-Extraction Hardening & UI Parity
+
+**dex_id:** `0x7D:0x12` | **Spec:** `docs/epics/COCKPIT-HARDENING-003.md` | **Cards:** `dex/cards/`
+
+Follow-up tracking after extraction of `StickHRPG` into standalone `stickhrpg-dev`.
+
+- [ ] `ISSUE-COCKPIT-001`: Wire `findDuplicates` to PRDashboard with interactive duplicate cluster alerts and selective multi-close.
+- [ ] `ISSUE-COCKPIT-002`: Refine `isTextInput` to allow shortcut keys (e.g., `R`) while checkboxes or radios are focused.
+- [ ] `ISSUE-COCKPIT-003`: Extend truthy draft coercion tests (e.g. `draft: 1`) and multi-page pagination assertions in `happy-path.test.ts`.
+- [ ] `ISSUE-COCKPIT-004`: Configure real browser Playwright E2E suite (`tests/e2e-dashboard.spec.ts`) with Chromium and webServer fixture.
+- [ ] `ISSUE-COCKPIT-005`: Complete full parity reconciliation between `PRCardEntity` and GraphQL rich fields.
+- [ ] `ISSUE-COCKPIT-006`: Implement OAuth rate limit backoff and error recovery toast banner in `PRDashboard`.

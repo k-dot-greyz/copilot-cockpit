@@ -8,15 +8,20 @@ legacy_map:
   midi_1_0_bank: 125
   midi_1_0_prog: 16
 status: "active"
-tags: ["copilot", "agents", "cockpit", "glitchworks", "reference", "workflow", "visualization", "pipeline", "hydration"]
+tags: ["copilot", "agents", "cockpit", "glitchworks", "reference", "workflow", "visualization", "pipeline", "hydration", "hardening"]
 child_epics:
   - dex_id: "0x7D:0x11"
     title: "COCKPIT-PIPELINE-002"
     spec: "docs/epics/COCKPIT-PIPELINE-002.md"
     cards: "dex/cards/"
+  - dex_id: "0x7D:0x12"
+    title: "COCKPIT-HARDENING-003"
+    spec: "docs/epics/COCKPIT-HARDENING-003.md"
+    cards: "dex/cards/"
 ---
 
 # Copilot Cockpit — dex entry
 
-See README.md. Spec sourced from dex/08-projects/copilot-cockpit.md in dev-master.
+See `README.md`. Spec sourced from `dex/08-projects/copilot-cockpit.md` in `dev-master`.
 Original prototype: https://www.perplexity.ai/computer/a/copilot-cockpit-glitchworks-de-rStGpl9TRXqgbKBH8lljmA
+Dashboard viewport accessible at `/`.

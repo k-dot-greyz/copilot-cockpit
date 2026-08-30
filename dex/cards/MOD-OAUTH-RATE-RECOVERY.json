@@ -1,0 +1,26 @@
+{
+  "dex_id": "0x7D:0x12:MOD-OAUTH-RATE-RECOVERY",
+  "dex_type": "task",
+  "status": "planning",
+  "module_id": "MOD-OAUTH-RATE-RECOVERY",
+  "title": "OAuth rate-limit tracking and error recovery toast",
+  "description": "Surface GitHub API rate-limit headers in the dashboard footer and render a dismissible toast banner on rate exhaustion.",
+  "tags": ["ui", "auth", "oauth", "rate-limit"],
+  "depends_on": ["MOD-JOINT-ENTITIES"],
+  "inputs": ["GitHubHeaders", "SessionState"],
+  "outputs": ["RateLimitState", "ToastErrorBanner"],
+  "tier": 1,
+  "acceptance": [
+    "Footer displays remaining API quota and reset timestamp when token is connected",
+    "Toast banner surfaces 403 rate-limit errors with countdown timer",
+    "Unit tests mock rate-limit responses and verify error states"
+  ],
+  "links": [
+    { "rel": "parent", "href": "dex-entry.md", "label": "Copilot Cockpit 0x7D:0x10" },
+    { "rel": "doc", "href": "docs/epics/COCKPIT-HARDENING-003.md", "label": "Hardening Epic" }
+  ],
+  "files": [
+    "src/components/PRDashboard.tsx",
+    "src/lib/github.ts"
+  ]
+}
