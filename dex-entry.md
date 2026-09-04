@@ -1,31 +1,27 @@
 ---
-dex_id: "0x7D:0x20"
-dex_type: "game_engine"
+dex_id: "0x7D:0x10"
+dex_type: "tool"
 midi_2_0_context:
-  resource_type: "Game"
-  property_exchange_id: "urn:zenos:games:stickhrpg"
+  resource_type: "Tool"
+  property_exchange_id: "urn:zenos:tools:copilot-cockpit"
 legacy_map:
   midi_1_0_bank: 125
-  midi_1_0_prog: 32
+  midi_1_0_prog: 16
 status: "active"
-tags: ["stickrpg", "gacha", "otome", "tarot", "rust", "astro", "vitest", "wcag3", "sysex", "pipeline", "hydration"]
+tags: ["copilot", "agents", "cockpit", "glitchworks", "reference", "workflow", "visualization", "pipeline", "hydration", "hardening"]
 child_epics:
-  - dex_id: "0x7D:0x10"
-    title: "COCKPIT-TRIAGE-001"
-    spec: "docs/epics/COCKPIT-TRIAGE-001.md"
   - dex_id: "0x7D:0x11"
     title: "COCKPIT-PIPELINE-002"
     spec: "docs/epics/COCKPIT-PIPELINE-002.md"
     cards: "dex/cards/"
-  - dex_id: "0x7D:0x21"
-    title: "STICKHRPG-CORE-001"
-    spec: "docs/whitepaper_stick_rpg.md"
-    cards: "content/cards/"
+  - dex_id: "0x7D:0x12"
+    title: "COCKPIT-HARDENING-003"
+    spec: "docs/epics/COCKPIT-HARDENING-003.md"
+    cards: "dex/cards/"
 ---
 
-# StickHRPG: Degenerate Horizon (Cultured Consoomer Edition) — dex entry
+# Copilot Cockpit — dex entry
 
-See `README.md` and `docs/whitepaper_stick_rpg.md`.
-Interactive playable viewport accessible at `/game`.
-Copilot Cockpit triage dashboard accessible at `/`.
-Full documentation indexed in `docs/reflibs.md`.
+See `README.md`. Spec sourced from `dex/08-projects/copilot-cockpit.md` in `dev-master`.
+Original prototype: https://www.perplexity.ai/computer/a/copilot-cockpit-glitchworks-de-rStGpl9TRXqgbKBH8lljmA
+Dashboard viewport accessible at `/`.
