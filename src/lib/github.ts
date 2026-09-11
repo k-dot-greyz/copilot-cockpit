@@ -1,29 +1,13 @@
 // GitHub API client for copilot-cockpit
 // Client-side only — uses token from sessionStorage
 
+import type { PRCardEntity } from './entities/pr-card';
+import { extractIssueRefs } from './issue-refs';
 import { classifyAuthor } from './validation/author-classification';
 import { sanitizePrUrl } from './validation/pr-url';
 import { validateAndMapGraphQLPR, validateAndMapGraphQLPRDetail } from './validation/graphql';
 
-export interface PR {
-  number: number;
-  title: string;
-  author: string;
-  authorType: 'human' | 'bot' | 'external';
-  createdAt: string;
-  updatedAt: string;
-  headRefName: string;
-  isDraft: boolean;
-  reviewDecision: string | null;
-  labels: string[];
-  url: string;
-  checksStatus: 'success' | 'failure' | 'pending' | 'none';
-  mergeable: 'MERGEABLE' | 'CONFLICTING' | 'UNKNOWN';
-  state: 'OPEN' | 'CLOSED' | 'MERGED';
-  commentsCount: number;
-  additions: number;
-  deletions: number;
-}
+export type PR = PRCardEntity;
 
 export interface CommitInfo {
   oid: string;
@@ -119,9 +103,12 @@ function mapPR(raw: PRApiResponse): PR {
         .filter(Boolean)
     : [];
 
+  const title = typeof raw.title === 'string' ? raw.title : '';
+  const number = raw.number;
   return {
-    number: raw.number,
-    title: typeof raw.title === 'string' ? raw.title : '',
+    id: `pr-${number}`,
+    number,
+    title,
     author: raw.user?.login ?? 'unknown',
     authorType: classifyAuthor(raw.user?.login ?? '', raw.user?.type ?? ''),
     createdAt: raw.created_at ?? '',
@@ -131,6 +118,7 @@ function mapPR(raw: PRApiResponse): PR {
     reviewDecision: null, // REST API doesn't return this directly
     labels,
     url: sanitizePrUrl(raw.html_url),
+    issueRefs: extractIssueRefs(title),
     checksStatus: 'none',
     mergeable: 'UNKNOWN',
     state: 'OPEN',

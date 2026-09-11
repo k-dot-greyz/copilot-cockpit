@@ -1,0 +1,24 @@
+{
+  "dex_id": "0x7D:0x30",
+  "schema": "cockpit_config",
+  "title": "Copilot Cockpit",
+  "target": {
+    "owner": "k-dot-greyz",
+    "repo": "dev-master"
+  },
+  "auth": {
+    "tokenKey": "cockpit-gh-token"
+  },
+  "storage": {
+    "targetOverrideKey": "cockpit-target-override"
+  },
+  "team": {
+    "humanLogins": ["k-dot-greyz", "kasparsgreizis", "greyZ"]
+  },
+  "flood": {
+    "minCount": 10
+  },
+  "rateLimit": {
+    "warnRemaining": 50
+  }
+}

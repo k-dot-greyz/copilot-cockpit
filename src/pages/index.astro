@@ -1,8 +1,6 @@
 ---
-// Copilot Cockpit — PR Triage Dashboard
-// dex_id: 0x7D:0x10 | GlitchWorks · dev-master · zenOS
 import '../styles/global.css';
-import PRDashboard from '../components/PRDashboard';
+import CockpitBoard from '../components/cockpit/CockpitBoard';
 ---
 
 <html lang="en">
@@ -13,7 +11,7 @@ import PRDashboard from '../components/PRDashboard';
     <title>Copilot Cockpit — PR Dashboard</title>
     <meta
       name="description"
-      content="Interactive PR triage dashboard for dev-master. Categorize, bulk-close, and nuke bot floods."
+      content="Keyboard-first PR triage cockpit. JSON-card lanes, flood nuke, command palette."
     />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link
@@ -25,7 +23,10 @@ import PRDashboard from '../components/PRDashboard';
     </style>
   </head>
   <body>
-    <PRDashboard client:only="react" />
+    <a class="skip-link" href="#cockpit-main">Skip to cockpit</a>
+    <main id="cockpit-main">
+      <CockpitBoard client:only="react" />
+    </main>
     <noscript>
       <div style="padding: 2rem; text-align: center; color: #e8e6f0; font-family: monospace;">
         <h1>Copilot Cockpit requires JavaScript</h1>

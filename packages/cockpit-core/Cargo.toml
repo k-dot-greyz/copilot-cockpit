@@ -1,0 +1,10 @@
+[package]
+name = "cockpit-core"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.83"
+description = "Deterministic PR hydrate/classify/flood helpers for Copilot Cockpit"
+license = "MIT"
+
+[lib]
+name = "cockpit_core"

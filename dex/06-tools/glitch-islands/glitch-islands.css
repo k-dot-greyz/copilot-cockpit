@@ -1,0 +1,99 @@
+/* glitch-islands — media surface + once-pulse RGB split. Compositor-only. */
+
+.project-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 280px;
+  overflow: visible;
+  transform: perspective(720px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+}
+.project-card.is-filtered-out {
+  display: none;
+}
+
+/* ─── RGB split (once per hover / focus-visible) ───────────────── */
+.glitch-rgb {
+  position: relative;
+}
+
+.glitch-rgb::before,
+.glitch-rgb::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  border: 1px solid transparent;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 4;
+}
+
+.glitch-rgb::before {
+  border-color: var(--color-glitch-cyan, #00e5ff);
+}
+
+.glitch-rgb::after {
+  border-color: var(--color-glitch-magenta, #ff00aa);
+}
+
+@keyframes glitch-rgb-cyan {
+  0% { opacity: 0; transform: translate3d(0, 0, 0); }
+  35% { opacity: 1; transform: translate3d(-2px, 0, 0); }
+  100% { opacity: 0; transform: translate3d(-2px, 0, 0); }
+}
+
+@keyframes glitch-rgb-magenta {
+  0% { opacity: 0; transform: translate3d(0, 0, 0); }
+  35% { opacity: 1; transform: translate3d(2px, 0, 0); }
+  100% { opacity: 0; transform: translate3d(2px, 0, 0); }
+}
+
+@media (hover: hover) {
+  .glitch-rgb:hover::before,
+  .glitch-rgb:focus-visible::before,
+  .project-card.glitch-rgb:focus-within::before {
+    animation: glitch-rgb-cyan 420ms cubic-bezier(0.16, 1, 0.3, 1) 1;
+  }
+  .glitch-rgb:hover::after,
+  .glitch-rgb:focus-visible::after,
+  .project-card.glitch-rgb:focus-within::after {
+    animation: glitch-rgb-magenta 420ms cubic-bezier(0.16, 1, 0.3, 1) 1;
+  }
+}
+
+.glitch-rgb:focus-visible,
+.project-card.glitch-rgb:focus-within {
+  border-color: var(--color-glitch-cyan, #00e5ff);
+  outline: 2px solid var(--color-glitch-cyan, #00e5ff);
+  outline-offset: 2px;
+}
+
+.nav-panel a.glitch-rgb {
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+}
+
+.glitch-cta.glitch-rgb {
+  position: relative;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glitch-rgb::before,
+  .glitch-rgb::after {
+    content: none;
+    animation: none;
+  }
+  .glitch-rgb:hover::before,
+  .glitch-rgb:hover::after,
+  .glitch-rgb:focus-visible::before,
+  .glitch-rgb:focus-visible::after,
+  .project-card.glitch-rgb:focus-within::before,
+  .project-card.glitch-rgb:focus-within::after {
+    animation: none;
+  }
+  .glitch-rgb:focus-visible,
+  .project-card.glitch-rgb:focus-within {
+    border-color: var(--color-glitch-cyan, #00e5ff);
+    outline: 2px solid var(--color-glitch-cyan, #00e5ff);
+    outline-offset: 2px;
+  }
+}

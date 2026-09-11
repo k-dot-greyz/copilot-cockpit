@@ -73,9 +73,10 @@ This happy path is fully verified by an end-to-end integration test in **Vitest*
 
 | Layer | Tech |
 |---|---|
-| Framework | Astro + TypeScript + React 19 |
-| Styling | CSS custom properties (zenOS theme) |
-| Data | Static JSON + GitHub API (live issues/PRs) |
+| Framework | Astro 7 + TypeScript + React 19 islands |
+| Styling | CSS custom properties + transplanted `glitch-islands` RGB pulse |
+| Data | JSON cards (`content/cockpit/`) + GitHub GraphQL |
+| Core | `packages/cockpit-core` (Rust) + TS hydrate pipes |
 | Deploy | Vercel |
 
 ---
@@ -85,7 +86,12 @@ This happy path is fully verified by an end-to-end integration test in **Vitest*
 | Key | View |
 |---|---|
 | `R` | Refresh PRs |
-| `Click code block` | Copy to clipboard |
+| `⌘K` / `Ctrl+K` / `/` | Command palette |
+| `J` / `K` | Next / previous PR |
+| `X` | Toggle select focused PR |
+| `I` | Inspect focused PR |
+| `?` | Keyboard help |
+| `Esc` | Close overlay |
 
 ---
 
