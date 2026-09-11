@@ -129,7 +129,7 @@ describe('validateAndMapGraphQLPRDetail', () => {
       reviewDecision: 'APPROVED',
       author: {
         login: 'k-dot-greyz',
-        avatarUrl: 'https://avatar.com/k-dot-greyz',
+        avatarUrl: 'https://avatars.githubusercontent.com/u/12345?v=4',
       },
       commits: {
         nodes: [
@@ -197,7 +197,7 @@ describe('validateAndMapGraphQLPRDetail', () => {
       mergeable: 'MERGEABLE',
       reviewDecision: 'APPROVED',
       author: 'k-dot-greyz',
-      authorAvatarUrl: 'https://avatar.com/k-dot-greyz',
+      authorAvatarUrl: 'https://avatars.githubusercontent.com/u/12345?v=4',
       commits: [
         {
           oid: 'sha123',
@@ -307,7 +307,7 @@ describe('validateAndMapGraphQLPRDetail', () => {
       changedFiles: 2,
       mergeable: 'MERGEABLE',
       reviewDecision: 'CHANGES_REQUESTED',
-      author: { login: 'k-dot-greyz', avatarUrl: 'https://avatars.com/k' },
+      author: { login: 'k-dot-greyz', avatarUrl: 'https://avatars.githubusercontent.com/u/99' },
       commits: {
         nodes: [
           {
@@ -376,6 +376,37 @@ describe('validateAndMapGraphQLPRDetail', () => {
       title: 'Bug #10',
       url: 'https://github.com/o/r/issues/10',
     });
+  });
+
+  it('sanitizes hostile author avatar URLs to empty string', () => {
+    const rawNode = {
+      number: 300,
+      title: 'PR with hostile avatar',
+      body: '',
+      state: 'OPEN',
+      draft: false,
+      createdAt: '2026-01-01T00:00:00Z',
+      updatedAt: '2026-01-01T00:00:00Z',
+      url: 'https://github.com/o/r/pull/300',
+      headRefName: 'feat/test',
+      baseRefName: 'main',
+      additions: 0,
+      deletions: 0,
+      changedFiles: 0,
+      mergeable: 'UNKNOWN',
+      reviewDecision: null,
+      author: {
+        login: 'attacker',
+        avatarUrl: 'javascript:alert("xss")',
+      },
+      commits: { nodes: [] },
+      files: { nodes: [] },
+      reviews: { nodes: [] },
+      closingIssuesReferences: { nodes: [] },
+    };
+
+    const result = validateAndMapGraphQLPRDetail(rawNode);
+    expect(result.authorAvatarUrl).toBe('');
   });
 });
 

@@ -1,5 +1,5 @@
 import { classifyAuthor } from './author-classification';
-import { sanitizeGithubIssueUrl, sanitizePrUrl } from './pr-url';
+import { sanitizeGithubAvatarUrl, sanitizeGithubIssueUrl, sanitizePrUrl } from './pr-url';
 import type { PR, PRDetail } from '../github';
 
 /**
@@ -162,7 +162,9 @@ export function validateAndMapGraphQLPRDetail(node: any): PRDetail {
 
   const authorNode = node.author && typeof node.author === 'object' ? node.author : null;
   const author = authorNode && typeof authorNode.login === 'string' ? authorNode.login : 'unknown';
-  const authorAvatarUrl = authorNode && typeof authorNode.avatarUrl === 'string' ? authorNode.avatarUrl : '';
+  const authorAvatarUrl = sanitizeGithubAvatarUrl(
+    authorNode && typeof authorNode.avatarUrl === 'string' ? authorNode.avatarUrl : undefined
+  );
 
   // Parse commits
   const commits: PRDetail['commits'] = [];

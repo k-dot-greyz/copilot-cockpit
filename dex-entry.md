@@ -8,7 +8,7 @@ legacy_map:
   midi_1_0_bank: 125
   midi_1_0_prog: 16
 status: "active"
-tags: ["copilot", "agents", "cockpit", "glitchworks", "reference", "workflow", "visualization", "pipeline", "hydration", "hardening"]
+tags: ["copilot", "agents", "cockpit", "glitchworks", "reference", "workflow", "visualization", "pipeline", "hydration", "hardening", "oauth", "graphql", "pr-triage"]
 child_epics:
   - dex_id: "0x7D:0x11"
     title: "COCKPIT-PIPELINE-002"

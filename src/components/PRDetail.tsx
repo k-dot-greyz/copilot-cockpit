@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { getFocusWrapIndex } from '../lib/focus-trap';
 import type { PRDetail as PRDetailType } from '../lib/github';
 
 interface PRDetailProps {
@@ -51,16 +52,12 @@ export const PRDetail: React.FC<PRDetailProps> = ({
       const focusable = getFocusableElements(drawer);
       if (focusable.length === 0) return;
 
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      const active = document.activeElement;
+      const activeIndex = focusable.findIndex((element) => element === document.activeElement);
+      const wrapIndex = getFocusWrapIndex(activeIndex, focusable.length, event.shiftKey);
 
-      if (event.shiftKey && active === first) {
+      if (wrapIndex !== null) {
         event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && active === last) {
-        event.preventDefault();
-        first.focus();
+        focusable[wrapIndex].focus();
       }
     };
 
