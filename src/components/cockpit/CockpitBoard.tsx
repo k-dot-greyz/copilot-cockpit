@@ -30,6 +30,7 @@ import { CommandPalette } from './CommandPalette';
 import { ConfirmModal } from './ConfirmModal';
 import { ShortcutHelp } from './ShortcutHelp';
 import { RepoChip } from './RepoChip';
+import { StatusBar } from './StatusBar';
 import { loadDemoPrs } from '../../lib/fixtures/demo-board';
 
 const CLIENT_ID = import.meta.env.PUBLIC_GITHUB_CLIENT_ID || '';
@@ -226,12 +227,39 @@ export default function CockpitBoard() {
 
   const handleViewDetail = useCallback(
     async (num: number) => {
-      if (!token) return;
       setFocusedNumber(num);
       setDetailLoading(true);
       setDetailError(null);
       setDetailData(null);
       try {
+        if (token === 'demo') {
+          const pr = prs.find((p) => p.number === num);
+          setDetailData({
+            number: num,
+            title: pr?.title ?? `Demo PR #${num}`,
+            body: 'Offline demo fixture. Connect a PAT to load live GitHub review/commits.',
+            state: pr?.state ?? 'OPEN',
+            draft: pr?.isDraft ?? false,
+            createdAt: pr?.createdAt ?? '',
+            updatedAt: pr?.updatedAt ?? '',
+            url: pr?.url ?? '#',
+            headRefName: pr?.headRefName ?? '',
+            baseRefName: 'main',
+            additions: pr?.additions ?? 0,
+            deletions: pr?.deletions ?? 0,
+            changedFiles: 0,
+            mergeable: pr?.mergeable ?? 'UNKNOWN',
+            reviewDecision: pr?.reviewDecision ?? null,
+            author: pr?.author ?? 'demo',
+            authorAvatarUrl: '',
+            commits: [],
+            files: [],
+            reviews: [],
+            linkedIssues: [],
+          });
+          return;
+        }
+        if (!token) return;
         setDetailData(await fetchPRDetail(owner, repo, num, token));
       } catch (err) {
         setDetailError(err instanceof Error ? err.message : 'Failed to fetch PR details');
@@ -239,7 +267,7 @@ export default function CockpitBoard() {
         setDetailLoading(false);
       }
     },
-    [token, owner, repo]
+    [token, owner, repo, prs]
   );
 
   const handleToggle = (n: number) => {
