@@ -1,27 +1,79 @@
 /**
  * Security regressions for PR triage dashboard boundaries.
- * Pure-function coverage — no live GitHub session required.
+ * Scenarios are constructor-configured via SecurityPlaywrightScenarios.
  */
 import { expect, test } from '@playwright/test';
 import { isAllowedGithubPrUrl, sanitizePrUrl } from '../src/lib/validation/pr-url';
 import { shouldHandleRefreshShortcut } from '../src/lib/keyboard-guards';
 import { detectFlood } from '../src/lib/triage';
+import { classifyAuthor } from '../src/lib/validation/author-classification';
+import { filterPRs } from '../src/lib/filters';
+import { validateOAuthState, OAUTH_STATE_KEY } from '../src/lib/auth/oauth';
 import { makePR } from '../src/lib/fixtures/pr';
+import { SecurityPlaywrightScenarios } from './harness/security-playwright';
+
+const harness = new SecurityPlaywrightScenarios();
 
 test.describe('PR link allowlist (XSS / open redirect)', () => {
-  test('blocks javascript: and github lookalike hosts', () => {
-    expect(isAllowedGithubPrUrl('javascript:alert(1)')).toBe(false);
-    expect(
-      isAllowedGithubPrUrl('https://github.com.attacker.example/o/r/pull/1')
-    ).toBe(false);
-    expect(sanitizePrUrl('https://evil.com/o/r/pull/1')).toBe('#');
-  });
+  for (const scenario of harness.urlScenarios) {
+    test(`[${scenario.label}] allowlist boundary`, () => {
+      expect(isAllowedGithubPrUrl(scenario.url)).toBe(scenario.expectAllowed);
+      if (scenario.expectSanitized !== undefined) {
+        expect(sanitizePrUrl(scenario.url)).toBe(scenario.expectSanitized);
+      }
+    });
+  }
+});
 
-  test('allows canonical https github pull URLs', () => {
-    const url = 'https://github.com/k-dot-greyz/dev-master/pull/526';
-    expect(isAllowedGithubPrUrl(url)).toBe(true);
-    expect(sanitizePrUrl(url)).toBe(url);
-  });
+test.describe('OAuth CSRF state validation', () => {
+  for (const scenario of harness.oauthStateScenarios) {
+    test(`[${scenario.label}]`, () => {
+      const store: Record<string, string> = {};
+      const sessionStorageMock = {
+        getItem: (key: string) => store[key] ?? null,
+        setItem: (key: string, value: string) => {
+          store[key] = value;
+        },
+        removeItem: (key: string) => {
+          delete store[key];
+        },
+      };
+
+      (globalThis as { sessionStorage?: typeof sessionStorageMock }).sessionStorage =
+        sessionStorageMock;
+
+      if (scenario.storedState) {
+        sessionStorageMock.setItem(OAUTH_STATE_KEY, scenario.storedState);
+      }
+
+      const result = validateOAuthState(scenario.callbackState);
+      expect(result).toBe(scenario.expectValid);
+    });
+  }
+});
+
+test.describe('Author classification under hostile logins', () => {
+  for (const scenario of harness.authorScenarios) {
+    test(`[${scenario.label}]`, () => {
+      expect(classifyAuthor(scenario.login, scenario.accountType)).toBe(
+        scenario.expectAuthorType
+      );
+    });
+  }
+});
+
+test.describe('Filter search injection resistance', () => {
+  const baselinePrs = [
+    makePR({ number: 1, title: 'Routine maintenance', headRefName: 'chore/upkeep' }),
+    makePR({ number: 2, title: 'Feature rollout', headRefName: 'feat/rollout' }),
+  ];
+
+  for (const scenario of harness.filterInjectionScenarios) {
+    test(`[${scenario.label}] returns safe empty match`, () => {
+      const matches = filterPRs(baselinePrs, { searchQuery: scenario.searchQuery });
+      expect(matches).toHaveLength(scenario.expectMatchCount);
+    });
+  }
 });
 
 test.describe('Destructive UX race guard', () => {
