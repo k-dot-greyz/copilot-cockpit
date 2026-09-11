@@ -77,9 +77,26 @@ Follow-up to merged [#7](https://github.com/k-dot-greyz/copilot-cockpit/pull/7).
 
 Follow-up tracking after extraction of `StickHRPG` into standalone `stickhrpg-dev`.
 
-- [ ] `ISSUE-COCKPIT-001`: Wire `findDuplicates` to PRDashboard with interactive duplicate cluster alerts and selective multi-close.
-- [ ] `ISSUE-COCKPIT-002`: Refine `isTextInput` to allow shortcut keys (e.g., `R`) while checkboxes or radios are focused.
+- [x] `ISSUE-COCKPIT-001`: Wire `findDuplicates` to PRDashboard with interactive duplicate cluster alerts and selective multi-close.
+- [x] `ISSUE-COCKPIT-002`: Refine `isTextInput` to allow shortcut keys (e.g., `R`) while checkboxes or radios are focused.
 - [ ] `ISSUE-COCKPIT-003`: Extend truthy draft coercion tests (e.g. `draft: 1`) and multi-page pagination assertions in `happy-path.test.ts`.
 - [ ] `ISSUE-COCKPIT-004`: Configure real browser Playwright E2E suite (`tests/e2e-dashboard.spec.ts`) with Chromium and webServer fixture.
-- [ ] `ISSUE-COCKPIT-005`: Complete full parity reconciliation between `PRCardEntity` and GraphQL rich fields.
+- [x] `ISSUE-COCKPIT-005`: Complete full parity reconciliation between `PRCardEntity` and GraphQL rich fields.
 - [ ] `ISSUE-COCKPIT-006`: Implement OAuth rate limit backoff and error recovery toast banner in `PRDashboard`.
+
+---
+
+## Epic: COCKPIT-UX-004 — Schema-hydrated polymorphic cockpit
+
+**dex_id:** `0x7D:0x13` | **Spec:** `docs/epics/COCKPIT-UX-004.md` | **GitHub:** [#20](https://github.com/k-dot-greyz/copilot-cockpit/issues/20)
+
+**User story:** As a maintainer drowning in bot floods, I open the cockpit, authenticate, scan JSON-defined kanban lanes, hit ⌘K to search/act, nuke a flood or close duplicate copies, inspect a PR, and refresh with `R` even when a checkbox is focused.
+
+- [x] Config / lane / action / PR JSON Schema cards (`schemas/`, `content/cockpit/`)
+- [x] Live path hydrates `PRCardEntity`; lanes assigned from matcher cards
+- [x] Glitch Islands kit transplant (`dex/06-tools/glitch-islands/`)
+- [x] Command palette + confirm modal + kanban + repo chip
+- [x] `?demo=1` offline board from fixture cards (no PAT required)
+- [ ] WASM hydrate (#26)
+- [ ] Real Chromium E2E (#27)
+- [ ] Rate-limit toast (#28)

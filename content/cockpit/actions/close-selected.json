@@ -1,0 +1,6 @@
+{
+  "id": "close-selected",
+  "title": "Close selected PRs",
+  "kind": "close",
+  "confirm": true
+}

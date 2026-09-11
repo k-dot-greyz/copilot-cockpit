@@ -10,6 +10,8 @@ import {
   extractIssueRefs,
   findDuplicates,
 } from '../src/lib/triage';
+import { searchPalette } from '../src/lib/commands/palette';
+import { numbersToCloseKeepingOldest } from '../src/lib/duplicates';
 import { makePR } from '../src/lib/fixtures/pr';
 
 test.describe('Story: maintainer connects PAT and loads open PRs', () => {
@@ -44,6 +46,7 @@ test.describe('Story: maintainer triages duplicate bot PRs before nuke', () => {
 
     expect(dupes).toHaveLength(1);
     expect(dupes[0].count).toBe(2);
+    expect(numbersToCloseKeepingOldest(dupes).sort()).toEqual([2]);
   });
 
   test('issue refs extracted from titles for flood context', () => {
@@ -61,5 +64,23 @@ test.describe('Story: maintainer refreshes dashboard during triage', () => {
         loading: false,
       })
     ).toBe(true);
+  });
+
+  test('checkbox focus does not block refresh', () => {
+    expect(
+      shouldHandleRefreshShortcut('r', { tagName: 'INPUT', type: 'checkbox' } as EventTarget, {
+        isClosing: false,
+        loading: false,
+      })
+    ).toBe(true);
+  });
+});
+
+test.describe('Story: maintainer uses command palette to find a PR', () => {
+  test('palette matches by number and lists close action', () => {
+    const items = searchPalette('#99', [makePR({ number: 99, title: 'fix(dex): hydrate' })], [
+      { id: 'close-selected', title: 'Close selected PRs', kind: 'close', confirm: true },
+    ]);
+    expect(items.some((i) => i.kind === 'pr' && i.prNumber === 99)).toBe(true);
   });
 });

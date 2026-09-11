@@ -1,0 +1,6 @@
+{
+  "id": "select-duplicate-copies",
+  "title": "Select duplicate copies (keep oldest)",
+  "kind": "select-duplicates",
+  "confirm": false
+}

@@ -1,12 +1,20 @@
 function isTextInput(target: EventTarget | null): boolean {
   if (!target || typeof target !== 'object') return false;
-  const tag = (target as { tagName?: string }).tagName;
-  return tag === 'INPUT' || tag === 'TEXTAREA';
+  const el = target as { tagName?: string; type?: string; isContentEditable?: boolean };
+  if (el.isContentEditable) return true;
+  const tag = el.tagName;
+  if (tag === 'TEXTAREA') return true;
+  if (tag === 'SELECT') return true;
+  if (tag !== 'INPUT') return false;
+  const type = (el.type ?? 'text').toLowerCase();
+  const nonText = new Set(['checkbox', 'radio', 'button', 'submit', 'reset', 'file', 'image', 'hidden', 'range', 'color']);
+  return !nonText.has(type);
 }
 
 /**
  * Whether the refresh keyboard shortcut should trigger a PR reload.
- * Blocks refresh while typing in inputs or during destructive bulk-close.
+ * Blocks refresh while typing in text fields or during destructive bulk-close.
+ * Checkbox / radio / button inputs do not count as text.
  */
 export function shouldHandleRefreshShortcut(
   key: string,
@@ -19,3 +27,5 @@ export function shouldHandleRefreshShortcut(
   if (options.isClosing || options.loading) return false;
   return key === 'r' || key === 'R';
 }
+
+export { isTextInput };

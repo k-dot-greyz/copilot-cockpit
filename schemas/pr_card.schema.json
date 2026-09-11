@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://glitchworks.dev/schemas/pr_card.schema.json",
+  "title": "PRCardEntity",
+  "type": "object",
+  "required": ["id", "number", "title", "author", "authorType", "url"],
+  "properties": {
+    "id": { "type": "string" },
+    "number": { "type": "integer" },
+    "title": { "type": "string" },
+    "author": { "type": "string" },
+    "authorType": { "enum": ["human", "bot", "external"] },
+    "createdAt": { "type": "string" },
+    "updatedAt": { "type": "string" },
+    "headRefName": { "type": "string" },
+    "isDraft": { "type": "boolean" },
+    "reviewDecision": { "type": ["string", "null"] },
+    "labels": { "type": "array", "items": { "type": "string" } },
+    "url": { "type": "string" },
+    "issueRefs": { "type": "array", "items": { "type": "integer" } },
+    "checksStatus": { "enum": ["success", "failure", "pending", "none"] },
+    "mergeable": { "enum": ["MERGEABLE", "CONFLICTING", "UNKNOWN"] },
+    "state": { "enum": ["OPEN", "CLOSED", "MERGED"] },
+    "commentsCount": { "type": "integer" },
+    "additions": { "type": "integer" },
+    "deletions": { "type": "integer" }
+  }
+}
