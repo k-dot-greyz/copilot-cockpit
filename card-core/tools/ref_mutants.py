@@ -81,4 +81,5 @@ MUTANTS = [
     ("card id may differ from its key", '            if card["id"] != cid:\n                errors.append(_e("E_ID_MISMATCH"', '            if False:\n                errors.append(_e("E_ID_MISMATCH"'),
     ("DEL in keys accepted", "                    elif bad_string(key):", "                    elif False:"),
     ("token key grammar unchecked", "                if not self._dotted.fullmatch(key):", "                if False:"),
+    ("allow_tokens ignored in merge", '                                 entry.get("allow_tokens", True), errors)', '                                 True, errors)'),
 ]

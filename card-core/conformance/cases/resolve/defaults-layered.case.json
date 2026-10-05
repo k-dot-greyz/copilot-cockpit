@@ -104,6 +104,38 @@
       }
     },
     {
+      "name": "dollar-key-in-defaults-values-is-schema-error",
+      "set": {
+        "/cards/defaults.prod/params/values/$x": 1
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/defaults/params/values"
+          }
+        ]
+      }
+    },
+    {
+      "name": "unset-marker-in-defaults-is-plain-data",
+      "set": {
+        "/cards/defaults.prod/params/values/b": {
+          "$unset": true
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/defaults/params/values/b"
+          }
+        ]
+      }
+    },
+    {
       "name": "layer-not-selected-hides-key",
       "set": {
         "/defaults": "defaults.base"
