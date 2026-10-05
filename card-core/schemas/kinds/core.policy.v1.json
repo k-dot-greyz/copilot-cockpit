@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cardcore://schemas/kinds/core.policy.v1.json",
+  "title": "core.policy",
+  "description": "A perishable set of rules about a subject. as_of and review_by are required. See SPEC.md section 6.",
+  "allOf": [
+    { "$ref": "cardcore://schemas/card.v1.json" },
+    {
+      "required": ["as_of", "review_by"],
+      "properties": {
+        "kind": { "const": "core.policy" },
+        "params": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["applies_to", "source", "rules"],
+          "properties": {
+            "applies_to": { "$ref": "cardcore://schemas/core.v1.json#/$defs/id" },
+            "source": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["url", "retrieved_on", "sha256"],
+              "properties": {
+                "url": { "$ref": "cardcore://schemas/core.v1.json#/$defs/https_url" },
+                "retrieved_on": { "$ref": "cardcore://schemas/core.v1.json#/$defs/date" },
+                "sha256": {
+                  "anyOf": [
+                    { "$ref": "cardcore://schemas/core.v1.json#/$defs/sha256" },
+                    { "type": "null" }
+                  ]
+                }
+              }
+            },
+            "rules": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 128,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "effect", "key", "value"],
+                "properties": {
+                  "id": { "type": "string", "maxLength": 64, "pattern": "^[a-z0-9][a-z0-9_-]*$" },
+                  "effect": { "enum": ["limit", "require", "forbid"] },
+                  "key": { "$ref": "cardcore://schemas/core.v1.json#/$defs/dotted_key" },
+                  "value": { "$ref": "cardcore://schemas/core.v1.json#/$defs/scalar" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

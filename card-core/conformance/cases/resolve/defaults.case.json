@@ -1,0 +1,197 @@
+{
+  "title": "$defaults substitution keeps types; only used keys are recorded",
+  "op": "resolve",
+  "input": {
+    "cards": {
+      "defaults.base": {
+        "schema_version": 1,
+        "kind": "core.defaults",
+        "id": "defaults.base",
+        "rev": 1,
+        "status": "active",
+        "visibility": "public",
+        "owner": "human:example-owner",
+        "params": {
+          "values": {
+            "model.tier": "mid",
+            "budget.tokens": 4000,
+            "retry.enabled": false,
+            "region": "eu"
+          }
+        }
+      },
+      "thing.uses-defaults": {
+        "schema_version": 1,
+        "kind": "test.thing",
+        "id": "thing.uses-defaults",
+        "rev": 1,
+        "status": "active",
+        "visibility": "public",
+        "owner": "human:example-owner",
+        "params": {
+          "model": "$defaults.model.tier",
+          "budget": {
+            "tokens": "$defaults.budget.tokens"
+          },
+          "retry": "$defaults.retry.enabled",
+          "note": "plain"
+        }
+      }
+    },
+    "target": "thing.uses-defaults",
+    "defaults": "defaults.base"
+  },
+  "expect": {
+    "ok": true,
+    "golden": "golden/resolve.defaults.json",
+    "digest": "sha256:9e0ca8a22b41b248dc44295b979a7ca44aa98bd1fc2e6172b08bea7dbfa3cfbc"
+  },
+  "mutations": [
+    {
+      "name": "token-key-missing",
+      "set": {
+        "/cards/thing.uses-defaults/params/model": "$defaults.nope"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DEFAULT_MISSING",
+            "pointer": "/params/model"
+          }
+        ]
+      }
+    },
+    {
+      "name": "no-defaults-card-given",
+      "remove": [
+        "/defaults"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DEFAULT_MISSING",
+            "pointer": "/params/model"
+          }
+        ]
+      }
+    },
+    {
+      "name": "defaults-id-unknown",
+      "set": {
+        "/defaults": "defaults.nope"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DEFAULT_MISSING",
+            "pointer": "/defaults"
+          }
+        ]
+      }
+    },
+    {
+      "name": "defaults-id-wrong-kind",
+      "set": {
+        "/defaults": "thing.uses-defaults"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DEFAULT_MISSING",
+            "pointer": "/defaults"
+          }
+        ]
+      }
+    },
+    {
+      "name": "token-inside-longer-string",
+      "set": {
+        "/cards/thing.uses-defaults/params/note": "see $defaults.region here"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DEFAULT_PARTIAL",
+            "pointer": "/params/note"
+          }
+        ]
+      }
+    },
+    {
+      "name": "token-with-prefix-text",
+      "set": {
+        "/cards/thing.uses-defaults/params/note": "x$defaults.region"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DEFAULT_PARTIAL",
+            "pointer": "/params/note"
+          }
+        ]
+      }
+    },
+    {
+      "name": "defaults-more-public-than-target",
+      "set": {
+        "/cards/defaults.base/visibility": "private"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_VISIBILITY_WIDEN",
+            "pointer": "/cards/thing.uses-defaults/visibility"
+          }
+        ]
+      }
+    },
+    {
+      "name": "defaults-private-but-no-value-used-ok",
+      "set": {
+        "/cards/defaults.base/visibility": "private",
+        "/cards/thing.uses-defaults/params": {
+          "note": "plain"
+        }
+      },
+      "expect": {
+        "ok": true,
+        "golden": "golden/resolve.defaults-unused.json",
+        "digest": "sha256:f259b894056450b2cf925967bb03da164eb2709b371ab06f888c6f9e5cfb7470"
+      }
+    },
+    {
+      "name": "target-private-defaults-private-ok",
+      "set": {
+        "/cards/defaults.base/visibility": "private",
+        "/cards/thing.uses-defaults/visibility": "private"
+      },
+      "expect": {
+        "ok": true,
+        "golden": "golden/resolve.defaults.json",
+        "digest": "sha256:9e0ca8a22b41b248dc44295b979a7ca44aa98bd1fc2e6172b08bea7dbfa3cfbc"
+      }
+    },
+    {
+      "name": "token-in-defaults-values",
+      "set": {
+        "/cards/defaults.base/params/values/region": "$defaults.model.tier"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/defaults/params/values/region"
+          }
+        ]
+      }
+    }
+  ]
+}

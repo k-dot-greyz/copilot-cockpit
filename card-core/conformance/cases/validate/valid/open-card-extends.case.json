@@ -1,0 +1,22 @@
+{
+  "title": "Open card: partial params validated after resolve",
+  "op": "validate",
+  "input": {
+    "schema_version": 1,
+    "kind": "core.policy",
+    "id": "pol.example-store.strict",
+    "rev": 1,
+    "status": "active",
+    "visibility": "public",
+    "owner": "human:example-owner",
+    "extends": "pol.example-store.v1",
+    "as_of": "2026-10-01",
+    "review_by": "2026-12-01",
+    "params": {
+      "applies_to": "sink.example-store-strict"
+    }
+  },
+  "expect": {
+    "ok": true
+  }
+}

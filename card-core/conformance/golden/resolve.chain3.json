@@ -1,0 +1,30 @@
+{
+  "id": "thing.leaf",
+  "kind": "test.thing",
+  "schema_version": 1,
+  "params": {
+    "a": 1,
+    "b": 2,
+    "c": 3,
+    "nested": {
+      "x": 1,
+      "y": 2,
+      "z": 3
+    }
+  },
+  "lineage": [
+    {
+      "id": "thing.root",
+      "rev": 1
+    },
+    {
+      "id": "thing.mid",
+      "rev": 1
+    },
+    {
+      "id": "thing.leaf",
+      "rev": 1
+    }
+  ],
+  "defaults": null
+}

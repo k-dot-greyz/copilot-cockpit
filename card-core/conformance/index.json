@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "suite": "card-core-conformance/1",
+  "registries": [
+    "../schemas/index.json",
+    "schemas/index.json"
+  ],
+  "limits": "../schemas/limits.json",
+  "cases": [
+    "adapt/dex-card.case.json",
+    "adapt/dex-frontmatter.case.json",
+    "adapt/kind-id.case.json",
+    "adapt/schema-string.case.json",
+    "freshness/freshness.case.json",
+    "lint/lint.case.json",
+    "resolve/array-replace.case.json",
+    "resolve/basic.case.json",
+    "resolve/chain3.case.json",
+    "resolve/defaults-layered.case.json",
+    "resolve/defaults.case.json",
+    "resolve/identity.case.json",
+    "resolve/typed.case.json",
+    "resolve/unset.case.json",
+    "validate/invalid/asset.case.json",
+    "validate/invalid/defaults.case.json",
+    "validate/invalid/envelope.case.json",
+    "validate/invalid/opportunity.case.json",
+    "validate/invalid/policy.case.json",
+    "validate/pack.case.json",
+    "validate/valid/asset-generated-with-evidence.case.json",
+    "validate/valid/asset-placeholder-draft.case.json",
+    "validate/valid/asset-unknown-license-draft.case.json",
+    "validate/valid/defaults-minimal.case.json",
+    "validate/valid/open-card-extends.case.json",
+    "validate/valid/opportunity-injection-quarantined.case.json",
+    "validate/valid/opportunity-stated.case.json",
+    "validate/valid/opportunity-unknowns.case.json",
+    "validate/valid/policy-full-envelope.case.json"
+  ]
+}

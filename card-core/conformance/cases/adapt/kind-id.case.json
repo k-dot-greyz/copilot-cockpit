@@ -1,0 +1,268 @@
+{
+  "title": "Adapter: kind + id + schema_version cards",
+  "op": "adapt",
+  "input": {
+    "dialect": "kind-id",
+    "legacy": {
+      "schema_version": 1,
+      "kind": "acme.widget",
+      "id": "widget-001",
+      "size": 3,
+      "label": "Blue widget"
+    },
+    "context": {
+      "owner": "human:example-owner",
+      "visibility": "private",
+      "status": "active",
+      "rev": 1
+    }
+  },
+  "expect": {
+    "ok": true,
+    "roundtrip": true,
+    "golden": "golden/adapt.kind-id.json",
+    "digest": "sha256:b543512588ab3f960f6acc27816591b9de17897d1979662e1968682a0c4f4d90"
+  },
+  "mutations": [
+    {
+      "name": "context-owner-missing",
+      "remove": [
+        "/context/owner"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_CONTEXT",
+            "pointer": "/context/owner"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-visibility-missing",
+      "remove": [
+        "/context/visibility"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_CONTEXT",
+            "pointer": "/context/visibility"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-rev-missing",
+      "remove": [
+        "/context/rev"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_CONTEXT",
+            "pointer": "/context/rev"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-status-missing-when-legacy-has-none",
+      "remove": [
+        "/context/status"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_CONTEXT",
+            "pointer": "/context/status"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-missing-entirely",
+      "remove": [
+        "/context"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_CONTEXT",
+            "pointer": "/context"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-visibility-invalid",
+      "set": {
+        "/context/visibility": "world"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/visibility"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-owner-invalid",
+      "set": {
+        "/context/owner": "nobody"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/owner"
+          }
+        ]
+      }
+    },
+    {
+      "name": "unknown-dialect",
+      "set": {
+        "/dialect": "nope"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_DIALECT",
+            "pointer": "/dialect"
+          }
+        ]
+      }
+    },
+    {
+      "name": "id-not-normalisable",
+      "set": {
+        "/legacy/id": "Widget 001"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_ID",
+            "pointer": "/legacy/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "id-too-long",
+      "set": {
+        "/legacy/id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_ID",
+            "pointer": "/legacy/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "id-at-limit-ok",
+      "set": {
+        "/legacy/id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expect": {
+        "ok": true,
+        "roundtrip": true,
+        "golden": "golden/adapt.kind-id-long.json",
+        "digest": "sha256:af2639d8cfa01bbdd5acdfa1fdff1dd5213cc77610ae3fb5b631edcf292248ac"
+      }
+    },
+    {
+      "name": "id-missing",
+      "remove": [
+        "/legacy/id"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_SHAPE",
+            "pointer": "/legacy/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "id-not-a-string",
+      "set": {
+        "/legacy/id": 7
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_SHAPE",
+            "pointer": "/legacy/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "kind-missing",
+      "remove": [
+        "/legacy/kind"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_SHAPE",
+            "pointer": "/legacy/kind"
+          }
+        ]
+      }
+    },
+    {
+      "name": "float-in-legacy",
+      "set": {
+        "/legacy/size": 1.5
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_FLOAT",
+            "pointer": "/legacy/size"
+          }
+        ]
+      }
+    },
+    {
+      "name": "legacy-not-an-object",
+      "set": {
+        "/legacy": [
+          1,
+          2
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_SHAPE",
+            "pointer": "/legacy"
+          }
+        ]
+      }
+    }
+  ]
+}

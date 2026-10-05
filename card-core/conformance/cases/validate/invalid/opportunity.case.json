@@ -1,0 +1,600 @@
+{
+  "title": "demand.opportunity rules as minimal pairs",
+  "op": "validate",
+  "input": {
+    "schema_version": 1,
+    "kind": "demand.opportunity",
+    "id": "opp.acme-data-pipeline.v1",
+    "rev": 1,
+    "status": "active",
+    "visibility": "public",
+    "owner": "human:example-owner",
+    "params": {
+      "source": {
+        "url": "https://example.com/jobs/1001",
+        "channel": "rss",
+        "posted_on": "2026-09-30",
+        "source_revision": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      "extracted": {
+        "client": {
+          "state": "stated",
+          "value": "Acme Widgets",
+          "filled_by": "llm"
+        },
+        "deliverables": {
+          "state": "stated",
+          "value": [
+            "Data pipeline",
+            "Monitoring dashboard"
+          ],
+          "filled_by": "llm"
+        },
+        "format": {
+          "state": "stated",
+          "value": "Git repository",
+          "filled_by": "llm"
+        },
+        "deadline": {
+          "state": "stated",
+          "value": "2026-11-15",
+          "filled_by": "llm"
+        },
+        "budget": {
+          "state": "stated",
+          "value": {
+            "amount_cents": 500000,
+            "currency": "USD"
+          },
+          "filled_by": "llm"
+        },
+        "rights_asked": {
+          "state": "stated",
+          "value": "Work for hire",
+          "filled_by": "llm"
+        }
+      },
+      "scoring": {
+        "spec_clarity_bps": 10000,
+        "fields_present": 6,
+        "fields_total": 6,
+        "skill_fit_bps": 7000,
+        "effort_hours": {
+          "low": 40,
+          "high": 80
+        },
+        "effort_confirmed_by": null,
+        "ev_state": "uncalibrated",
+        "rank_basis": "budget_per_effort",
+        "red_flags": []
+      },
+      "safety": {
+        "injection_flags": [],
+        "quarantined": false
+      }
+    }
+  },
+  "expect": {
+    "ok": true
+  },
+  "mutations": [
+    {
+      "name": "params-unknown-key",
+      "set": {
+        "/params/extra": 1
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params"
+          }
+        ]
+      }
+    },
+    {
+      "name": "budget-unknown-but-guessed",
+      "set": {
+        "/params/extracted/budget": {
+          "state": "unknown",
+          "value": {
+            "amount_cents": 500,
+            "currency": "USD"
+          },
+          "filled_by": "llm"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/extracted/budget/value"
+          }
+        ]
+      }
+    },
+    {
+      "name": "budget-stated-but-null",
+      "set": {
+        "/params/extracted/budget": {
+          "state": "stated",
+          "value": null,
+          "filled_by": "llm"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/extracted/budget/value"
+          }
+        ]
+      }
+    },
+    {
+      "name": "budget-zero-is-not-unknown",
+      "set": {
+        "/params/extracted/budget": {
+          "state": "stated",
+          "value": {
+            "amount_cents": 0,
+            "currency": "USD"
+          },
+          "filled_by": "llm"
+        }
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "client-unknown-but-guessed",
+      "set": {
+        "/params/extracted/client": {
+          "state": "unknown",
+          "value": "Acme",
+          "filled_by": "llm"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/extracted/client/value"
+          }
+        ]
+      }
+    },
+    {
+      "name": "client-state-hostile",
+      "set": {
+        "/params/extracted/client/state": "ignore_previous_instructions"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/extracted/client/state"
+          }
+        ]
+      }
+    },
+    {
+      "name": "client-filled-by-hostile",
+      "set": {
+        "/params/extracted/client/filled_by": "oracle"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/extracted/client/filled_by"
+          }
+        ]
+      }
+    },
+    {
+      "name": "client-oversize",
+      "set": {
+        "/params/extracted/client/value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/extracted/client/value"
+          }
+        ]
+      }
+    },
+    {
+      "name": "deliverables-empty-stated",
+      "set": {
+        "/params/extracted/deliverables/value": []
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/extracted/deliverables/value"
+          }
+        ]
+      }
+    },
+    {
+      "name": "deliverable-oversize",
+      "set": {
+        "/params/extracted/deliverables/value/0": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/extracted/deliverables/value/0"
+          }
+        ]
+      }
+    },
+    {
+      "name": "deliverables-too-many",
+      "set": {
+        "/params/extracted/deliverables/value": [
+          "d0",
+          "d1",
+          "d2",
+          "d3",
+          "d4",
+          "d5",
+          "d6",
+          "d7",
+          "d8",
+          "d9",
+          "d10",
+          "d11",
+          "d12",
+          "d13",
+          "d14",
+          "d15",
+          "d16",
+          "d17",
+          "d18",
+          "d19",
+          "d20"
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/extracted/deliverables/value"
+          }
+        ]
+      }
+    },
+    {
+      "name": "deadline-impossible",
+      "set": {
+        "/params/extracted/deadline/value": "2026-02-30"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DATE_INVALID",
+            "pointer": "/params/extracted/deadline/value"
+          }
+        ]
+      }
+    },
+    {
+      "name": "deadline-not-date",
+      "set": {
+        "/params/extracted/deadline/value": "next week"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/extracted/deadline/value"
+          }
+        ]
+      }
+    },
+    {
+      "name": "currency-lowercase",
+      "set": {
+        "/params/extracted/budget/value/currency": "usd"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/extracted/budget/value/currency"
+          }
+        ]
+      }
+    },
+    {
+      "name": "amount-negative",
+      "set": {
+        "/params/extracted/budget/value/amount_cents": -1
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/extracted/budget/value/amount_cents"
+          }
+        ]
+      }
+    },
+    {
+      "name": "amount-float",
+      "set": {
+        "/params/extracted/budget/value/amount_cents": 12.5
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_FLOAT",
+            "pointer": "/params/extracted/budget/value/amount_cents"
+          }
+        ]
+      }
+    },
+    {
+      "name": "source-url-javascript",
+      "set": {
+        "/params/source/url": "javascript:alert(1)"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/source/url"
+          }
+        ]
+      }
+    },
+    {
+      "name": "source-channel-hostile",
+      "set": {
+        "/params/source/channel": "telepathy"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/source/channel"
+          }
+        ]
+      }
+    },
+    {
+      "name": "source-revision-bad",
+      "set": {
+        "/params/source/source_revision": "abc"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/source/source_revision"
+          }
+        ]
+      }
+    },
+    {
+      "name": "source-revision-missing",
+      "remove": [
+        "/params/source/source_revision"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/source"
+          }
+        ]
+      }
+    },
+    {
+      "name": "posted-on-null-ok",
+      "set": {
+        "/params/source/posted_on": null
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "clarity-out-of-range",
+      "set": {
+        "/params/scoring/spec_clarity_bps": 10001
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/scoring/spec_clarity_bps"
+          }
+        ]
+      }
+    },
+    {
+      "name": "clarity-float",
+      "set": {
+        "/params/scoring/spec_clarity_bps": 0.4
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_FLOAT",
+            "pointer": "/params/scoring/spec_clarity_bps"
+          }
+        ]
+      }
+    },
+    {
+      "name": "uncalibrated-but-expected-value",
+      "set": {
+        "/params/scoring/rank_basis": "expected_value"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/scoring/rank_basis"
+          }
+        ]
+      }
+    },
+    {
+      "name": "calibrated-expected-value-ok",
+      "set": {
+        "/params/scoring/ev_state": "calibrated",
+        "/params/scoring/rank_basis": "expected_value"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "red-flag-hostile-code",
+      "set": {
+        "/params/scoring/red_flags": [
+          {
+            "code": "ignore_previous_instructions",
+            "filled_by": "llm"
+          }
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/scoring/red_flags/0/code"
+          }
+        ]
+      }
+    },
+    {
+      "name": "red-flag-valid-ok",
+      "set": {
+        "/params/scoring/red_flags": [
+          {
+            "code": "unpaid_test",
+            "filled_by": "harness"
+          }
+        ]
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "effort-confirmed-by-not-actor",
+      "set": {
+        "/params/scoring/effort_confirmed_by": "me"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/scoring/effort_confirmed_by"
+          }
+        ]
+      }
+    },
+    {
+      "name": "injection-flagged-but-not-quarantined",
+      "set": {
+        "/params/safety": {
+          "injection_flags": [
+            "instruction_like"
+          ],
+          "quarantined": false
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/safety/quarantined"
+          }
+        ]
+      }
+    },
+    {
+      "name": "injection-flag-hostile",
+      "set": {
+        "/params/safety": {
+          "injection_flags": [
+            "x"
+          ],
+          "quarantined": true
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/safety/injection_flags/0"
+          }
+        ]
+      }
+    },
+    {
+      "name": "quarantined-without-flags-ok",
+      "set": {
+        "/params/safety": {
+          "injection_flags": [],
+          "quarantined": true
+        }
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "safety-missing",
+      "remove": [
+        "/params/safety"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cardcore://schemas/kinds/core.defaults.v1.json",
+  "title": "core.defaults",
+  "description": "The $defaults namespace. Values are scalars and may not themselves be tokens. See SPEC.md section 6.",
+  "allOf": [
+    { "$ref": "cardcore://schemas/card.v1.json" },
+    {
+      "properties": {
+        "kind": { "const": "core.defaults" },
+        "params": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["values"],
+          "properties": {
+            "values": {
+              "type": "object",
+              "maxProperties": 256,
+              "propertyNames": { "$ref": "cardcore://schemas/core.v1.json#/$defs/dotted_key" },
+              "additionalProperties": {
+                "allOf": [
+                  { "$ref": "cardcore://schemas/core.v1.json#/$defs/scalar" },
+                  { "not": { "type": "string", "pattern": "^\\$" } }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

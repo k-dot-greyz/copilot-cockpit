@@ -1,0 +1,34 @@
+{
+  "id": "thing.uses-defaults",
+  "kind": "test.thing",
+  "schema_version": 1,
+  "params": {
+    "model": "mid",
+    "budget": {
+      "tokens": 4000
+    },
+    "retry": false,
+    "note": "plain"
+  },
+  "lineage": [
+    {
+      "id": "thing.uses-defaults",
+      "rev": 1
+    }
+  ],
+  "defaults": {
+    "id": "defaults.base",
+    "rev": 1,
+    "lineage": [
+      {
+        "id": "defaults.base",
+        "rev": 1
+      }
+    ],
+    "used": {
+      "model.tier": "mid",
+      "budget.tokens": 4000,
+      "retry.enabled": false
+    }
+  }
+}

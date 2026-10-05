@@ -1,0 +1,25 @@
+{
+  "id": "thing.uses-defaults",
+  "kind": "test.thing",
+  "schema_version": 1,
+  "params": {
+    "note": "plain"
+  },
+  "lineage": [
+    {
+      "id": "thing.uses-defaults",
+      "rev": 1
+    }
+  ],
+  "defaults": {
+    "id": "defaults.base",
+    "rev": 1,
+    "lineage": [
+      {
+        "id": "defaults.base",
+        "rev": 1
+      }
+    ],
+    "used": {}
+  }
+}

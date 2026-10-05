@@ -1,0 +1,6 @@
+{
+  "max_json_bytes": 1048576,
+  "max_nesting_depth": 32,
+  "extends_max_depth": 8,
+  "int_max": 9007199254740991
+}

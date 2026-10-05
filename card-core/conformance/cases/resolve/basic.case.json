@@ -1,0 +1,383 @@
+{
+  "title": "extends merge: objects merge, scalars and arrays replace",
+  "op": "resolve",
+  "input": {
+    "cards": {
+      "thing.parent": {
+        "schema_version": 1,
+        "kind": "test.thing",
+        "id": "thing.parent",
+        "rev": 1,
+        "status": "active",
+        "visibility": "public",
+        "owner": "human:example-owner",
+        "params": {
+          "name": "parent",
+          "limits": {
+            "max": 10,
+            "min": 1
+          },
+          "tags": [
+            "a",
+            "b"
+          ],
+          "flags": {
+            "x": true
+          }
+        }
+      },
+      "thing.child": {
+        "schema_version": 1,
+        "kind": "test.thing",
+        "id": "thing.child",
+        "rev": 1,
+        "status": "active",
+        "visibility": "public",
+        "owner": "human:example-owner",
+        "params": {
+          "limits": {
+            "max": 20
+          },
+          "extra": "yes"
+        },
+        "extends": "thing.parent"
+      }
+    },
+    "target": "thing.child"
+  },
+  "expect": {
+    "ok": true,
+    "golden": "golden/resolve.basic.json",
+    "digest": "sha256:7c6fa83703d14a65fcddab2b42e192256bf5d16273a7bbd756de4f4b05607ea2"
+  },
+  "mutations": [
+    {
+      "name": "target-missing",
+      "set": {
+        "/target": "thing.nope"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_REF_MISSING",
+            "pointer": "/target"
+          }
+        ]
+      }
+    },
+    {
+      "name": "parent-missing",
+      "set": {
+        "/cards/thing.child/extends": "thing.nope"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_REF_MISSING",
+            "pointer": "/cards/thing.child/extends"
+          }
+        ]
+      }
+    },
+    {
+      "name": "self-extends",
+      "set": {
+        "/cards/thing.child/extends": "thing.child"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_EXTENDS_CYCLE",
+            "pointer": "/cards/thing.child/extends"
+          }
+        ]
+      }
+    },
+    {
+      "name": "cycle",
+      "set": {
+        "/cards/thing.parent/extends": "thing.child"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_EXTENDS_CYCLE",
+            "pointer": "/cards/thing.parent/extends"
+          }
+        ]
+      }
+    },
+    {
+      "name": "parent-kind-differs",
+      "set": {
+        "/cards/thing.parent/kind": "test.typed"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_EXTENDS_KIND",
+            "pointer": "/cards/thing.child/extends"
+          }
+        ]
+      }
+    },
+    {
+      "name": "parent-schema-version-differs",
+      "set": {
+        "/cards/thing.parent/schema_version": 2
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_EXTENDS_KIND",
+            "pointer": "/cards/thing.child/extends"
+          }
+        ]
+      }
+    },
+    {
+      "name": "child-more-public-than-parent",
+      "set": {
+        "/cards/thing.parent/visibility": "private"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_VISIBILITY_WIDEN",
+            "pointer": "/cards/thing.child/visibility"
+          }
+        ]
+      }
+    },
+    {
+      "name": "child-internal-parent-private",
+      "set": {
+        "/cards/thing.parent/visibility": "private",
+        "/cards/thing.child/visibility": "internal"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_VISIBILITY_WIDEN",
+            "pointer": "/cards/thing.child/visibility"
+          }
+        ]
+      }
+    },
+    {
+      "name": "child-narrower-than-parent-ok",
+      "set": {
+        "/cards/thing.child/visibility": "private"
+      },
+      "expect": {
+        "ok": true,
+        "golden": "golden/resolve.basic.json",
+        "digest": "sha256:7c6fa83703d14a65fcddab2b42e192256bf5d16273a7bbd756de4f4b05607ea2"
+      }
+    },
+    {
+      "name": "child-equal-visibility-ok",
+      "set": {
+        "/cards/thing.parent/visibility": "internal",
+        "/cards/thing.child/visibility": "internal"
+      },
+      "expect": {
+        "ok": true,
+        "golden": "golden/resolve.basic.json",
+        "digest": "sha256:7c6fa83703d14a65fcddab2b42e192256bf5d16273a7bbd756de4f4b05607ea2"
+      }
+    },
+    {
+      "name": "unset-in-root",
+      "set": {
+        "/cards/thing.parent/params/name": {
+          "$unset": true
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_UNSET_ORPHAN",
+            "pointer": "/cards/thing.parent/params/name"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dollar-key-in-params",
+      "set": {
+        "/cards/thing.child/params/$merge": 1
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DOLLAR_KEY",
+            "pointer": "/cards/thing.child/params/$merge"
+          }
+        ]
+      }
+    },
+    {
+      "name": "unset-marker-not-true",
+      "set": {
+        "/cards/thing.child/params/name": {
+          "$unset": false
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DOLLAR_KEY",
+            "pointer": "/cards/thing.child/params/name/$unset"
+          }
+        ]
+      }
+    },
+    {
+      "name": "parent-envelope-invalid",
+      "set": {
+        "/cards/thing.parent/owner": "nobody"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/cards/thing.parent/owner"
+          }
+        ]
+      }
+    },
+    {
+      "name": "child-envelope-invalid",
+      "set": {
+        "/cards/thing.child/rev": 0
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/cards/thing.child/rev"
+          }
+        ]
+      }
+    },
+    {
+      "name": "parent-params-not-an-object",
+      "set": {
+        "/cards/thing.parent/params": []
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/cards/thing.parent/params"
+          }
+        ]
+      }
+    },
+    {
+      "name": "kind-missing-from-both-cards",
+      "remove": [
+        "/cards/thing.parent/kind",
+        "/cards/thing.child/kind"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/cards/thing.parent"
+          }
+        ]
+      }
+    },
+    {
+      "name": "schema-version-missing-from-both-cards",
+      "remove": [
+        "/cards/thing.parent/schema_version",
+        "/cards/thing.child/schema_version"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/cards/thing.parent"
+          }
+        ]
+      }
+    },
+    {
+      "name": "kind-not-registered",
+      "set": {
+        "/cards/thing.parent/kind": "test.nope",
+        "/cards/thing.child/kind": "test.nope"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_KIND_UNKNOWN",
+            "pointer": "/cards/thing.parent/kind"
+          }
+        ]
+      }
+    },
+    {
+      "name": "schema-version-not-registered",
+      "set": {
+        "/cards/thing.parent/schema_version": 7,
+        "/cards/thing.child/schema_version": 7
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_KIND_UNKNOWN",
+            "pointer": "/cards/thing.parent/schema_version"
+          }
+        ]
+      }
+    },
+    {
+      "name": "chain-longer-than-limit",
+      "limits": {
+        "extends_max_depth": 1
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_EXTENDS_DEPTH",
+            "pointer": "/target"
+          }
+        ]
+      }
+    },
+    {
+      "name": "chain-at-limit-ok",
+      "limits": {
+        "extends_max_depth": 2
+      },
+      "expect": {
+        "ok": true,
+        "golden": "golden/resolve.basic.json",
+        "digest": "sha256:7c6fa83703d14a65fcddab2b42e192256bf5d16273a7bbd756de4f4b05607ea2"
+      }
+    }
+  ]
+}

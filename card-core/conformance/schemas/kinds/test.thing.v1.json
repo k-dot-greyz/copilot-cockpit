@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cardcore://conformance/kinds/test.thing.v1.json",
+  "title": "test.thing (conformance only)",
+  "description": "Free-form params, used to exercise extends and merge rules.",
+  "allOf": [
+    { "$ref": "cardcore://schemas/card.v1.json" },
+    { "properties": { "kind": { "const": "test.thing" } } }
+  ]
+}

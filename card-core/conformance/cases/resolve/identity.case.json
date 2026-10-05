@@ -1,0 +1,30 @@
+{
+  "title": "A card with no extends and no tokens resolves to itself",
+  "op": "resolve",
+  "input": {
+    "cards": {
+      "thing.solo": {
+        "schema_version": 1,
+        "kind": "test.thing",
+        "id": "thing.solo",
+        "rev": 1,
+        "status": "active",
+        "visibility": "public",
+        "owner": "human:example-owner",
+        "params": {
+          "a": 1,
+          "list": [
+            1,
+            2
+          ]
+        }
+      }
+    },
+    "target": "thing.solo"
+  },
+  "expect": {
+    "ok": true,
+    "golden": "golden/resolve.identity.json",
+    "digest": "sha256:23dfee585488f62b21811176b5965a6da00c3f172a9e16cd030330cc88303479"
+  }
+}

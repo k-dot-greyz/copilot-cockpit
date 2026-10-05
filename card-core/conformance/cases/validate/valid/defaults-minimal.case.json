@@ -1,0 +1,21 @@
+{
+  "title": "Minimal closed card",
+  "op": "validate",
+  "input": {
+    "schema_version": 1,
+    "kind": "core.defaults",
+    "id": "defaults.base",
+    "rev": 1,
+    "status": "active",
+    "visibility": "public",
+    "owner": "human:example-owner",
+    "params": {
+      "values": {
+        "model.tier": "mid"
+      }
+    }
+  },
+  "expect": {
+    "ok": true
+  }
+}

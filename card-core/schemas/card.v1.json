@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cardcore://schemas/card.v1.json",
+  "title": "Card Core card base",
+  "description": "Envelope plus extends, refs and params. Closed: unknown top-level properties are rejected. See SPEC.md section 4.",
+  "allOf": [
+    { "$ref": "cardcore://schemas/envelope.v1.json" },
+    {
+      "type": "object",
+      "required": ["params"],
+      "properties": {
+        "extends": { "$ref": "cardcore://schemas/core.v1.json#/$defs/id" },
+        "refs": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["rel", "id"],
+            "properties": {
+              "rel": { "$ref": "cardcore://schemas/core.v1.json#/$defs/tag" },
+              "id": { "$ref": "cardcore://schemas/core.v1.json#/$defs/id" },
+              "rev": { "$ref": "cardcore://schemas/core.v1.json#/$defs/rev" }
+            }
+          }
+        },
+        "params": { "type": "object" }
+      }
+    }
+  ],
+  "unevaluatedProperties": false
+}

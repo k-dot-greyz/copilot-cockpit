@@ -1,0 +1,31 @@
+{
+  "id": "typed.user",
+  "kind": "test.typed",
+  "schema_version": 1,
+  "params": {
+    "limit": 5,
+    "name": "abc",
+    "enabled": true
+  },
+  "lineage": [
+    {
+      "id": "typed.user",
+      "rev": 1
+    }
+  ],
+  "defaults": {
+    "id": "defaults.base",
+    "rev": 1,
+    "lineage": [
+      {
+        "id": "defaults.base",
+        "rev": 1
+      }
+    ],
+    "used": {
+      "limit": 5,
+      "label": "abc",
+      "on": true
+    }
+  }
+}

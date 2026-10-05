@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cardcore://schemas/kinds/demand.opportunity.v1.json",
+  "title": "demand.opportunity",
+  "description": "Exemplar domain kind. Unknown stays unknown: an unknown field has value null, a stated field has a value. Uncalibrated scores rank by budget per effort. Injection flags force quarantine. See SPEC.md section 6.",
+  "allOf": [
+    { "$ref": "cardcore://schemas/card.v1.json" },
+    {
+      "properties": {
+        "kind": { "const": "demand.opportunity" },
+        "params": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["source", "extracted", "scoring", "safety"],
+          "properties": {
+            "source": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["url", "channel", "posted_on", "source_revision"],
+              "properties": {
+                "url": { "$ref": "cardcore://schemas/core.v1.json#/$defs/https_url" },
+                "channel": { "enum": ["rss", "api", "alert", "email", "manual"] },
+                "posted_on": {
+                  "anyOf": [
+                    { "$ref": "cardcore://schemas/core.v1.json#/$defs/date" },
+                    { "type": "null" }
+                  ]
+                },
+                "source_revision": { "$ref": "cardcore://schemas/core.v1.json#/$defs/sha256" }
+              }
+            },
+            "extracted": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["client", "deliverables", "format", "deadline", "budget", "rights_asked"],
+              "properties": {
+                "client": { "$ref": "#/$defs/maybe_text" },
+                "deliverables": { "$ref": "#/$defs/maybe_list" },
+                "format": { "$ref": "#/$defs/maybe_text" },
+                "deadline": { "$ref": "#/$defs/maybe_date" },
+                "budget": { "$ref": "#/$defs/maybe_money" },
+                "rights_asked": { "$ref": "#/$defs/maybe_text" }
+              }
+            },
+            "scoring": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "spec_clarity_bps", "fields_present", "fields_total", "skill_fit_bps",
+                "effort_hours", "effort_confirmed_by", "ev_state", "rank_basis", "red_flags"
+              ],
+              "properties": {
+                "spec_clarity_bps": { "$ref": "cardcore://schemas/core.v1.json#/$defs/bps" },
+                "fields_present": { "type": "integer", "minimum": 0, "maximum": 64 },
+                "fields_total": { "type": "integer", "minimum": 1, "maximum": 64 },
+                "skill_fit_bps": {
+                  "anyOf": [
+                    { "type": "null" },
+                    { "$ref": "cardcore://schemas/core.v1.json#/$defs/bps" }
+                  ]
+                },
+                "effort_hours": {
+                  "anyOf": [
+                    { "type": "null" },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["low", "high"],
+                      "properties": {
+                        "low": { "type": "integer", "minimum": 0, "maximum": 100000 },
+                        "high": { "type": "integer", "minimum": 0, "maximum": 100000 }
+                      }
+                    }
+                  ]
+                },
+                "effort_confirmed_by": {
+                  "anyOf": [
+                    { "type": "null" },
+                    { "$ref": "cardcore://schemas/core.v1.json#/$defs/actor" }
+                  ]
+                },
+                "ev_state": { "enum": ["uncalibrated", "calibrated"] },
+                "rank_basis": { "enum": ["budget_per_effort", "expected_value"] },
+                "red_flags": {
+                  "type": "array",
+                  "maxItems": 16,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["code", "filled_by"],
+                    "properties": {
+                      "code": { "enum": ["unpaid_test", "rights_grab", "off_platform_payment", "scope_exceeds_budget", "other"] },
+                      "filled_by": { "enum": ["harness", "llm"] }
+                    }
+                  }
+                }
+              },
+              "if": { "required": ["ev_state"], "properties": { "ev_state": { "const": "uncalibrated" } } },
+              "then": { "properties": { "rank_basis": { "const": "budget_per_effort" } } }
+            },
+            "safety": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["injection_flags", "quarantined"],
+              "properties": {
+                "injection_flags": {
+                  "type": "array",
+                  "maxItems": 16,
+                  "uniqueItems": true,
+                  "items": { "enum": ["instruction_like", "role_override", "link_obfuscation", "other"] }
+                },
+                "quarantined": { "type": "boolean" }
+              },
+              "if": { "required": ["injection_flags"], "properties": { "injection_flags": { "minItems": 1 } } },
+              "then": { "properties": { "quarantined": { "const": true } } }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "filled_by": { "enum": ["harness", "llm", "human"] },
+    "state": { "enum": ["stated", "unknown"] },
+    "maybe_text": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "value", "filled_by"],
+      "properties": {
+        "state": { "$ref": "#/$defs/state" },
+        "value": { "anyOf": [{ "type": "null" }, { "type": "string", "minLength": 1, "maxLength": 500 }] },
+        "filled_by": { "$ref": "#/$defs/filled_by" }
+      },
+      "allOf": [
+        { "if": { "required": ["state"], "properties": { "state": { "const": "unknown" } } }, "then": { "properties": { "value": { "type": "null" } } } },
+        { "if": { "required": ["state"], "properties": { "state": { "const": "stated" } } }, "then": { "properties": { "value": { "type": "string" } } } }
+      ]
+    },
+    "maybe_list": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "value", "filled_by"],
+      "properties": {
+        "state": { "$ref": "#/$defs/state" },
+        "value": {
+          "anyOf": [
+            { "type": "null" },
+            { "type": "array", "minItems": 1, "maxItems": 20, "items": { "type": "string", "minLength": 1, "maxLength": 200 } }
+          ]
+        },
+        "filled_by": { "$ref": "#/$defs/filled_by" }
+      },
+      "allOf": [
+        { "if": { "required": ["state"], "properties": { "state": { "const": "unknown" } } }, "then": { "properties": { "value": { "type": "null" } } } },
+        { "if": { "required": ["state"], "properties": { "state": { "const": "stated" } } }, "then": { "properties": { "value": { "type": "array" } } } }
+      ]
+    },
+    "maybe_date": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "value", "filled_by"],
+      "properties": {
+        "state": { "$ref": "#/$defs/state" },
+        "value": {
+          "anyOf": [
+            { "type": "null" },
+            { "$ref": "cardcore://schemas/core.v1.json#/$defs/date" }
+          ]
+        },
+        "filled_by": { "$ref": "#/$defs/filled_by" }
+      },
+      "allOf": [
+        { "if": { "required": ["state"], "properties": { "state": { "const": "unknown" } } }, "then": { "properties": { "value": { "type": "null" } } } },
+        { "if": { "required": ["state"], "properties": { "state": { "const": "stated" } } }, "then": { "properties": { "value": { "type": "string" } } } }
+      ]
+    },
+    "maybe_money": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "value", "filled_by"],
+      "properties": {
+        "state": { "$ref": "#/$defs/state" },
+        "value": {
+          "anyOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["amount_cents", "currency"],
+              "properties": {
+                "amount_cents": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+                "currency": { "type": "string", "pattern": "^[A-Z]{3}$" }
+              }
+            }
+          ]
+        },
+        "filled_by": { "$ref": "#/$defs/filled_by" }
+      },
+      "allOf": [
+        { "if": { "required": ["state"], "properties": { "state": { "const": "unknown" } } }, "then": { "properties": { "value": { "type": "null" } } } },
+        { "if": { "required": ["state"], "properties": { "state": { "const": "stated" } } }, "then": { "properties": { "value": { "type": "object" } } } }
+      ]
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "kinds": [
+    { "kind": "test.thing", "schema_version": 1, "class": "card", "schema": "cardcore://conformance/kinds/test.thing.v1.json" },
+    { "kind": "test.typed", "schema_version": 1, "class": "card", "schema": "cardcore://conformance/kinds/test.typed.v1.json" }
+  ]
+}

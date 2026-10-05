@@ -1,0 +1,48 @@
+name: card-core
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "card-core/**"
+      - ".github/workflows/card-core.yml"
+  pull_request:
+    paths:
+      - "card-core/**"
+      - ".github/workflows/card-core.yml"
+
+jobs:
+  conformance:
+    name: Conformance (Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.14"]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: card-core/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r card-core/requirements.txt
+
+      - name: Check shell scripts parse
+        run: |
+          bash -n card-core/tools/digest.sh
+          bash -n card-core/tools/setup-toolchain.sh
+
+      - name: Run conformance suite
+        run: python card-core/tools/run_conformance.py
+
+      - name: Prove the suite has teeth
+        run: python card-core/tools/run_conformance.py --selftest
+
+      - name: Run pytest wrapper
+        run: python -m pytest card-core/tests -q

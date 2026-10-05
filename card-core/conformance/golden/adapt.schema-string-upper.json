@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "kind": "legacy.wrap",
+  "id": "report.q3",
+  "rev": 1,
+  "status": "draft",
+  "visibility": "private",
+  "owner": "human:example-owner",
+  "params": {
+    "dialect": "schema-string",
+    "original_kind": "acme.report.v1",
+    "original": {
+      "schema": "acme.report.v1",
+      "id": "Report:Q3",
+      "title": "Q3 report",
+      "rows": [
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  "aliases": [
+    "Report:Q3"
+  ]
+}

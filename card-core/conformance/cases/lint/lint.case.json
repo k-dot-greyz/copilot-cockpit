@@ -1,0 +1,289 @@
+{
+  "title": "Raw-byte lint rules",
+  "op": "lint",
+  "rows": [
+    {
+      "name": "clean",
+      "raw": "raw/clean.raw",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "duplicate-key",
+      "raw": "raw/dup-key.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a"
+          }
+        ]
+      }
+    },
+    {
+      "name": "duplicate-key-nested",
+      "raw": "raw/dup-key-nested.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/x/b"
+          }
+        ]
+      }
+    },
+    {
+      "name": "bom",
+      "raw": "raw/bom.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_BOM",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "nan",
+      "raw": "raw/nan.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_NONFINITE"
+          }
+        ]
+      }
+    },
+    {
+      "name": "infinity",
+      "raw": "raw/infinity.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_NONFINITE"
+          }
+        ]
+      }
+    },
+    {
+      "name": "negative-infinity",
+      "raw": "raw/neg-infinity.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_NONFINITE"
+          }
+        ]
+      }
+    },
+    {
+      "name": "float-decimal",
+      "raw": "raw/float-decimal.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_FLOAT",
+            "pointer": "/a"
+          }
+        ]
+      }
+    },
+    {
+      "name": "float-exponent",
+      "raw": "raw/float-exponent.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_FLOAT",
+            "pointer": "/a"
+          }
+        ]
+      }
+    },
+    {
+      "name": "float-fraction",
+      "raw": "raw/float-fraction.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_FLOAT",
+            "pointer": "/a/0"
+          }
+        ]
+      }
+    },
+    {
+      "name": "int-out-of-range",
+      "raw": "raw/int-range.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_INT_RANGE",
+            "pointer": "/a"
+          }
+        ]
+      }
+    },
+    {
+      "name": "int-at-limit-ok",
+      "raw": "raw/int-limit.raw",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "key-non-ascii",
+      "raw": "raw/key-nonascii.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_KEY_NONASCII",
+            "pointer": "/\u00e9"
+          }
+        ]
+      }
+    },
+    {
+      "name": "trailing-comma",
+      "raw": "raw/trailing-comma.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_PARSE"
+          }
+        ]
+      }
+    },
+    {
+      "name": "trailing-garbage",
+      "raw": "raw/trailing-garbage.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_PARSE"
+          }
+        ]
+      }
+    },
+    {
+      "name": "empty-file",
+      "raw": "raw/empty.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_PARSE"
+          }
+        ]
+      }
+    },
+    {
+      "name": "nul-byte",
+      "raw": "raw/nul.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_PARSE"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lone-surrogate-escape",
+      "raw": "raw/lone-surrogate.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ENCODING",
+            "pointer": "/a"
+          }
+        ]
+      }
+    },
+    {
+      "name": "del-character",
+      "raw": "raw/del-char.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ENCODING",
+            "pointer": "/a"
+          }
+        ]
+      }
+    },
+    {
+      "name": "invalid-utf8",
+      "raw": "raw/invalid-utf8.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ENCODING",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "too-large",
+      "raw": "raw/clean.raw",
+      "limits": {
+        "max_json_bytes": 8
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_TOO_LARGE",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "too-deep",
+      "raw": "raw/too-deep.raw",
+      "limits": {
+        "max_nesting_depth": 2
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_TOO_DEEP",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "depth-at-limit-ok",
+      "raw": "raw/too-deep.raw",
+      "limits": {
+        "max_nesting_depth": 3
+      },
+      "expect": {
+        "ok": true
+      }
+    }
+  ]
+}

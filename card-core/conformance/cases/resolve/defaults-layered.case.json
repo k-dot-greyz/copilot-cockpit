@@ -1,0 +1,122 @@
+{
+  "title": "Polymorphic defaults: a defaults card extends another",
+  "op": "resolve",
+  "input": {
+    "cards": {
+      "defaults.base": {
+        "schema_version": 1,
+        "kind": "core.defaults",
+        "id": "defaults.base",
+        "rev": 1,
+        "status": "active",
+        "visibility": "public",
+        "owner": "human:example-owner",
+        "params": {
+          "values": {
+            "a": 1,
+            "b": "x"
+          }
+        }
+      },
+      "defaults.prod": {
+        "schema_version": 1,
+        "kind": "core.defaults",
+        "id": "defaults.prod",
+        "rev": 1,
+        "status": "active",
+        "visibility": "public",
+        "owner": "human:example-owner",
+        "extends": "defaults.base",
+        "params": {
+          "values": {
+            "b": "y",
+            "c": true
+          }
+        }
+      },
+      "thing.uses-layered": {
+        "schema_version": 1,
+        "kind": "test.thing",
+        "id": "thing.uses-layered",
+        "rev": 1,
+        "status": "active",
+        "visibility": "public",
+        "owner": "human:example-owner",
+        "params": {
+          "one": "$defaults.a",
+          "two": "$defaults.b",
+          "three": "$defaults.c"
+        }
+      }
+    },
+    "target": "thing.uses-layered",
+    "defaults": "defaults.prod"
+  },
+  "expect": {
+    "ok": true,
+    "golden": "golden/resolve.defaults-layered.json",
+    "digest": "sha256:d6ee206848bf9cae29a2c6a6ed25a652084be7bfb4ee065351dd7637e53d24e1"
+  },
+  "mutations": [
+    {
+      "name": "defaults-child-more-public-than-parent",
+      "set": {
+        "/cards/defaults.base/visibility": "private"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_VISIBILITY_WIDEN",
+            "pointer": "/cards/defaults.prod/visibility"
+          }
+        ]
+      }
+    },
+    {
+      "name": "defaults-parent-missing",
+      "set": {
+        "/cards/defaults.prod/extends": "defaults.nope"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_REF_MISSING",
+            "pointer": "/cards/defaults.prod/extends"
+          }
+        ]
+      }
+    },
+    {
+      "name": "defaults-cycle",
+      "set": {
+        "/cards/defaults.base/extends": "defaults.prod"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_EXTENDS_CYCLE",
+            "pointer": "/cards/defaults.base/extends"
+          }
+        ]
+      }
+    },
+    {
+      "name": "layer-not-selected-hides-key",
+      "set": {
+        "/defaults": "defaults.base"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DEFAULT_MISSING",
+            "pointer": "/params/three"
+          }
+        ]
+      }
+    }
+  ]
+}

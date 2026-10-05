@@ -1,0 +1,53 @@
+{
+  "title": "Arrays are replaced, never concatenated; an empty array replaces",
+  "op": "resolve",
+  "input": {
+    "cards": {
+      "thing.parent": {
+        "schema_version": 1,
+        "kind": "test.thing",
+        "id": "thing.parent",
+        "rev": 1,
+        "status": "active",
+        "visibility": "public",
+        "owner": "human:example-owner",
+        "params": {
+          "tags": [
+            "a",
+            "b",
+            "c"
+          ],
+          "items": [
+            1,
+            2
+          ],
+          "keep": [
+            9
+          ]
+        }
+      },
+      "thing.child": {
+        "schema_version": 1,
+        "kind": "test.thing",
+        "id": "thing.child",
+        "rev": 1,
+        "status": "active",
+        "visibility": "public",
+        "owner": "human:example-owner",
+        "params": {
+          "tags": [
+            "z"
+          ],
+          "items": []
+        },
+        "extends": "thing.parent"
+      }
+    },
+    "target": "thing.child"
+  },
+  "expect": {
+    "ok": true,
+    "golden": "golden/resolve.array-replace.json",
+    "digest": "sha256:555f51af22fdd47f85d96ca092111afcbdf049e1dab5ed49d6b8b4b4e5684f7f"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "id": "thing.solo",
+  "kind": "test.thing",
+  "schema_version": 1,
+  "params": {
+    "a": 1,
+    "list": [
+      1,
+      2
+    ]
+  },
+  "lineage": [
+    {
+      "id": "thing.solo",
+      "rev": 1
+    }
+  ],
+  "defaults": null
+}

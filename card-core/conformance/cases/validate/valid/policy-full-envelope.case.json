@@ -1,0 +1,68 @@
+{
+  "title": "Every optional envelope field populated",
+  "op": "validate",
+  "input": {
+    "schema_version": 1,
+    "kind": "core.policy",
+    "id": "pol.example-store.v1",
+    "rev": 1,
+    "status": "active",
+    "visibility": "public",
+    "owner": "human:example-owner",
+    "title": "Example store listing policy",
+    "as_of": "2026-10-01",
+    "review_by": "2026-12-01",
+    "aliases": [
+      "POL-ES-1"
+    ],
+    "tags": [
+      "policy",
+      "store"
+    ],
+    "provenance": {
+      "authored_by": [
+        "human:example-owner"
+      ],
+      "method": "authored",
+      "sources": [
+        {
+          "ref": "https://example.com/terms",
+          "rev": 1,
+          "sha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "license": "CC-BY-4.0"
+        }
+      ]
+    },
+    "ext": {
+      "dex": {
+        "dex_id": "0x7D:0x20",
+        "dex_type": "spec"
+      }
+    },
+    "params": {
+      "applies_to": "sink.example-store",
+      "source": {
+        "url": "https://example.com/terms",
+        "retrieved_on": "2026-10-01",
+        "sha256": null
+      },
+      "rules": [
+        {
+          "id": "daily-cap",
+          "effect": "limit",
+          "key": "publish.daily",
+          "value": 12
+        },
+        {
+          "id": "disclose-ai",
+          "effect": "require",
+          "key": "listing.ai_disclosure",
+          "value": true
+        }
+      ]
+    }
+  },
+  "expect": {
+    "ok": true
+  }
+}
