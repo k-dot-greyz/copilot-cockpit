@@ -497,6 +497,9 @@ class Ref:
             if errs:
                 errors.extend(_prefix(errs, ["cards", cid]))
                 continue
+            if card["id"] != cid:
+                errors.append(_e("E_ID_MISMATCH", ["cards", cid, "id"]))
+                continue
             entry = self.kinds.get((card["kind"], card["schema_version"]))
             if entry is None:
                 known = any(kind == card["kind"] for kind, _ in self.kinds)
