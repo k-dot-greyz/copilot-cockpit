@@ -327,6 +327,51 @@
       }
     },
     {
+      "name": "target-id-differs-from-its-key",
+      "set": {
+        "/cards/thing.child/id": "thing.other"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ID_MISMATCH",
+            "pointer": "/cards/thing.child/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "parent-id-differs-from-its-key",
+      "set": {
+        "/cards/thing.parent/id": "thing.other"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ID_MISMATCH",
+            "pointer": "/cards/thing.parent/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "id-mismatch-needs-a-valid-id-first",
+      "set": {
+        "/cards/thing.child/id": "Bad Id"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/cards/thing.child/id"
+          }
+        ]
+      }
+    },
+    {
       "name": "parent-envelope-invalid",
       "set": {
         "/cards/thing.parent/owner": "nobody"

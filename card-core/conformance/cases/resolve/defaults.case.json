@@ -179,6 +179,21 @@
       }
     },
     {
+      "name": "defaults-id-differs-from-its-key",
+      "set": {
+        "/cards/defaults.base/id": "defaults.other"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ID_MISMATCH",
+            "pointer": "/cards/defaults.base/id"
+          }
+        ]
+      }
+    },
+    {
       "name": "token-in-defaults-values",
       "set": {
         "/cards/defaults.base/params/values/region": "$defaults.model.tier"
