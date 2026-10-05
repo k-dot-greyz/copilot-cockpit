@@ -67,4 +67,6 @@ MUTANTS = [
     ("$unset marker accepts any truthy value", "                if len(val) == 1 and val[UNSET] is True:", "                if len(val) == 1 and val[UNSET]:"),
     ("$unset marker accepts extra keys", "                if len(val) == 1 and val[UNSET] is True:", "                if val[UNSET] is True:"),
     ("ids lowercased with unicode folding", "        new_id = text.translate(_ASCII_LOWER).replace(", "        new_id = text.lower().replace("),
+    ("pointers keep lone surrogates", '    return _LONE_SURROGATE.sub("\\ufffd", text)', "    return text"),
+    ("huge integer literals crash the parser", "parse_constant=constant, parse_int=parse_int)", "parse_constant=constant)"),
 ]

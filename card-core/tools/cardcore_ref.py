@@ -107,8 +107,13 @@ class _NonFinite(Exception):
     pass
 
 
+_LONE_SURROGATE = re.compile("[\ud800-\udfff]")
+
+
 def _ptr(tokens) -> str:
-    return "".join("/" + str(t).replace("~", "~0").replace("/", "~1") for t in tokens)
+    # SPEC.md section 8: a pointer never contains a lone surrogate; it is written as U+FFFD.
+    text = "".join("/" + str(t).replace("~", "~0").replace("/", "~1") for t in tokens)
+    return _LONE_SURROGATE.sub("\ufffd", text)
 
 
 def _e(code: str, tokens=()) -> dict:
@@ -242,8 +247,15 @@ class Ref:
         def constant(name):
             raise _NonFinite(name)
 
+        def parse_int(literal):
+            # Python refuses integer literals over 4300 digits. SPEC.md section 5 reads them at
+            # any length, and anything this long is out of range whatever the limit is.
+            if len(literal.lstrip("-")) > 40:
+                return -(limits["int_max"] + 1) if literal.startswith("-") else limits["int_max"] + 1
+            return int(literal)
+
         try:
-            value = json.loads(text, object_pairs_hook=hook, parse_constant=constant)
+            value = json.loads(text, object_pairs_hook=hook, parse_constant=constant, parse_int=parse_int)
         except _NonFinite:
             return None, [_e("E_NONFINITE")]
         except RecursionError:
