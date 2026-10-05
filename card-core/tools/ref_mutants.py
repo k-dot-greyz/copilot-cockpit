@@ -59,4 +59,6 @@ MUTANTS = [
     ("adapter id length unchecked", "        if (self._id_max is not None and len(new_id) > self._id_max) or not self._id_re.fullmatch(new_id):",
      "        if not self._id_re.fullmatch(new_id):"),
     ("unwrap loses data", "        return _ok(copy.deepcopy(original))", '        return _ok({k: v for k, v in original.items() if k != "tags"})'),
+    ("pattern end anchor allows trailing newline", r'            out.append("\\Z")', r'            out.append("$")'),
+    ("dialect resets on $ref to a whole resource", '                schema.pop("$schema", None)', "                pass"),
 ]

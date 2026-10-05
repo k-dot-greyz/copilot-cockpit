@@ -16,7 +16,8 @@ import re
 from pathlib import Path
 from typing import Any
 
-from jsonschema import Draft202012Validator
+from jsonschema import Draft202012Validator, validators
+from jsonschema.exceptions import ValidationError
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT202012
 
@@ -45,6 +46,46 @@ DIALECTS: dict[str, dict[str, Any]] = {
         "strip": "urn:",
     },
 }
+
+
+def _ecma_pattern(pattern: str) -> str:
+    """Translate an ASCII-subset ECMA-262 pattern to Python `re` syntax.
+
+    SPEC.md section 4.1: `$` matches only at the very end of the string. Python
+    lets `$` match before a final newline, so an unescaped `$` outside a
+    character class becomes `\\Z`. Patterns are restricted to an ASCII subset
+    (no `.`, `\\d`, `\\w`, `\\s`, lookarounds or flags), where the two
+    dialects otherwise agree.
+    """
+    out: list[str] = []
+    in_class = escaped = False
+    for ch in pattern:
+        if escaped:
+            out.append(ch)
+            escaped = False
+        elif ch == "\\":
+            out.append(ch)
+            escaped = True
+        elif in_class:
+            out.append(ch)
+            in_class = ch != "]"
+        elif ch == "[":
+            out.append(ch)
+            in_class = True
+        elif ch == "$":
+            out.append("\\Z")
+        else:
+            out.append(ch)
+    return "".join(out)
+
+
+def _pattern_keyword(validator, pattern, instance, schema):
+    if validator.is_type(instance, "string") and not re.search(_ecma_pattern(pattern), instance):
+        yield ValidationError(f"{instance!r} does not match {pattern!r}")
+
+
+# Draft 2020-12 with the SPEC.md section 4.1 `pattern` semantics.
+CardValidator = validators.extend(Draft202012Validator, {"pattern": _pattern_keyword})
 
 
 class _NonFinite(Exception):
@@ -104,6 +145,10 @@ class Ref:
                 if path.name in ("index.json", "limits.json"):
                     continue
                 schema = json.loads(path.read_text(encoding="utf-8"))
+                # The dialect is fixed by CardValidator. A `$schema` key would make
+                # jsonschema pick plain Draft 2020-12 again when it follows a `$ref`
+                # to this resource, silently dropping the `pattern` semantics.
+                schema.pop("$schema", None)
                 self.schemas[schema["$id"]] = schema
         if mutate is not None:
             mutate(self.schemas)
@@ -114,8 +159,8 @@ class Ref:
         if not self.envelope_id or "card" not in self.class_ids or "asset" not in self.class_ids:
             raise ValueError("registry must define envelope and classes")
         core = self._schema_by_suffix("/core.v1.json")["$defs"]
-        self._dotted = re.compile(core["dotted_key"]["pattern"])
-        self._id_re = re.compile(core["id"]["pattern"])
+        self._dotted = re.compile(_ecma_pattern(core["dotted_key"]["pattern"]))
+        self._id_re = re.compile(_ecma_pattern(core["id"]["pattern"]))
         self._id_max = core["id"].get("maxLength")
         order = self.schemas[self.envelope_id]["properties"]["visibility"]["enum"]
         self._rank = {v: len(order) - 1 - i for i, v in enumerate(order)}
@@ -130,7 +175,7 @@ class Ref:
 
     def _validator(self, sid: str) -> Draft202012Validator:
         if sid not in self._validators:
-            self._validators[sid] = Draft202012Validator(self.schemas[sid], registry=self.registry)
+            self._validators[sid] = CardValidator(self.schemas[sid], registry=self.registry)
         return self._validators[sid]
 
     def _schema_errors(self, sid: str, instance: Any) -> list[dict]:
