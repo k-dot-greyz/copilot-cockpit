@@ -26,6 +26,11 @@ ROOT = Path(__file__).resolve().parents[1]
 CRATE = ROOT / "rust"
 
 # (name, file under src/, old snippet, new snippet). Every occurrence of `old` is replaced.
+#
+# Not mutated on purpose: the `is_file()` guard in pack validation. A directory that passes it
+# fails the read right after and is reported as the same E_PACK_MISSING, so the mutant is
+# equivalent. The path-escape guard is unreachable for the same reason as in the Python
+# reference: the path grammar rejects every escaping path first.
 MUTANTS: list[tuple[str, str, str, str]] = [
     # --- lint -----------------------------------------------------------------------------
     ("size limit unchecked", "json.rs", "if data.len() > limits.max_json_bytes {", "if false {"),
@@ -48,7 +53,7 @@ MUTANTS: list[tuple[str, str, str, str]] = [
     ("duplicate keys unreported", "json.rs", ".filter(|d| d.tokens.len() <= limits.max_nesting_depth)", ".filter(|_| false)"),
     ("duplicate keys ignore the depth limit", "json.rs", ".filter(|d| d.tokens.len() <= limits.max_nesting_depth)",
      ".filter(|_| true)"),
-    ("trailing garbage accepted", "json.rs", "Err(ParseFail::Syntax)\n                    };", "Ok(value)\n                    };"),
+    ("trailing garbage accepted", "json.rs", "return if self.i == self.b.len() { Ok(value) } else { Err(ParseFail::Syntax) };", "return Ok(value);"),
     ("control characters in strings accepted", "json.rs", "if c == b'\"' || c == b'\\\\' || c < 0x20 {",
      "if c == b'\"' || c == b'\\\\' {"),
     ("lone surrogate pairs not combined", "json.rs", "if let Some(low) = low {", "if let Some(low) = low.filter(|_| false) {"),
@@ -60,7 +65,7 @@ MUTANTS: list[tuple[str, str, str, str]] = [
     ("date order exclusive", "ops.rs", "if as_of > review_by {", "if as_of >= review_by {"),
     ("freshness: review_by exclusive", "ops.rs", "if as_of.and_then(V::as_str) > review_by.as_str() {",
      "if as_of.and_then(V::as_str) >= review_by.as_str() {"),
-    ("open-card detection off", "ops.rs", 'let open = card.get("extends").is_some()', "let open = false"),
+    ("open-card detection off", "ops.rs", 'card.get("extends").is_some() || (entry.allow_tokens', 'false || (entry.allow_tokens'),
     ("allow_tokens ignored in open-card detection", "ops.rs", "(entry.allow_tokens && card.get(\"params\").is_some_and(has_tokens))",
      "(card.get(\"params\").is_some_and(has_tokens))"),
     ("kind-unknown pointers swapped", "ops.rs",
@@ -68,7 +73,6 @@ MUTANTS: list[tuple[str, str, str, str]] = [
      'let pointer = if engine.kind_name_known(kind) { "kind" } else { "schema_version" };'),
     ("pack digest unchecked", "ops.rs", "if crate::sha256_label(bytes) != want {", "if false {"),
     ("pack duplicate ids accepted", "ops.rs", "if ids.contains_key(&id) {", "if false {"),
-    ("pack missing file accepted", "ops.rs", "p.starts_with(&root) && p.is_file()", "p.starts_with(&root)"),
     # --- resolve ---------------------------------------------------------------------------
     ("cycle detection off", "ops.rs", "if seen.iter().any(|x| x == id) {", "if false {"),
     ("extends kind check off", "ops.rs",
@@ -82,6 +86,8 @@ MUTANTS: list[tuple[str, str, str, str]] = [
     ("visibility ratchet allows equal", "ops.rs",
      "if chain[..i].iter().any(|ancestor| rank > self.visibility_rank(ancestor.card)) {",
      "if chain[..i].iter().any(|ancestor| rank >= self.visibility_rank(ancestor.card)) {"),
+    ("card id may differ from its key", "ops.rs", 'if link.card.get("id").and_then(V::as_str) != Some(link.id.as_str()) {',
+     "if false {"),
     ("$unset ignored", "ops.rs", "if out.remove(key).is_none() {", "if out.get(key).is_none() {"),
     ("orphan and missing swapped", "ops.rs", 'let code = if has_parent { "E_UNSET_MISSING" } else { "E_UNSET_ORPHAN" };',
      'let code = if has_parent { "E_UNSET_ORPHAN" } else { "E_UNSET_MISSING" };'),
@@ -96,7 +102,7 @@ MUTANTS: list[tuple[str, str, str, str]] = [
     ("defaults visibility unchecked", "ops.rs", "if !used.is_empty() {", "if false {"),
     ("resolved card not validated", "ops.rs", "self.validate(&V::Obj(resolved), None)?;\n        let defaults = match info {",
      "let _ = resolved;\n        let defaults = match info {"),
-    ("allow_tokens ignored in merge", "ops.rs", ".expect(\"checked\")\n                .allow_tokens;", ".expect(\"checked\")\n                .allow_tokens || true;"),
+    ("allow_tokens ignored in merge", "ops.rs", 'let allow_tokens = self.engine.kind(kind, version).expect("checked").allow_tokens;\n            let params', 'let allow_tokens = true;\n            let params'),
     # --- adapt -----------------------------------------------------------------------------
     ("legacy status ignored", "ops.rs", "let legacy_status = if dialect.dex {", "let legacy_status = if false && dialect.dex {"),
     ("aliases dropped", "ops.rs", "if !aliases.is_empty() {", "if false {"),
