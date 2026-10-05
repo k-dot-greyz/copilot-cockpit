@@ -105,7 +105,7 @@ Whether an asset may be sold, listed or called exclusive is a policy decision ma
 ## 5. Numbers, strings and size
 
 - Numbers are integers. A JSON number with a fraction or exponent is rejected, including `2.0` and `1e3` (`E_FLOAT`). Fractions are basis points (`_bps`), money is cents (`_cents`). This keeps canonical JSON identical across languages.
-- Integers MUST be within plus or minus 9007199254740991 (`E_INT_RANGE`).
+- Integers MUST be within plus or minus 9007199254740991 (`E_INT_RANGE`). An integer literal is read at any length, so a literal of five thousand digits is `E_INT_RANGE` at its own pointer, not a parse failure.
 - Object keys MUST be ASCII (`E_KEY_NONASCII`).
 - Strings MUST be valid Unicode and MUST NOT contain U+007F or lone surrogates (`E_ENCODING`).
 - Any string shaped like a date (`NNNN-NN-NN`) anywhere in a card MUST be a real calendar date (`E_DATE_INVALID`).
@@ -140,7 +140,7 @@ Kind registry: `schemas/index.json` maps each `(kind, schema_version)` to a `cla
 
 ## 8. Operations
 
-An implementation provides these operations. Inputs and outputs are JSON. Every failure is a list of `{code, pointer}` where `pointer` is an RFC 6901 pointer into the input. Codes are stable; messages are advisory.
+An implementation provides these operations. Inputs and outputs are JSON. Every failure is a list of `{code, pointer}` where `pointer` is an RFC 6901 pointer into the input. A pointer never contains a lone surrogate: each one is written as U+FFFD, so an implementation that cannot hold a lone surrogate in a string still reports the same pointer. Codes are stable; messages are advisory.
 
 ```
 raw bytes --lint--> value --validate--> ok

@@ -231,6 +231,49 @@
       }
     },
     {
+      "name": "lone-surrogate-key",
+      "raw": "raw/lone-surrogate-key.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_KEY_NONASCII",
+            "pointer": "/\ufffd"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lone-surrogate-key-nested",
+      "raw": "raw/lone-surrogate-key-nested.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_KEY_NONASCII",
+            "pointer": "/\ufffd"
+          },
+          {
+            "code": "E_FLOAT",
+            "pointer": "/\ufffd/a"
+          }
+        ]
+      }
+    },
+    {
+      "name": "huge-integer-literal",
+      "raw": "raw/huge-int.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_INT_RANGE",
+            "pointer": "/a"
+          }
+        ]
+      }
+    },
+    {
       "name": "invalid-utf8",
       "raw": "raw/invalid-utf8.raw",
       "expect": {
