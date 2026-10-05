@@ -66,7 +66,10 @@ Cards add `extends` (an id), `refs` (up to 64 of `rel`, `id`, optional `rev`) an
 
 ### 4.1 Grammars
 
-All patterns are ASCII and anchored.
+All patterns are ASCII and anchored. They use the ECMA-262 subset JSON Schema defines for `pattern`: literals, character classes, groups, alternation, quantifiers and the anchors `^` and `$`. Two rules remove the places where regex dialects disagree:
+
+- `$` matches only at the very end of the string, never before a final newline. `pol.example` followed by a newline is therefore not an id, and neither is a date, a digest or a path with a trailing newline. An implementation whose regex engine lets `$` match before a final newline (Python's `re` does) MUST translate it, for example to `\Z`.
+- Patterns MUST NOT use `.`, `\d`, `\w`, `\s`, lookarounds, backreferences or flags. A schema that needs one is a schema bug.
 
 | Name | Pattern | Limit |
 | --- | --- | --- |

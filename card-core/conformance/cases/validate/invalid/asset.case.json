@@ -486,6 +486,51 @@
       }
     },
     {
+      "name": "locator-trailing-newline",
+      "set": {
+        "/artifact/locator": "assets/cover-draft.png\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/artifact/locator"
+          }
+        ]
+      }
+    },
+    {
+      "name": "media-type-trailing-newline",
+      "set": {
+        "/artifact/media_type": "image/png\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/artifact/media_type"
+          }
+        ]
+      }
+    },
+    {
+      "name": "artifact-digest-trailing-newline",
+      "set": {
+        "/artifact/sha256": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/artifact/sha256"
+          }
+        ]
+      }
+    },
+    {
       "name": "locator-absolute",
       "set": {
         "/artifact/locator": "/etc/passwd"

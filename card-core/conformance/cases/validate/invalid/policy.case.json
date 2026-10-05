@@ -1067,6 +1067,51 @@
       }
     },
     {
+      "name": "applies-to-trailing-newline",
+      "set": {
+        "/params/applies_to": "sink.example-store\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/applies_to"
+          }
+        ]
+      }
+    },
+    {
+      "name": "rule-key-trailing-newline",
+      "set": {
+        "/params/rules/0/key": "publish.daily\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/rules/0/key"
+          }
+        ]
+      }
+    },
+    {
+      "name": "source-url-trailing-newline",
+      "set": {
+        "/params/source/url": "https://example.com/terms\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/source/url"
+          }
+        ]
+      }
+    },
+    {
       "name": "source-retrieved-on-impossible",
       "set": {
         "/params/source/retrieved_on": "2026-04-31"

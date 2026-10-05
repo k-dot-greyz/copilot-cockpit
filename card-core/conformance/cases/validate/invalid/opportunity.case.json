@@ -327,6 +327,21 @@
       }
     },
     {
+      "name": "currency-trailing-newline",
+      "set": {
+        "/params/extracted/budget/value/currency": "USD\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/extracted/budget/value/currency"
+          }
+        ]
+      }
+    },
+    {
       "name": "amount-negative",
       "set": {
         "/params/extracted/budget/value/amount_cents": -1

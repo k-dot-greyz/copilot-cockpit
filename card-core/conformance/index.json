@@ -24,6 +24,7 @@
     "validate/invalid/asset.case.json",
     "validate/invalid/defaults.case.json",
     "validate/invalid/envelope.case.json",
+    "validate/invalid/open-card.case.json",
     "validate/invalid/opportunity.case.json",
     "validate/invalid/policy.case.json",
     "validate/pack.case.json",

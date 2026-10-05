@@ -1,0 +1,476 @@
+{
+  "title": "Open cards: envelope and card base are checked, kind params wait for resolve",
+  "op": "validate",
+  "input": {
+    "schema_version": 1,
+    "kind": "core.policy",
+    "id": "pol.example-store.strict",
+    "rev": 1,
+    "status": "active",
+    "visibility": "public",
+    "owner": "human:example-owner",
+    "extends": "pol.example-store.v1",
+    "as_of": "2026-10-01",
+    "review_by": "2026-12-01",
+    "params": {
+      "applies_to": "sink.example-store-strict"
+    }
+  },
+  "expect": {
+    "ok": true
+  },
+  "mutations": [
+    {
+      "name": "extends-bad-grammar",
+      "set": {
+        "/extends": "Bad Id"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/extends"
+          }
+        ]
+      }
+    },
+    {
+      "name": "extends-trailing-newline",
+      "set": {
+        "/extends": "pol.example-store.v1\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/extends"
+          }
+        ]
+      }
+    },
+    {
+      "name": "extends-not-a-string",
+      "set": {
+        "/extends": 7
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/extends"
+          }
+        ]
+      }
+    },
+    {
+      "name": "params-missing",
+      "remove": [
+        "/params"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "params-not-an-object",
+      "set": {
+        "/params": []
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params"
+          }
+        ]
+      }
+    },
+    {
+      "name": "unknown-top-level-key",
+      "set": {
+        "/extra": 1
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "refs-entry-bad-rel",
+      "set": {
+        "/refs": [
+          {
+            "rel": "Bad Rel",
+            "id": "pol.other"
+          }
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/refs/0/rel"
+          }
+        ]
+      }
+    },
+    {
+      "name": "refs-entry-id-trailing-newline",
+      "set": {
+        "/refs": [
+          {
+            "rel": "see",
+            "id": "pol.other\n"
+          }
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/refs/0/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "refs-entry-ok",
+      "set": {
+        "/refs": [
+          {
+            "rel": "see",
+            "id": "pol.other",
+            "rev": 2
+          }
+        ]
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "refs-too-many",
+      "set": {
+        "/refs": [
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          },
+          {
+            "rel": "see",
+            "id": "pol.other"
+          }
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/refs"
+          }
+        ]
+      }
+    },
+    {
+      "name": "token-in-params-is-open-ok",
+      "set": {
+        "/params/applies_to": "$defaults.sink.name"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "unset-in-params-is-open-ok",
+      "set": {
+        "/params/rules": {
+          "$unset": true
+        }
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "partial-params-validated-after-resolve-only",
+      "set": {
+        "/params": {
+          "rules": []
+        }
+      },
+      "expect": {
+        "ok": true
+      }
+    }
+  ]
+}

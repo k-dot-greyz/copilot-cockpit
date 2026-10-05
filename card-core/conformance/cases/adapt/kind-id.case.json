@@ -130,6 +130,21 @@
       }
     },
     {
+      "name": "id-trailing-newline",
+      "set": {
+        "/legacy/id": "widget-001\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_ID",
+            "pointer": "/legacy/id"
+          }
+        ]
+      }
+    },
+    {
       "name": "unknown-dialect",
       "set": {
         "/dialect": "nope"

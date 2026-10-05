@@ -1042,6 +1042,145 @@
       }
     },
     {
+      "name": "id-trailing-newline",
+      "set": {
+        "/id": "pol.example\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "kind-trailing-newline",
+      "set": {
+        "/kind": "core.policy\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/kind"
+          }
+        ]
+      }
+    },
+    {
+      "name": "owner-trailing-newline",
+      "set": {
+        "/owner": "human:example-owner\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/owner"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tag-trailing-newline",
+      "set": {
+        "/tags": [
+          "policy\n"
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/tags/0"
+          }
+        ]
+      }
+    },
+    {
+      "name": "alias-trailing-newline",
+      "set": {
+        "/aliases": [
+          "POL-ES-1\n"
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/aliases/0"
+          }
+        ]
+      }
+    },
+    {
+      "name": "as-of-trailing-newline",
+      "set": {
+        "/as_of": "2026-10-01\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/as_of"
+          }
+        ]
+      }
+    },
+    {
+      "name": "review-by-trailing-newline",
+      "set": {
+        "/review_by": "2026-12-01\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/review_by"
+          }
+        ]
+      }
+    },
+    {
+      "name": "provenance-sha256-trailing-newline",
+      "set": {
+        "/provenance/sources/0/sha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/provenance/sources/0/sha256"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ext-dex-id-trailing-newline",
+      "set": {
+        "/ext/dex/dex_id": "0x7D:0x10\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/ext/dex/dex_id"
+          }
+        ]
+      }
+    },
+    {
       "name": "nesting-too-deep",
       "limits": {
         "max_nesting_depth": 2
