@@ -245,6 +245,88 @@
       }
     },
     {
+      "name": "unset-marker-integer-one-is-not-true",
+      "set": {
+        "/cards/thing.child/params/name": {
+          "$unset": 1
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DOLLAR_KEY",
+            "pointer": "/cards/thing.child/params/name/$unset"
+          }
+        ]
+      }
+    },
+    {
+      "name": "unset-marker-null",
+      "set": {
+        "/cards/thing.child/params/name": {
+          "$unset": null
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DOLLAR_KEY",
+            "pointer": "/cards/thing.child/params/name/$unset"
+          }
+        ]
+      }
+    },
+    {
+      "name": "unset-marker-with-extra-key",
+      "set": {
+        "/cards/thing.child/params/name": {
+          "$unset": true,
+          "keep": 1
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DOLLAR_KEY",
+            "pointer": "/cards/thing.child/params/name/$unset"
+          }
+        ]
+      }
+    },
+    {
+      "name": "parent-schema-version-true-is-not-1",
+      "set": {
+        "/cards/thing.parent/schema_version": true
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_EXTENDS_KIND",
+            "pointer": "/cards/thing.child/extends"
+          }
+        ]
+      }
+    },
+    {
+      "name": "child-schema-version-true-is-not-1",
+      "set": {
+        "/cards/thing.child/schema_version": true
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_EXTENDS_KIND",
+            "pointer": "/cards/thing.child/extends"
+          }
+        ]
+      }
+    },
+    {
       "name": "parent-envelope-invalid",
       "set": {
         "/cards/thing.parent/owner": "nobody"

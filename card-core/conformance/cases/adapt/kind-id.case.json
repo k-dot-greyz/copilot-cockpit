@@ -175,6 +175,36 @@
       }
     },
     {
+      "name": "id-kelvin-sign-is-not-lowercased",
+      "set": {
+        "/legacy/id": "\u212a-widget"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_ID",
+            "pointer": "/legacy/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "id-non-ascii-letter",
+      "set": {
+        "/legacy/id": "\u00c9cole"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_ID",
+            "pointer": "/legacy/id"
+          }
+        ]
+      }
+    },
+    {
       "name": "id-too-long",
       "set": {
         "/legacy/id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
