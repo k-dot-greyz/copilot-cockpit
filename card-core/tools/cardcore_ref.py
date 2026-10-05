@@ -88,6 +88,21 @@ def _pattern_keyword(validator, pattern, instance, schema):
 CardValidator = validators.extend(Draft202012Validator, {"pattern": _pattern_keyword})
 
 
+# SPEC.md section 5: equality is exact JSON equality. Python's `==` treats True as 1 and 1.0 as 1.
+def _same(a: Any, b: Any) -> bool:
+    if type(a) is not type(b):
+        return False
+    if isinstance(a, dict):
+        return a.keys() == b.keys() and all(_same(a[k], b[k]) for k in a)
+    if isinstance(a, list):
+        return len(a) == len(b) and all(_same(x, y) for x, y in zip(a, b))
+    return a == b
+
+
+# SPEC.md section 10: only A to Z are lowercased. str.lower() would fold the Kelvin sign into `k`.
+_ASCII_LOWER = {c: c + 32 for c in range(ord("A"), ord("Z") + 1)}
+
+
 class _NonFinite(Exception):
     pass
 
@@ -390,7 +405,7 @@ class Ref:
                 parsed[i] = value
         for i, value in parsed.items():  # stage 4: file envelope equals entry
             for field in ("id", "kind", "schema_version", "rev"):
-                if not isinstance(value, dict) or value.get(field) != entries[i][field]:
+                if not isinstance(value, dict) or not _same(value.get(field), entries[i][field]):
                     errors.append(_e("E_PACK_MISMATCH", head + [i]))
                     break
         if errors:
@@ -431,7 +446,8 @@ class Ref:
             card = cards[cur]
             if prev is not None:
                 child = cards[prev]
-                if (card.get("kind"), card.get("schema_version")) != (child.get("kind"), child.get("schema_version")):
+                if not (_same(card.get("kind"), child.get("kind"))
+                        and _same(card.get("schema_version"), child.get("schema_version"))):
                     return [], [_e("E_EXTENDS_KIND", ["cards", prev, "extends"])]
             chain.append((cur, card))
             parent = card.get("extends")
@@ -488,7 +504,7 @@ class Ref:
                 errors.append(_e("E_DOLLAR_KEY", here))
                 continue
             if tokens_ok and isinstance(val, dict) and UNSET in val:
-                if val == {UNSET: True}:
+                if len(val) == 1 and val[UNSET] is True:
                     if key in out:
                         del out[key]
                     else:
@@ -666,7 +682,7 @@ class Ref:
         text = source
         if spec.get("strip") and text.startswith(spec["strip"]):
             text = text[len(spec["strip"]):]
-        new_id = text.lower().replace(":", ".")
+        new_id = text.translate(_ASCII_LOWER).replace(":", ".")
         if (self._id_max is not None and len(new_id) > self._id_max) or not self._id_re.fullmatch(new_id):
             return _fail([_e("E_ADAPT_ID", ["legacy"] + src_path)])
         ctx = inp.get("context")
