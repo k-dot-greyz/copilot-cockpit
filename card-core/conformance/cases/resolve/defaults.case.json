@@ -138,6 +138,66 @@
       }
     },
     {
+      "name": "token-key-bad-grammar",
+      "set": {
+        "/cards/thing.uses-defaults/params/model": "$defaults.Bad Key"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DEFAULT_PARTIAL",
+            "pointer": "/params/model"
+          }
+        ]
+      }
+    },
+    {
+      "name": "token-key-empty",
+      "set": {
+        "/cards/thing.uses-defaults/params/model": "$defaults."
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DEFAULT_PARTIAL",
+            "pointer": "/params/model"
+          }
+        ]
+      }
+    },
+    {
+      "name": "token-key-trailing-newline",
+      "set": {
+        "/cards/thing.uses-defaults/params/model": "$defaults.model.tier\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DEFAULT_PARTIAL",
+            "pointer": "/params/model"
+          }
+        ]
+      }
+    },
+    {
+      "name": "token-key-trailing-dot",
+      "set": {
+        "/cards/thing.uses-defaults/params/model": "$defaults.model."
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DEFAULT_PARTIAL",
+            "pointer": "/params/model"
+          }
+        ]
+      }
+    },
+    {
       "name": "defaults-more-public-than-target",
       "set": {
         "/cards/defaults.base/visibility": "private"

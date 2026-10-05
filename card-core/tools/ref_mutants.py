@@ -79,4 +79,6 @@ MUTANTS = [
      '                for key, val in node.items():\n                    shadowed(val, path + [key], depth)',
      '                pass'),
     ("card id may differ from its key", '            if card["id"] != cid:\n                errors.append(_e("E_ID_MISMATCH"', '            if False:\n                errors.append(_e("E_ID_MISMATCH"'),
+    ("DEL in keys accepted", "                    elif bad_string(key):", "                    elif False:"),
+    ("token key grammar unchecked", "                if not self._dotted.fullmatch(key):", "                if False:"),
 ]

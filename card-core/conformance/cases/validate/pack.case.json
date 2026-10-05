@@ -226,6 +226,21 @@
       }
     },
     {
+      "name": "path-is-a-directory",
+      "set": {
+        "/params/cards/0/path": "cards"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_PACK_MISSING",
+            "pointer": "/params/cards/0/path"
+          }
+        ]
+      }
+    },
+    {
       "name": "path-too-long",
       "set": {
         "/params/cards/0/path": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"

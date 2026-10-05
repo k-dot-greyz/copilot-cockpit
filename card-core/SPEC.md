@@ -108,7 +108,7 @@ Whether an asset may be sold, listed or called exclusive is a policy decision ma
 - Integers MUST be within plus or minus 9007199254740991 (`E_INT_RANGE`). An integer literal is read at any length, so a literal of five thousand digits is `E_INT_RANGE` at its own pointer, not a parse failure.
 - Object keys MUST be ASCII (`E_KEY_NONASCII`).
 - Strings MUST be valid Unicode and MUST NOT contain U+007F or lone surrogates (`E_ENCODING`).
-- Any string shaped like a date (`NNNN-NN-NN`) anywhere in a card MUST be a real calendar date (`E_DATE_INVALID`).
+- Any string shaped like a date (`NNNN-NN-NN`) anywhere in a card MUST be a real calendar date (`E_DATE_INVALID`): proleptic Gregorian, years 0001 to 9999, with leap years every fourth year except centuries not divisible by 400.
 - Wherever this specification compares two values for equality, the comparison is exact JSON equality: the types must match, so `true` is not `1` and `1.0` is not `1`.
 - Duplicate object keys are rejected (`E_DUP_KEY`). JSON allows them; parsers silently keep the last, which hides merge damage.
 - Documents are UTF-8 without a byte-order mark (`E_BOM`), at most `max_json_bytes` (`E_TOO_LARGE`) and nested at most `max_nesting_depth` (`E_TOO_DEEP`). `NaN` and `Infinity` are rejected (`E_NONFINITE`).

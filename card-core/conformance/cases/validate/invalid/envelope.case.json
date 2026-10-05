@@ -557,6 +557,64 @@
       }
     },
     {
+      "name": "as-of-century-is-not-a-leap-year",
+      "set": {
+        "/as_of": "2100-02-29"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DATE_INVALID",
+            "pointer": "/as_of"
+          }
+        ]
+      }
+    },
+    {
+      "name": "as-of-every-400-years-is-a-leap-year-ok",
+      "set": {
+        "/as_of": "2000-02-29"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "as-of-year-zero",
+      "set": {
+        "/as_of": "0000-01-01"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DATE_INVALID",
+            "pointer": "/as_of"
+          }
+        ]
+      }
+    },
+    {
+      "name": "as-of-year-one-ok",
+      "set": {
+        "/as_of": "0001-01-01"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "as-of-year-9999-ok",
+      "set": {
+        "/as_of": "9999-12-31",
+        "/review_by": "9999-12-31"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
       "name": "as-of-after-review-by",
       "set": {
         "/as_of": "2027-01-01"
