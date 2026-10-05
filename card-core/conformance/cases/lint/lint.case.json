@@ -36,6 +36,53 @@
       }
     },
     {
+      "name": "duplicate-key-in-replaced-value",
+      "raw": "raw/dup-key-replaced.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a"
+          },
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a/b"
+          }
+        ]
+      }
+    },
+    {
+      "name": "duplicate-key-in-replaced-array-value",
+      "raw": "raw/dup-key-replaced-array.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a"
+          },
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a/0/b"
+          }
+        ]
+      }
+    },
+    {
+      "name": "duplicate-key-three-times",
+      "raw": "raw/dup-key-three.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a"
+          }
+        ]
+      }
+    },
+    {
       "name": "bom",
       "raw": "raw/bom.raw",
       "expect": {

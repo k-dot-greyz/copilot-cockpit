@@ -156,7 +156,7 @@ raw bytes --lint--> value --validate--> ok
 
 Parses bytes into a value and applies every rule in section 5 that can be checked on text or value. Returns the value or the lint errors. Lint errors are returned alone: if lint fails, no later check runs.
 
-Lint runs in stages. Stage 1 checks the bytes (`E_TOO_LARGE`, `E_BOM`, invalid UTF-8 as `E_ENCODING`) and stops at the first failure. Stage 2 parses; `E_PARSE` stops the stage, otherwise duplicate keys and `NaN` or `Infinity` are reported. Stage 3 walks the value and accumulates `E_FLOAT`, `E_INT_RANGE`, `E_KEY_NONASCII`, `E_ENCODING` and `E_TOO_DEEP`. For duplicate and non-ASCII keys the pointer is the pointer of the key itself; for other value errors it is the pointer of the offending value; for `E_TOO_DEEP` and the byte-level errors it is the empty pointer.
+Lint runs in stages. Stage 1 checks the bytes (`E_TOO_LARGE`, `E_BOM`, invalid UTF-8 as `E_ENCODING`) and stops at the first failure. Stage 2 parses; `E_PARSE` stops the stage, otherwise duplicate keys and `NaN` or `Infinity` are reported. Every duplicate key is reported wherever it occurs, including inside a value that a later duplicate of the same key replaced. Stage 3 walks the value and accumulates `E_FLOAT`, `E_INT_RANGE`, `E_KEY_NONASCII`, `E_ENCODING` and `E_TOO_DEEP`. For duplicate and non-ASCII keys the pointer is the pointer of the key itself; for other value errors it is the pointer of the offending value; for `E_TOO_DEEP` and the byte-level errors it is the empty pointer.
 
 ### 8.2 validate
 
