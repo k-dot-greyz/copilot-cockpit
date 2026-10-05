@@ -82,20 +82,23 @@ def _protocol_json(cmd: list[str], request: dict) -> tuple[dict, int, str]:
 
 
 @pytest.fixture(scope="session")
-def rust_impl() -> rc.CommandImpl | None:
+def rust_impl() -> rc.CommandImpl:
+    """Use a pre-built release binary (Rust CI job) or opt-in local build."""
     impl = _rust_impl()
     if impl is not None:
         return impl
-    if which("cargo") is None:
-        return None
-    subprocess.run(
-        ["cargo", "build", "--release", "--locked"],
-        cwd=ROOT / "rust",
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    return _rust_impl()
+    if os.environ.get("CARD_CORE_BUILD_RUST") == "1" and which("cargo") is not None:
+        subprocess.run(
+            ["cargo", "build", "--release", "--locked"],
+            cwd=ROOT / "rust",
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        impl = _rust_impl()
+        if impl is not None:
+            return impl
+    pytest.skip("release cardcore binary not present (build in card-core/rust or set CARD_CORE_RUST_BIN)")
 
 
 def test_cc31_ci_rust_job_pins_release_conformance():
@@ -182,7 +185,6 @@ def test_cc31_sad_unknown_op_is_typed_not_shell_injection():
     assert body["errors"][0]["code"] == "E_OP_UNKNOWN"
 
 
-@pytest.mark.skipif(_release_rust_bin() is None and which("cargo") is None, reason="no Rust toolchain")
 def test_cc31_happy_rust_sample_matches_in_process(rust_impl: rc.CommandImpl):
     """CC31-H-03 (high): Release Rust binary matches reference on a per-op sample."""
     sample = []
@@ -194,14 +196,12 @@ def test_cc31_happy_rust_sample_matches_in_process(rust_impl: rc.CommandImpl):
 
 
 @pytest.mark.parametrize("row", CURATED_ROWS, ids=[r.id for r in CURATED_ROWS])
-@pytest.mark.skipif(_release_rust_bin() is None and which("cargo") is None, reason="no Rust toolchain")
 def test_cc31_happy_curated_rows_via_rust(row, rust_impl: rc.CommandImpl):
     """CC31-H-04 (high): Curated PR #31 rows through the Rust protocol adapter."""
     passed, message = rc.check_row(row, rust_impl, ROOT, LIMITS)
     assert passed, message
 
 
-@pytest.mark.skipif(_release_rust_bin() is None and which("cargo") is None, reason="no Rust toolchain")
 def test_cc31_sad_rust_malformed_protocol_single_line_exit_zero(rust_impl: rc.CommandImpl):
     """CC31-S-02 (high): Malformed stdin still yields one JSON line and exit 0 (no panic on stderr)."""
     cmd = rust_impl.cmd
@@ -215,7 +215,6 @@ def test_cc31_sad_rust_malformed_protocol_single_line_exit_zero(rust_impl: rc.Co
         assert body["errors"][0]["code"] in {"E_IMPL_PROTOCOL", "E_IMPL_CRASH"}
 
 
-@pytest.mark.skipif(_release_rust_bin() is None and which("cargo") is None, reason="no Rust toolchain")
 def test_cc31_ablation_python_and_rust_agree_on_curated_rows(rust_impl: rc.CommandImpl):
     """CC31-A-01 (high): Dual-impl parity on curated rows — graceful ablation if either diverges."""
     for row in CURATED_ROWS:
@@ -224,7 +223,6 @@ def test_cc31_ablation_python_and_rust_agree_on_curated_rows(rust_impl: rc.Comma
         assert py == rs, f"{row.id}: python {py!r} rust {rs!r}"
 
 
-@pytest.mark.skipif(_release_rust_bin() is None and which("cargo") is None, reason="no Rust toolchain")
 def test_cc31_sec_rust_lint_does_not_echo_file_bytes(rust_impl: rc.CommandImpl):
     """CC31-SEC-03 (critical): Rust lint path matches the no-exfiltration contract."""
     secret = "CC31-RUST-SECRET-b4e2"

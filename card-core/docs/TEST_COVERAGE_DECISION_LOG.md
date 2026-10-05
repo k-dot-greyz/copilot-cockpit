@@ -42,4 +42,4 @@
 
 - [ ] Issue: wire `rust_mutants.py` into optional CI workflow_dispatch job.
 - [ ] Issue: align `ref_cli.py` malformed stdin with Rust (`E_IMPL_PROTOCOL` + exit 0) if product wants symmetric hosts.
-- [ ] Add `CARD_CORE_RUST_BIN` to contributor docs when running Rust parity tests locally without building.
+- [ ] Add `CARD_CORE_RUST_BIN` / `CARD_CORE_BUILD_RUST=1` to contributor docs for local Rust parity (Python CI skips Rust tests without a release binary).
