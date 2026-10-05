@@ -1,0 +1,74 @@
+{
+  "title": "Unknown stays unknown: null values with explicit state",
+  "op": "validate",
+  "input": {
+    "schema_version": 1,
+    "kind": "demand.opportunity",
+    "id": "opp.acme-unknowns.v1",
+    "rev": 1,
+    "status": "active",
+    "visibility": "public",
+    "owner": "human:example-owner",
+    "params": {
+      "source": {
+        "url": "https://example.com/jobs/1001",
+        "channel": "rss",
+        "posted_on": "2026-09-30",
+        "source_revision": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      "extracted": {
+        "client": {
+          "state": "stated",
+          "value": "Acme Widgets",
+          "filled_by": "llm"
+        },
+        "deliverables": {
+          "state": "stated",
+          "value": [
+            "Data pipeline",
+            "Monitoring dashboard"
+          ],
+          "filled_by": "llm"
+        },
+        "format": {
+          "state": "stated",
+          "value": "Git repository",
+          "filled_by": "llm"
+        },
+        "deadline": {
+          "state": "unknown",
+          "value": null,
+          "filled_by": "harness"
+        },
+        "budget": {
+          "state": "unknown",
+          "value": null,
+          "filled_by": "harness"
+        },
+        "rights_asked": {
+          "state": "stated",
+          "value": "Work for hire",
+          "filled_by": "llm"
+        }
+      },
+      "scoring": {
+        "spec_clarity_bps": 6667,
+        "fields_present": 4,
+        "fields_total": 6,
+        "skill_fit_bps": 7000,
+        "effort_hours": null,
+        "effort_confirmed_by": null,
+        "ev_state": "uncalibrated",
+        "rank_basis": "budget_per_effort",
+        "red_flags": []
+      },
+      "safety": {
+        "injection_flags": [],
+        "quarantined": false
+      }
+    }
+  },
+  "expect": {
+    "ok": true
+  }
+}

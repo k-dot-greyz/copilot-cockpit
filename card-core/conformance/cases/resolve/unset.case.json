@@ -1,0 +1,106 @@
+{
+  "title": "$unset removes inherited keys, including nested ones",
+  "op": "resolve",
+  "input": {
+    "cards": {
+      "thing.parent": {
+        "schema_version": 1,
+        "kind": "test.thing",
+        "id": "thing.parent",
+        "rev": 1,
+        "status": "active",
+        "visibility": "public",
+        "owner": "human:example-owner",
+        "params": {
+          "a": 1,
+          "b": {
+            "c": 2,
+            "d": 3
+          },
+          "keep": true
+        }
+      },
+      "thing.child": {
+        "schema_version": 1,
+        "kind": "test.thing",
+        "id": "thing.child",
+        "rev": 1,
+        "status": "active",
+        "visibility": "public",
+        "owner": "human:example-owner",
+        "params": {
+          "a": {
+            "$unset": true
+          },
+          "b": {
+            "c": {
+              "$unset": true
+            }
+          }
+        },
+        "extends": "thing.parent"
+      }
+    },
+    "target": "thing.child"
+  },
+  "expect": {
+    "ok": true,
+    "golden": "golden/resolve.unset.json",
+    "digest": "sha256:0d78a0c318e2759a19e3057b62b709a4ac95bc73a3b9e41d417cefdb1929179f"
+  },
+  "mutations": [
+    {
+      "name": "unset-key-not-inherited",
+      "set": {
+        "/cards/thing.child/params/zzz": {
+          "$unset": true
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_UNSET_MISSING",
+            "pointer": "/cards/thing.child/params/zzz"
+          }
+        ]
+      }
+    },
+    {
+      "name": "unset-nested-key-not-inherited",
+      "set": {
+        "/cards/thing.child/params/b/nope": {
+          "$unset": true
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_UNSET_MISSING",
+            "pointer": "/cards/thing.child/params/b/nope"
+          }
+        ]
+      }
+    },
+    {
+      "name": "unset-under-replaced-scalar",
+      "set": {
+        "/cards/thing.child/params/keep": {
+          "x": {
+            "$unset": true
+          }
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_UNSET_MISSING",
+            "pointer": "/cards/thing.child/params/keep/x"
+          }
+        ]
+      }
+    }
+  ]
+}

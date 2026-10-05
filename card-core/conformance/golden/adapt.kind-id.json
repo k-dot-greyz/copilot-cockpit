@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "kind": "legacy.wrap",
+  "id": "widget-001",
+  "rev": 1,
+  "status": "active",
+  "visibility": "private",
+  "owner": "human:example-owner",
+  "params": {
+    "dialect": "kind-id",
+    "original_kind": "acme.widget",
+    "original": {
+      "schema_version": 1,
+      "kind": "acme.widget",
+      "id": "widget-001",
+      "size": 3,
+      "label": "Blue widget"
+    }
+  }
+}

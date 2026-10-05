@@ -1,0 +1,1395 @@
+{
+  "title": "core.asset rules as minimal pairs",
+  "op": "validate",
+  "input": {
+    "schema_version": 1,
+    "kind": "core.asset",
+    "id": "asset.cover-draft.v1",
+    "rev": 1,
+    "status": "active",
+    "visibility": "public",
+    "owner": "human:example-owner",
+    "provenance": {
+      "authored_by": [
+        "human:example-owner",
+        "ai:example-model"
+      ],
+      "method": "generated",
+      "sources": [
+        {
+          "ref": "brief.example.v1",
+          "rev": 1
+        }
+      ]
+    },
+    "artifact": {
+      "media_type": "image/png",
+      "size_bytes": 123456,
+      "sha256": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "locator": "assets/cover-draft.png",
+      "placeholder": false
+    },
+    "lineage": {
+      "parents": [
+        {
+          "id": "brief.example.v1",
+          "rev": 1
+        }
+      ],
+      "produced_by": {
+        "card": "asm.cover-art.v1",
+        "rev": 2,
+        "run": "run-0001"
+      },
+      "seed": 42
+    },
+    "license_ledger": [
+      {
+        "input": "brief.example.v1",
+        "license": "CC0-1.0",
+        "grant": "open",
+        "evidence": null
+      }
+    ],
+    "human_contribution": [
+      {
+        "actor": "human:example-owner",
+        "role": "edited",
+        "rev": 1,
+        "evidence": "Retouched composition and typography."
+      }
+    ],
+    "disclosure": {
+      "ai_used": "assisted",
+      "tags": [
+        "ai-assisted"
+      ]
+    }
+  },
+  "expect": {
+    "ok": true
+  },
+  "mutations": [
+    {
+      "name": "kind-with-extends",
+      "set": {
+        "/extends": "asset.parent"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "kind-with-params",
+      "set": {
+        "/params": {}
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "provenance-missing",
+      "remove": [
+        "/provenance"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "artifact-missing",
+      "remove": [
+        "/artifact"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "lineage-missing",
+      "remove": [
+        "/lineage"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "ledger-missing",
+      "remove": [
+        "/license_ledger"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "human-contribution-missing",
+      "remove": [
+        "/human_contribution"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "disclosure-missing",
+      "remove": [
+        "/disclosure"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "active-with-unknown-license",
+      "set": {
+        "/license_ledger/0/grant": "unknown"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/status"
+          }
+        ]
+      }
+    },
+    {
+      "name": "draft-with-unknown-license-ok",
+      "set": {
+        "/license_ledger/0/grant": "unknown",
+        "/status": "draft"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "active-with-ai-unknown",
+      "set": {
+        "/disclosure/ai_used": "unknown"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/status"
+          }
+        ]
+      }
+    },
+    {
+      "name": "active-ai-assisted-no-human-evidence",
+      "set": {
+        "/human_contribution": []
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/status"
+          }
+        ]
+      }
+    },
+    {
+      "name": "active-ai-generated-no-human-evidence",
+      "set": {
+        "/disclosure/ai_used": "generated",
+        "/human_contribution": []
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/status"
+          }
+        ]
+      }
+    },
+    {
+      "name": "active-no-ai-no-human-evidence-ok",
+      "set": {
+        "/disclosure/ai_used": "none",
+        "/human_contribution": []
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "deprecated-with-unknown-license",
+      "set": {
+        "/license_ledger/0/grant": "unknown",
+        "/status": "deprecated"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/status"
+          }
+        ]
+      }
+    },
+    {
+      "name": "placeholder-with-locator",
+      "set": {
+        "/artifact": {
+          "media_type": "image/png",
+          "size_bytes": 0,
+          "sha256": null,
+          "locator": "assets/x.png",
+          "placeholder": true
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/artifact/locator"
+          }
+        ]
+      }
+    },
+    {
+      "name": "placeholder-with-digest",
+      "set": {
+        "/artifact": {
+          "media_type": "image/png",
+          "size_bytes": 0,
+          "sha256": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "locator": null,
+          "placeholder": true
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/artifact/sha256"
+          }
+        ]
+      }
+    },
+    {
+      "name": "placeholder-with-size",
+      "set": {
+        "/artifact": {
+          "media_type": "image/png",
+          "size_bytes": 5,
+          "sha256": null,
+          "locator": null,
+          "placeholder": true
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/artifact/size_bytes"
+          }
+        ]
+      }
+    },
+    {
+      "name": "real-asset-null-locator",
+      "set": {
+        "/artifact/locator": null
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/artifact/locator"
+          }
+        ]
+      }
+    },
+    {
+      "name": "real-asset-null-digest",
+      "set": {
+        "/artifact/sha256": null
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/artifact/sha256"
+          }
+        ]
+      }
+    },
+    {
+      "name": "artifact-bad-digest",
+      "set": {
+        "/artifact/sha256": "sha256:zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/artifact/sha256"
+          }
+        ]
+      }
+    },
+    {
+      "name": "artifact-short-digest",
+      "set": {
+        "/artifact/sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/artifact/sha256"
+          }
+        ]
+      }
+    },
+    {
+      "name": "artifact-negative-size",
+      "set": {
+        "/artifact/size_bytes": -1
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/artifact/size_bytes"
+          }
+        ]
+      }
+    },
+    {
+      "name": "artifact-float-size",
+      "set": {
+        "/artifact/size_bytes": 1.5
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_FLOAT",
+            "pointer": "/artifact/size_bytes"
+          }
+        ]
+      }
+    },
+    {
+      "name": "artifact-bad-media-type",
+      "set": {
+        "/artifact/media_type": "not a type"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/artifact/media_type"
+          }
+        ]
+      }
+    },
+    {
+      "name": "locator-traversal",
+      "set": {
+        "/artifact/locator": "../etc/passwd"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/artifact/locator"
+          }
+        ]
+      }
+    },
+    {
+      "name": "locator-percent-encoded",
+      "set": {
+        "/artifact/locator": "%2e%2e/secret.png"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/artifact/locator"
+          }
+        ]
+      }
+    },
+    {
+      "name": "locator-absolute",
+      "set": {
+        "/artifact/locator": "/etc/passwd"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/artifact/locator"
+          }
+        ]
+      }
+    },
+    {
+      "name": "artifact-unknown-key",
+      "set": {
+        "/artifact/extra": 1
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/artifact"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ledger-grant-hostile",
+      "set": {
+        "/license_ledger/0/grant": "ignore_previous_instructions"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/license_ledger/0/grant"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ledger-license-with-space",
+      "set": {
+        "/license_ledger/0/license": "not a license"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/license_ledger/0/license"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ledger-evidence-oversize",
+      "set": {
+        "/license_ledger/0/evidence": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/license_ledger/0/evidence"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ledger-input-bad-id",
+      "set": {
+        "/license_ledger/0/input": "Bad Id"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/license_ledger/0/input"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ledger-too-many",
+      "set": {
+        "/license_ledger": [
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          },
+          {
+            "input": "a",
+            "license": "MIT",
+            "grant": "open",
+            "evidence": null
+          }
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/license_ledger"
+          }
+        ]
+      }
+    },
+    {
+      "name": "human-role-hostile",
+      "set": {
+        "/human_contribution/0/role": "boss"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/human_contribution/0/role"
+          }
+        ]
+      }
+    },
+    {
+      "name": "human-actor-bad",
+      "set": {
+        "/human_contribution/0/actor": "someone"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/human_contribution/0/actor"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lineage-parent-bad-id",
+      "set": {
+        "/lineage/parents/0/id": "Bad Id"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/lineage/parents/0/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lineage-parent-rev-zero",
+      "set": {
+        "/lineage/parents/0/rev": 0
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/lineage/parents/0/rev"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lineage-produced-by-null-ok",
+      "set": {
+        "/lineage/produced_by": null
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "lineage-produced-by-incomplete",
+      "set": {
+        "/lineage/produced_by": {
+          "card": "x"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/lineage/produced_by"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lineage-seed-float",
+      "set": {
+        "/lineage/seed": 0.5
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_FLOAT",
+            "pointer": "/lineage/seed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lineage-too-many-parents",
+      "set": {
+        "/lineage/parents": [
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          },
+          {
+            "id": "p",
+            "rev": 1
+          }
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/lineage/parents"
+          }
+        ]
+      }
+    },
+    {
+      "name": "disclosure-tags-duplicate",
+      "set": {
+        "/disclosure/tags": [
+          "a",
+          "a"
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/disclosure/tags"
+          }
+        ]
+      }
+    },
+    {
+      "name": "disclosure-ai-used-hostile",
+      "set": {
+        "/disclosure/ai_used": "maybe"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/disclosure/ai_used"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "kind": "legacy.wrap",
+  "id": "zenos.tools.copilot-cockpit",
+  "rev": 1,
+  "status": "active",
+  "visibility": "public",
+  "owner": "human:example-owner",
+  "params": {
+    "dialect": "dex-frontmatter",
+    "original_kind": "tool",
+    "original": {
+      "dex_id": "0x7D:0x10",
+      "dex_type": "tool",
+      "midi_2_0_context": {
+        "resource_type": "Tool",
+        "property_exchange_id": "urn:zenos:tools:copilot-cockpit"
+      },
+      "legacy_map": {
+        "midi_1_0_bank": 125,
+        "midi_1_0_prog": 16
+      },
+      "status": "active",
+      "tags": [
+        "copilot",
+        "agents",
+        "cockpit",
+        "reference",
+        "workflow",
+        "visualization",
+        "pipeline",
+        "hydration"
+      ]
+    }
+  },
+  "aliases": [
+    "urn:zenos:tools:copilot-cockpit",
+    "0x7D:0x10"
+  ],
+  "tags": [
+    "copilot",
+    "agents",
+    "cockpit",
+    "reference",
+    "workflow",
+    "visualization",
+    "pipeline",
+    "hydration"
+  ],
+  "ext": {
+    "dex": {
+      "dex_id": "0x7D:0x10",
+      "dex_type": "tool",
+      "midi_2_0_context": {
+        "resource_type": "Tool",
+        "property_exchange_id": "urn:zenos:tools:copilot-cockpit"
+      },
+      "legacy_map": {
+        "midi_1_0_bank": 125,
+        "midi_1_0_prog": 16
+      }
+    }
+  }
+}

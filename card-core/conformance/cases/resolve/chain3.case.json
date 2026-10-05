@@ -1,0 +1,105 @@
+{
+  "title": "Three-level chain: lineage is root first, target last",
+  "op": "resolve",
+  "input": {
+    "cards": {
+      "thing.root": {
+        "schema_version": 1,
+        "kind": "test.thing",
+        "id": "thing.root",
+        "rev": 1,
+        "status": "active",
+        "visibility": "public",
+        "owner": "human:example-owner",
+        "params": {
+          "a": 1,
+          "nested": {
+            "x": 1,
+            "y": 1
+          }
+        }
+      },
+      "thing.mid": {
+        "schema_version": 1,
+        "kind": "test.thing",
+        "id": "thing.mid",
+        "rev": 1,
+        "status": "active",
+        "visibility": "public",
+        "owner": "human:example-owner",
+        "params": {
+          "b": 2,
+          "nested": {
+            "y": 2
+          }
+        },
+        "extends": "thing.root"
+      },
+      "thing.leaf": {
+        "schema_version": 1,
+        "kind": "test.thing",
+        "id": "thing.leaf",
+        "rev": 1,
+        "status": "active",
+        "visibility": "public",
+        "owner": "human:example-owner",
+        "params": {
+          "c": 3,
+          "nested": {
+            "z": 3
+          }
+        },
+        "extends": "thing.mid"
+      }
+    },
+    "target": "thing.leaf"
+  },
+  "expect": {
+    "ok": true,
+    "golden": "golden/resolve.chain3.json",
+    "digest": "sha256:c7a05ffa4425fe70d7cf1d7683239c7cddeede103725af4318d9c59d672e08a5"
+  },
+  "mutations": [
+    {
+      "name": "middle-link-removed",
+      "remove": [
+        "/cards/thing.mid"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_REF_MISSING",
+            "pointer": "/cards/thing.leaf/extends"
+          }
+        ]
+      }
+    },
+    {
+      "name": "depth-limit-two",
+      "limits": {
+        "extends_max_depth": 2
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_EXTENDS_DEPTH",
+            "pointer": "/target"
+          }
+        ]
+      }
+    },
+    {
+      "name": "depth-limit-three-ok",
+      "limits": {
+        "extends_max_depth": 3
+      },
+      "expect": {
+        "ok": true,
+        "golden": "golden/resolve.chain3.json",
+        "digest": "sha256:c7a05ffa4425fe70d7cf1d7683239c7cddeede103725af4318d9c59d672e08a5"
+      }
+    }
+  ]
+}

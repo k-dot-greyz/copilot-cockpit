@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "kind": "legacy.wrap",
+  "id": "mod-joint-entities",
+  "rev": 1,
+  "status": "deprecated",
+  "visibility": "public",
+  "owner": "human:example-owner",
+  "params": {
+    "dialect": "dex-card",
+    "original_kind": "entity",
+    "original": {
+      "dex_id": "0x7D:0x11:MOD-JOINT-ENTITIES",
+      "dex_type": "entity",
+      "status": "deprecated",
+      "module_id": "MOD-JOINT-ENTITIES",
+      "title": "Shared joint entity contracts",
+      "tags": [
+        "architecture",
+        "types",
+        "hydration"
+      ],
+      "depends_on": [],
+      "inputs": [],
+      "outputs": [
+        "PRCardEntity",
+        "TriageViewEntity",
+        "DexAssetCard"
+      ],
+      "tier": 0,
+      "acceptance": [
+        "Types are JSON-serializable (no functions, no Date objects)"
+      ],
+      "links": [
+        {
+          "rel": "parent",
+          "href": "dex-entry.md",
+          "label": "Copilot Cockpit 0x7D:0x10"
+        }
+      ],
+      "files": [
+        "src/lib/entities/index.ts"
+      ]
+    }
+  },
+  "aliases": [
+    "MOD-JOINT-ENTITIES",
+    "0x7D:0x11:MOD-JOINT-ENTITIES"
+  ],
+  "tags": [
+    "architecture",
+    "types",
+    "hydration"
+  ],
+  "ext": {
+    "dex": {
+      "dex_id": "0x7D:0x11:MOD-JOINT-ENTITIES",
+      "dex_type": "entity"
+    }
+  }
+}

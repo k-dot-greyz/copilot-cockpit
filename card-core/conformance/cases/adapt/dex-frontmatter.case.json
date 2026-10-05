@@ -1,0 +1,191 @@
+{
+  "title": "Adapter: dex front-matter, id from the property exchange urn",
+  "op": "adapt",
+  "input": {
+    "dialect": "dex-frontmatter",
+    "legacy": {
+      "dex_id": "0x7D:0x10",
+      "dex_type": "tool",
+      "midi_2_0_context": {
+        "resource_type": "Tool",
+        "property_exchange_id": "urn:zenos:tools:copilot-cockpit"
+      },
+      "legacy_map": {
+        "midi_1_0_bank": 125,
+        "midi_1_0_prog": 16
+      },
+      "status": "active",
+      "tags": [
+        "copilot",
+        "agents",
+        "cockpit",
+        "reference",
+        "workflow",
+        "visualization",
+        "pipeline",
+        "hydration"
+      ]
+    },
+    "context": {
+      "owner": "human:example-owner",
+      "visibility": "public",
+      "rev": 1
+    }
+  },
+  "expect": {
+    "ok": true,
+    "roundtrip": true,
+    "golden": "golden/adapt.dex-frontmatter.json",
+    "digest": "sha256:c5e221eab7181ca8439af84a240069678a7d19fd19b7178c450e84c912497398"
+  },
+  "mutations": [
+    {
+      "name": "urn-missing",
+      "remove": [
+        "/legacy/midi_2_0_context/property_exchange_id"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_SHAPE",
+            "pointer": "/legacy/midi_2_0_context/property_exchange_id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "midi-context-missing",
+      "remove": [
+        "/legacy/midi_2_0_context"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_SHAPE",
+            "pointer": "/legacy/midi_2_0_context/property_exchange_id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "urn-has-space",
+      "set": {
+        "/legacy/midi_2_0_context/property_exchange_id": "urn:zenos:tools:two words"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_ID",
+            "pointer": "/legacy/midi_2_0_context/property_exchange_id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "urn-uppercase-is-lowercased",
+      "set": {
+        "/legacy/midi_2_0_context/property_exchange_id": "urn:ZenOS:tools:x"
+      },
+      "expect": {
+        "ok": true,
+        "roundtrip": true,
+        "golden": "golden/adapt.dex-frontmatter-upper.json",
+        "digest": "sha256:8da7cb9f89d61c2d8c6838bda0efd03dbbd4b405d7e9bebe9c72856b9523dffc"
+      }
+    },
+    {
+      "name": "urn-without-prefix-still-normalises",
+      "set": {
+        "/legacy/midi_2_0_context/property_exchange_id": "zenos:tools:copilot-cockpit"
+      },
+      "expect": {
+        "ok": true,
+        "roundtrip": true,
+        "golden": "golden/adapt.dex-frontmatter-noprefix.json",
+        "digest": "sha256:5f40c5caa275c51b29b91bbb8608aed37008663128c626058e857545e1536291"
+      }
+    },
+    {
+      "name": "legacy-map-out-of-range",
+      "set": {
+        "/legacy/legacy_map/midi_1_0_bank": 200
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/ext/dex/legacy_map/midi_1_0_bank"
+          }
+        ]
+      }
+    },
+    {
+      "name": "unknown-status",
+      "set": {
+        "/legacy/status": "weird"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_STATUS",
+            "pointer": "/legacy/status"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tags-too-many",
+      "set": {
+        "/legacy/tags": [
+          "t0",
+          "t1",
+          "t2",
+          "t3",
+          "t4",
+          "t5",
+          "t6",
+          "t7",
+          "t8",
+          "t9",
+          "t10",
+          "t11",
+          "t12",
+          "t13",
+          "t14",
+          "t15",
+          "t16",
+          "t17",
+          "t18",
+          "t19",
+          "t20",
+          "t21",
+          "t22",
+          "t23",
+          "t24",
+          "t25",
+          "t26",
+          "t27",
+          "t28",
+          "t29",
+          "t30",
+          "t31",
+          "t32"
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/tags"
+          }
+        ]
+      }
+    }
+  ]
+}

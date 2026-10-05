@@ -1,0 +1,44 @@
+{
+  "title": "Placeholder asset: null locator and digest",
+  "op": "validate",
+  "input": {
+    "schema_version": 1,
+    "kind": "core.asset",
+    "id": "asset.cover-stub.v1",
+    "rev": 1,
+    "status": "draft",
+    "visibility": "public",
+    "owner": "human:example-owner",
+    "provenance": {
+      "authored_by": [
+        "system:example-pipeline"
+      ],
+      "method": "generated"
+    },
+    "artifact": {
+      "media_type": "image/png",
+      "size_bytes": 0,
+      "sha256": null,
+      "locator": null,
+      "placeholder": true
+    },
+    "lineage": {
+      "parents": [],
+      "produced_by": {
+        "card": "asm.cover-art.v1",
+        "rev": 2,
+        "run": "run-0002"
+      },
+      "seed": null
+    },
+    "license_ledger": [],
+    "human_contribution": [],
+    "disclosure": {
+      "ai_used": "none",
+      "tags": []
+    }
+  },
+  "expect": {
+    "ok": true
+  }
+}

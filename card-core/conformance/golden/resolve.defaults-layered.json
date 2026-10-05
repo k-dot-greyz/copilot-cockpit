@@ -1,0 +1,35 @@
+{
+  "id": "thing.uses-layered",
+  "kind": "test.thing",
+  "schema_version": 1,
+  "params": {
+    "one": 1,
+    "two": "y",
+    "three": true
+  },
+  "lineage": [
+    {
+      "id": "thing.uses-layered",
+      "rev": 1
+    }
+  ],
+  "defaults": {
+    "id": "defaults.prod",
+    "rev": 1,
+    "lineage": [
+      {
+        "id": "defaults.base",
+        "rev": 1
+      },
+      {
+        "id": "defaults.prod",
+        "rev": 1
+      }
+    ],
+    "used": {
+      "a": 1,
+      "b": "y",
+      "c": true
+    }
+  }
+}

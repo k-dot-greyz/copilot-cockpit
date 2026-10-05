@@ -126,7 +126,7 @@ Conformance-only kinds `test.thing` and `test.typed` live under `conformance/sch
 
 A new kind adds a schema file and an entry in a kind registry. It never changes the core. A kind schema constrains `params` and MAY require optional envelope fields. It MUST NOT add top-level properties.
 
-Kind registry: `schemas/index.json` maps each `(kind, schema_version)` to a schema `$id`. A consumer may supply more registries.
+Kind registry: `schemas/index.json` maps each `(kind, schema_version)` to a `class` (`card` or `asset`), a schema `$id`, and an optional `allow_tokens` flag (default true). A kind with `allow_tokens` false never interprets `$defaults` tokens or `$unset` markers in its `params`; they are plain data and the kind schema decides whether they are legal. `core.defaults`, `core.pack` and `legacy.wrap` set it to false. A consumer may supply more registries.
 
 ## 7. Extensions
 
@@ -152,27 +152,36 @@ raw bytes --lint--> value --validate--> ok
 
 Parses bytes into a value and applies every rule in section 5 that can be checked on text or value. Returns the value or the lint errors. Lint errors are returned alone: if lint fails, no later check runs.
 
+Lint runs in stages. Stage 1 checks the bytes (`E_TOO_LARGE`, `E_BOM`, invalid UTF-8 as `E_ENCODING`) and stops at the first failure. Stage 2 parses; `E_PARSE` stops the stage, otherwise duplicate keys and `NaN` or `Infinity` are reported. Stage 3 walks the value and accumulates `E_FLOAT`, `E_INT_RANGE`, `E_KEY_NONASCII`, `E_ENCODING` and `E_TOO_DEEP`. For duplicate and non-ASCII keys the pointer is the pointer of the key itself; for other value errors it is the pointer of the offending value; for `E_TOO_DEEP` and the byte-level errors it is the empty pointer.
+
 ### 8.2 validate
 
 1. Run value-level lint.
 2. Validate against the envelope schema. Any envelope violation is `E_SCHEMA`, and no later step runs.
 3. Look up `(kind, schema_version)` in the registry. A well-formed kind that is not registered is `E_KIND_UNKNOWN` at `/kind`. A registered kind with another version is `E_KIND_UNKNOWN` at `/schema_version`.
 4. Validate against the class schema (card or asset) and then the kind schema.
-   - A card is **open** if it has `extends` or any `$defaults` / `$unset` token in `params`. An open card is validated by the envelope and card schemas only, because its `params` is partial until resolved. Kind validation happens in `resolve`.
+   - A card is **open** if it has `extends`, or if its kind allows tokens and its `params` contains a `$defaults` token or `$unset` marker. An open card is validated by the envelope and card schemas only, because its `params` is partial until resolved. Kind validation happens in `resolve`.
    - A **closed** card is fully validated here.
 5. Semantic checks: calendar-valid dates (`E_DATE_INVALID`) and `as_of` not after `review_by` (`E_DATE_ORDER`).
-6. If the card is a pack and a base directory is given, check the pack against the files: unique ids (`E_ID_DUP`), each file exists (`E_PACK_MISSING`), the SHA-256 of the file bytes equals the entry (`E_HASH_MISMATCH`), the file's `id`, `kind`, `schema_version` and `rev` equal the entry (`E_PACK_MISMATCH`), and every `extends`, `refs[].id` and `defaults_ref` names a pack id (`E_REF_MISSING`). Each file card is itself validated with this operation.
+6. If the card is a pack and a base directory is given, check the pack against the files in these stages. A stage reports all of its own errors, and the first stage that has errors stops the operation.
+   1. Unique ids (`E_ID_DUP`, pointer `/params/cards/<n>/id` of the repeat).
+   2. Each file exists (`E_PACK_MISSING`, pointer `/params/cards/<n>/path`).
+   3. The SHA-256 of the file bytes equals the entry (`E_HASH_MISMATCH`, pointer `/params/cards/<n>/sha256`).
+   4. The file's `id`, `kind`, `schema_version` and `rev` equal the entry (`E_PACK_MISMATCH`, pointer `/params/cards/<n>`).
+   5. Each file card passes this operation (errors keep their own codes; the pointer is prefixed with `/params/cards/<n>`).
+   6. Every `extends` and `refs[].id` in a file card, and `defaults_ref`, names a pack id (`E_REF_MISSING`; pointer `/params/cards/<n>` of the entry whose file holds the dangling reference, or `/params/defaults_ref`).
 
 ### 8.3 resolve
 
 Input: a map of cards, a target id, and optionally a defaults card id.
 
 1. Build the chain from the target through `extends` to the root. A missing target is `E_REF_MISSING`. A repeated id is `E_EXTENDS_CYCLE`. More cards than `extends_max_depth` is `E_EXTENDS_DEPTH`. A parent with another `kind` or `schema_version` is `E_EXTENDS_KIND`.
-2. Visibility ratchet: a card MUST NOT be more public than any ancestor. The order is `private` < `internal` < `public`. Violation is `E_VISIBILITY_WIDEN`.
-3. Merge `params` from the root to the target. Objects merge recursively. Any other value, including an array, is replaced by the child value. The marker `{"$unset": true}` removes an inherited key: in a root card it is `E_UNSET_ORPHAN`, and for a key the merged parent does not have it is `E_UNSET_MISSING`. Any other object key starting with `$` is `E_DOLLAR_KEY`.
-4. Defaults. If the merged `params` contains tokens, a defaults card is required. The defaults card is itself resolved (it may extend another defaults card; its values MUST NOT contain tokens). A string that is exactly `$defaults.<dotted key>` is replaced by the value, keeping its type. A missing key or missing defaults card is `E_DEFAULT_MISSING`. A string that contains `$defaults.` without being exactly a token is `E_DEFAULT_PARTIAL`. If any value is used, the target MUST NOT be more public than any card in the defaults chain (`E_VISIBILITY_WIDEN`).
-5. Build the resolved card: the target envelope without `extends`, with the merged and substituted `params`. Validate it with `validate` (including the kind schema). Failures are reported with pointers into the resolved card.
-6. Output:
+2. Visibility ratchet: a card MUST NOT be more public than any ancestor. The order is `private` < `internal` < `public`. Violation is `E_VISIBILITY_WIDEN`. The ratchet applies to every `extends` chain, including a defaults chain.
+3. Merge `params` from the root to the target. Objects merge recursively. Any other value, including an array, is replaced by the child value. The marker `{"$unset": true}` removes an inherited key: in a root card it is `E_UNSET_ORPHAN`, and for a key the merged parent does not have it is `E_UNSET_MISSING`. Any other object key starting with `$` is `E_DOLLAR_KEY`. For a kind with `allow_tokens` false, markers and `$` keys are not interpreted here or in step 4; the merge is otherwise identical.
+4. Defaults. If the merged `params` contains tokens, a defaults card is required. A defaults id that is absent, unknown or not a `core.defaults` card is `E_DEFAULT_MISSING` at `/defaults`. The defaults card is itself resolved by steps 1 to 3 (it may extend another defaults card; its values MUST NOT contain tokens, which is a schema error). A string that is exactly `$defaults.<dotted key>` is replaced by the value, keeping its type. A missing key or missing defaults card is `E_DEFAULT_MISSING`. A string that contains `$defaults.` without being exactly a token is `E_DEFAULT_PARTIAL`. If any value is used, the target MUST NOT be more public than any card in the defaults chain (`E_VISIBILITY_WIDEN`).
+5. Build the resolved card: the target envelope without `extends`, with the merged and substituted `params`. Validate it with `validate` (including the kind schema). Failures are reported with pointers into the resolved card, such as `/params/limit`.
+6. Pointers. Errors found before merging point into the input: `/target`, `/defaults`, `/cards/<id>/extends`, `/cards/<id>/visibility`, or `/cards/<id>/params/<path>` for `$unset` and `$` keys. Errors found after merging point into the merged params, `/params/<path>`, for tokens; errors in the resolved defaults card use the same form prefixed with `/defaults`. For `$unset` and `$` keys the path ends at the offending key. `E_EXTENDS_CYCLE` points at the `extends` of the card that closes the loop. `E_EXTENDS_DEPTH` points at `/target`. `E_VISIBILITY_WIDEN` points at the `visibility` of the card that is too public.
+7. Output:
 
 ```
 { "id", "kind", "schema_version", "params",
@@ -200,7 +209,9 @@ An adapter wraps an existing artifact as a `legacy.wrap` card without losing inf
 
 Output envelope: `kind` `legacy.wrap`, `schema_version` 1, `id` normalised from the legacy id, and `params` = `{dialect, original_kind, original}` where `original` is the legacy JSON verbatim. `aliases` holds the original id string when it differs from `id`; the dex dialects also add their `dex_id`. The output is validated like any card.
 
-Id normalisation: lowercase, then each `:` becomes `.`. If the result does not match the id grammar, `E_ADAPT_ID`.
+A legacy payload that is not an object is `E_ADAPT_SHAPE` at `/legacy`. Each dialect has required fields (table below); one that is missing or not a string is `E_ADAPT_SHAPE` at that field.
+
+Id normalisation: lowercase, then each `:` becomes `.`. If the result does not match the id grammar, `E_ADAPT_ID`. Uppercase input is therefore normalised, not rejected.
 
 Status mapping for dex-style statuses: `active` to `active`, `deprecated` to `deprecated`, `experimental` to `draft`, `archived` to `retired`. Anything else is `E_ADAPT_STATUS`. A legacy status wins over `context.status`.
 
@@ -208,12 +219,12 @@ Round trip: `unwrap` returns `params.original`. For every adapter fixture, `unwr
 
 Dialects in v1:
 
-| Dialect | Shape | id source | Extras |
-| --- | --- | --- | --- |
-| `kind-id` | `schema_version`, `kind`, `id` at top level | `id` | `original_kind` = `kind` |
-| `schema-string` | fused `schema: "<ns>.<name>.v<N>"` and a colon-prefixed `id` | `id` | `original_kind` = `schema` |
-| `dex-card` | `dex_id`, `dex_type`, `module_id`, `status`, `tags` | `module_id` | `ext.dex`, `tags`, mapped status |
-| `dex-frontmatter` | `dex_id`, `dex_type`, `midi_2_0_context`, `legacy_map`, `status`, `tags` | `midi_2_0_context.property_exchange_id` without a leading `urn:` | `ext.dex`, `tags`, mapped status |
+| Dialect | Required fields | id source | `original_kind` | Extras |
+| --- | --- | --- | --- | --- |
+| `kind-id` | `kind`, `id` | `id` | `kind` | none |
+| `schema-string` | `schema` (fused `<ns>.<name>.v<N>`), `id` (colon-prefixed) | `id` | `schema` | none |
+| `dex-card` | `dex_id`, `dex_type`, `module_id` | `module_id` | `dex_type` | `ext.dex`; `tags` and `status` copied when present |
+| `dex-frontmatter` | `dex_id`, `dex_type`, `midi_2_0_context.property_exchange_id` | that urn without a leading `urn:` | `dex_type` | `ext.dex` including `midi_2_0_context` and `legacy_map` when present; `tags` and `status` copied when present |
 
 Legacy payloads containing a non-integer number cannot be wrapped (`E_FLOAT`).
 
@@ -228,7 +239,7 @@ Layout under `conformance/`:
 
 A case file has `op`, `title`, `input`, `expect`, optional `base_dir` (a directory next to the case file, for packs), optional `limits` (overrides) and either `mutations` or `rows`.
 
-- `mutations`: each has a `name`, optional `set` (a map of JSON pointer to new value), optional `remove` (a list of pointers) and its own `expect`. A mutation is applied to a copy of `input`. A case with mutations MUST have a base `expect`, so every negative is a minimal pair of a passing input.
+- `mutations`: each has a `name`, optional `set` (a map of JSON pointer to new value), optional `remove` (a list of pointers), optional `limits` (overrides for this mutation only) and its own `expect`. A mutation is applied to a copy of `input`. A case with mutations MUST have a base `expect`, so every negative is a minimal pair of a passing input.
 - `rows`: independent rows, used for raw-byte lint cases.
 
 `expect` is one of:
@@ -287,6 +298,7 @@ Operations: `lint`, `validate`, `resolve`, `freshness`, `adapt`, `unwrap`.
 | `E_STALE` | freshness | `as_of` after `review_by` |
 | `E_ADAPT_DIALECT` | adapt | unknown dialect |
 | `E_ADAPT_CONTEXT` | adapt | missing context |
+| `E_ADAPT_SHAPE` | adapt | legacy payload is not an object, or lacks a required field |
 | `E_ADAPT_ID` | adapt | id cannot be normalised |
 | `E_ADAPT_STATUS` | adapt | status cannot be mapped |
 

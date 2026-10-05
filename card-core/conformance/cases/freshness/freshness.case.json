@@ -1,0 +1,224 @@
+{
+  "title": "review_by is inclusive; as_of is injected, never read from a clock",
+  "op": "freshness",
+  "input": {
+    "card": {
+      "schema_version": 1,
+      "kind": "core.policy",
+      "id": "pol.example-store.v1",
+      "rev": 1,
+      "status": "active",
+      "visibility": "public",
+      "owner": "human:example-owner",
+      "title": "Example store listing policy",
+      "as_of": "2026-10-01",
+      "review_by": "2026-12-01",
+      "aliases": [
+        "POL-ES-1"
+      ],
+      "tags": [
+        "policy",
+        "store"
+      ],
+      "provenance": {
+        "authored_by": [
+          "human:example-owner"
+        ],
+        "method": "authored",
+        "sources": [
+          {
+            "ref": "https://example.com/terms",
+            "rev": 1,
+            "sha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "license": "CC-BY-4.0"
+          }
+        ]
+      },
+      "ext": {
+        "dex": {
+          "dex_id": "0x7D:0x20",
+          "dex_type": "spec"
+        }
+      },
+      "params": {
+        "applies_to": "sink.example-store",
+        "source": {
+          "url": "https://example.com/terms",
+          "retrieved_on": "2026-10-01",
+          "sha256": null
+        },
+        "rules": [
+          {
+            "id": "daily-cap",
+            "effect": "limit",
+            "key": "publish.daily",
+            "value": 12
+          },
+          {
+            "id": "disclose-ai",
+            "effect": "require",
+            "key": "listing.ai_disclosure",
+            "value": true
+          }
+        ]
+      }
+    },
+    "as_of": "2026-11-30"
+  },
+  "expect": {
+    "ok": true
+  },
+  "mutations": [
+    {
+      "name": "on-review-by-date-is-fresh",
+      "set": {
+        "/as_of": "2026-12-01"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "day-after-is-stale",
+      "set": {
+        "/as_of": "2026-12-02"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_STALE",
+            "pointer": "/review_by"
+          }
+        ]
+      }
+    },
+    {
+      "name": "far-future-is-stale",
+      "set": {
+        "/as_of": "2030-01-01"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_STALE",
+            "pointer": "/review_by"
+          }
+        ]
+      }
+    },
+    {
+      "name": "no-review-by-is-fresh",
+      "set": {
+        "/as_of": "2099-01-01"
+      },
+      "remove": [
+        "/card/review_by"
+      ],
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "leap-day-is-valid",
+      "set": {
+        "/as_of": "2028-02-29",
+        "/card/review_by": "2028-03-01"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "non-leap-feb-29",
+      "set": {
+        "/as_of": "2027-02-29"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DATE_INVALID",
+            "pointer": "/as_of"
+          }
+        ]
+      }
+    },
+    {
+      "name": "impossible-day",
+      "set": {
+        "/as_of": "2026-02-30"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DATE_INVALID",
+            "pointer": "/as_of"
+          }
+        ]
+      }
+    },
+    {
+      "name": "not-iso-format",
+      "set": {
+        "/as_of": "12/01/2026"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DATE_INVALID",
+            "pointer": "/as_of"
+          }
+        ]
+      }
+    },
+    {
+      "name": "as-of-is-a-number",
+      "set": {
+        "/as_of": 20261201
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DATE_INVALID",
+            "pointer": "/as_of"
+          }
+        ]
+      }
+    },
+    {
+      "name": "as-of-missing",
+      "remove": [
+        "/as_of"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DATE_INVALID",
+            "pointer": "/as_of"
+          }
+        ]
+      }
+    },
+    {
+      "name": "as-of-empty",
+      "set": {
+        "/as_of": ""
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DATE_INVALID",
+            "pointer": "/as_of"
+          }
+        ]
+      }
+    }
+  ]
+}

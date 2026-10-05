@@ -1,0 +1,133 @@
+{
+  "title": "Adapter: fused schema string and colon-prefixed ids",
+  "op": "adapt",
+  "input": {
+    "dialect": "schema-string",
+    "legacy": {
+      "schema": "acme.report.v1",
+      "id": "report:2026-q3:0",
+      "title": "Q3 report",
+      "rows": [
+        1,
+        2,
+        3
+      ]
+    },
+    "context": {
+      "owner": "human:example-owner",
+      "visibility": "private",
+      "status": "draft",
+      "rev": 1
+    }
+  },
+  "expect": {
+    "ok": true,
+    "roundtrip": true,
+    "golden": "golden/adapt.schema-string.json",
+    "digest": "sha256:7e854bbe0558db5d5a0bd1b2a8192d508f529438def7ca52fadfcdfdc525c8ec"
+  },
+  "mutations": [
+    {
+      "name": "id-uppercase-is-lowercased",
+      "set": {
+        "/legacy/id": "Report:Q3"
+      },
+      "expect": {
+        "ok": true,
+        "roundtrip": true,
+        "golden": "golden/adapt.schema-string-upper.json",
+        "digest": "sha256:7e78bac33881d99c69c982a00f4c11a5f27455ab3f18261893f82d9178d692fa"
+      }
+    },
+    {
+      "name": "id-has-space",
+      "set": {
+        "/legacy/id": "report:q3 final"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_ID",
+            "pointer": "/legacy/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "id-empty-segment",
+      "set": {
+        "/legacy/id": "report::0"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_ID",
+            "pointer": "/legacy/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "id-ends-with-colon",
+      "set": {
+        "/legacy/id": "report:"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_ID",
+            "pointer": "/legacy/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-status-missing",
+      "remove": [
+        "/context/status"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_CONTEXT",
+            "pointer": "/context/status"
+          }
+        ]
+      }
+    },
+    {
+      "name": "schema-field-missing",
+      "remove": [
+        "/legacy/schema"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_SHAPE",
+            "pointer": "/legacy/schema"
+          }
+        ]
+      }
+    },
+    {
+      "name": "schema-field-not-a-string",
+      "set": {
+        "/legacy/schema": 1
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_SHAPE",
+            "pointer": "/legacy/schema"
+          }
+        ]
+      }
+    }
+  ]
+}

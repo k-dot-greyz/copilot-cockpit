@@ -1,0 +1,1085 @@
+{
+  "title": "core.policy rules as minimal pairs",
+  "op": "validate",
+  "input": {
+    "schema_version": 1,
+    "kind": "core.policy",
+    "id": "pol.example-store.v1",
+    "rev": 1,
+    "status": "active",
+    "visibility": "public",
+    "owner": "human:example-owner",
+    "title": "Example store listing policy",
+    "as_of": "2026-10-01",
+    "review_by": "2026-12-01",
+    "aliases": [
+      "POL-ES-1"
+    ],
+    "tags": [
+      "policy",
+      "store"
+    ],
+    "provenance": {
+      "authored_by": [
+        "human:example-owner"
+      ],
+      "method": "authored",
+      "sources": [
+        {
+          "ref": "https://example.com/terms",
+          "rev": 1,
+          "sha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "license": "CC-BY-4.0"
+        }
+      ]
+    },
+    "ext": {
+      "dex": {
+        "dex_id": "0x7D:0x20",
+        "dex_type": "spec"
+      }
+    },
+    "params": {
+      "applies_to": "sink.example-store",
+      "source": {
+        "url": "https://example.com/terms",
+        "retrieved_on": "2026-10-01",
+        "sha256": null
+      },
+      "rules": [
+        {
+          "id": "daily-cap",
+          "effect": "limit",
+          "key": "publish.daily",
+          "value": 12
+        },
+        {
+          "id": "disclose-ai",
+          "effect": "require",
+          "key": "listing.ai_disclosure",
+          "value": true
+        }
+      ]
+    }
+  },
+  "expect": {
+    "ok": true
+  },
+  "mutations": [
+    {
+      "name": "missing-review-by",
+      "remove": [
+        "/review_by"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "missing-as-of",
+      "remove": [
+        "/as_of"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "params-unknown-key",
+      "set": {
+        "/params/extra": 1
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params"
+          }
+        ]
+      }
+    },
+    {
+      "name": "missing-applies-to",
+      "remove": [
+        "/params/applies_to"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params"
+          }
+        ]
+      }
+    },
+    {
+      "name": "applies-to-bad-id",
+      "set": {
+        "/params/applies_to": "Bad Id"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/applies_to"
+          }
+        ]
+      }
+    },
+    {
+      "name": "rules-empty",
+      "set": {
+        "/params/rules": []
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/rules"
+          }
+        ]
+      }
+    },
+    {
+      "name": "rules-too-many",
+      "set": {
+        "/params/rules": [
+          {
+            "id": "r0",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 0
+          },
+          {
+            "id": "r1",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 1
+          },
+          {
+            "id": "r2",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 2
+          },
+          {
+            "id": "r3",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 3
+          },
+          {
+            "id": "r4",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 4
+          },
+          {
+            "id": "r5",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 5
+          },
+          {
+            "id": "r6",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 6
+          },
+          {
+            "id": "r7",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 7
+          },
+          {
+            "id": "r8",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 8
+          },
+          {
+            "id": "r9",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 9
+          },
+          {
+            "id": "r10",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 10
+          },
+          {
+            "id": "r11",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 11
+          },
+          {
+            "id": "r12",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 12
+          },
+          {
+            "id": "r13",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 13
+          },
+          {
+            "id": "r14",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 14
+          },
+          {
+            "id": "r15",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 15
+          },
+          {
+            "id": "r16",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 16
+          },
+          {
+            "id": "r17",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 17
+          },
+          {
+            "id": "r18",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 18
+          },
+          {
+            "id": "r19",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 19
+          },
+          {
+            "id": "r20",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 20
+          },
+          {
+            "id": "r21",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 21
+          },
+          {
+            "id": "r22",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 22
+          },
+          {
+            "id": "r23",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 23
+          },
+          {
+            "id": "r24",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 24
+          },
+          {
+            "id": "r25",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 25
+          },
+          {
+            "id": "r26",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 26
+          },
+          {
+            "id": "r27",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 27
+          },
+          {
+            "id": "r28",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 28
+          },
+          {
+            "id": "r29",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 29
+          },
+          {
+            "id": "r30",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 30
+          },
+          {
+            "id": "r31",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 31
+          },
+          {
+            "id": "r32",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 32
+          },
+          {
+            "id": "r33",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 33
+          },
+          {
+            "id": "r34",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 34
+          },
+          {
+            "id": "r35",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 35
+          },
+          {
+            "id": "r36",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 36
+          },
+          {
+            "id": "r37",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 37
+          },
+          {
+            "id": "r38",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 38
+          },
+          {
+            "id": "r39",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 39
+          },
+          {
+            "id": "r40",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 40
+          },
+          {
+            "id": "r41",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 41
+          },
+          {
+            "id": "r42",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 42
+          },
+          {
+            "id": "r43",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 43
+          },
+          {
+            "id": "r44",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 44
+          },
+          {
+            "id": "r45",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 45
+          },
+          {
+            "id": "r46",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 46
+          },
+          {
+            "id": "r47",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 47
+          },
+          {
+            "id": "r48",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 48
+          },
+          {
+            "id": "r49",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 49
+          },
+          {
+            "id": "r50",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 50
+          },
+          {
+            "id": "r51",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 51
+          },
+          {
+            "id": "r52",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 52
+          },
+          {
+            "id": "r53",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 53
+          },
+          {
+            "id": "r54",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 54
+          },
+          {
+            "id": "r55",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 55
+          },
+          {
+            "id": "r56",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 56
+          },
+          {
+            "id": "r57",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 57
+          },
+          {
+            "id": "r58",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 58
+          },
+          {
+            "id": "r59",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 59
+          },
+          {
+            "id": "r60",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 60
+          },
+          {
+            "id": "r61",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 61
+          },
+          {
+            "id": "r62",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 62
+          },
+          {
+            "id": "r63",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 63
+          },
+          {
+            "id": "r64",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 64
+          },
+          {
+            "id": "r65",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 65
+          },
+          {
+            "id": "r66",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 66
+          },
+          {
+            "id": "r67",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 67
+          },
+          {
+            "id": "r68",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 68
+          },
+          {
+            "id": "r69",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 69
+          },
+          {
+            "id": "r70",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 70
+          },
+          {
+            "id": "r71",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 71
+          },
+          {
+            "id": "r72",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 72
+          },
+          {
+            "id": "r73",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 73
+          },
+          {
+            "id": "r74",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 74
+          },
+          {
+            "id": "r75",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 75
+          },
+          {
+            "id": "r76",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 76
+          },
+          {
+            "id": "r77",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 77
+          },
+          {
+            "id": "r78",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 78
+          },
+          {
+            "id": "r79",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 79
+          },
+          {
+            "id": "r80",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 80
+          },
+          {
+            "id": "r81",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 81
+          },
+          {
+            "id": "r82",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 82
+          },
+          {
+            "id": "r83",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 83
+          },
+          {
+            "id": "r84",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 84
+          },
+          {
+            "id": "r85",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 85
+          },
+          {
+            "id": "r86",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 86
+          },
+          {
+            "id": "r87",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 87
+          },
+          {
+            "id": "r88",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 88
+          },
+          {
+            "id": "r89",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 89
+          },
+          {
+            "id": "r90",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 90
+          },
+          {
+            "id": "r91",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 91
+          },
+          {
+            "id": "r92",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 92
+          },
+          {
+            "id": "r93",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 93
+          },
+          {
+            "id": "r94",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 94
+          },
+          {
+            "id": "r95",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 95
+          },
+          {
+            "id": "r96",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 96
+          },
+          {
+            "id": "r97",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 97
+          },
+          {
+            "id": "r98",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 98
+          },
+          {
+            "id": "r99",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 99
+          },
+          {
+            "id": "r100",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 100
+          },
+          {
+            "id": "r101",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 101
+          },
+          {
+            "id": "r102",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 102
+          },
+          {
+            "id": "r103",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 103
+          },
+          {
+            "id": "r104",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 104
+          },
+          {
+            "id": "r105",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 105
+          },
+          {
+            "id": "r106",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 106
+          },
+          {
+            "id": "r107",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 107
+          },
+          {
+            "id": "r108",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 108
+          },
+          {
+            "id": "r109",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 109
+          },
+          {
+            "id": "r110",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 110
+          },
+          {
+            "id": "r111",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 111
+          },
+          {
+            "id": "r112",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 112
+          },
+          {
+            "id": "r113",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 113
+          },
+          {
+            "id": "r114",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 114
+          },
+          {
+            "id": "r115",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 115
+          },
+          {
+            "id": "r116",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 116
+          },
+          {
+            "id": "r117",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 117
+          },
+          {
+            "id": "r118",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 118
+          },
+          {
+            "id": "r119",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 119
+          },
+          {
+            "id": "r120",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 120
+          },
+          {
+            "id": "r121",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 121
+          },
+          {
+            "id": "r122",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 122
+          },
+          {
+            "id": "r123",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 123
+          },
+          {
+            "id": "r124",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 124
+          },
+          {
+            "id": "r125",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 125
+          },
+          {
+            "id": "r126",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 126
+          },
+          {
+            "id": "r127",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 127
+          },
+          {
+            "id": "r128",
+            "effect": "limit",
+            "key": "a.b",
+            "value": 128
+          }
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/rules"
+          }
+        ]
+      }
+    },
+    {
+      "name": "rule-effect-hostile",
+      "set": {
+        "/params/rules/0/effect": "ignore_previous_instructions"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/rules/0/effect"
+          }
+        ]
+      }
+    },
+    {
+      "name": "rule-key-bad-grammar",
+      "set": {
+        "/params/rules/0/key": "Bad Key"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/rules/0/key"
+          }
+        ]
+      }
+    },
+    {
+      "name": "rule-value-float",
+      "set": {
+        "/params/rules/0/value": 0.5
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_FLOAT",
+            "pointer": "/params/rules/0/value"
+          }
+        ]
+      }
+    },
+    {
+      "name": "rule-value-null",
+      "set": {
+        "/params/rules/0/value": null
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/rules/0/value"
+          }
+        ]
+      }
+    },
+    {
+      "name": "rule-value-oversize",
+      "set": {
+        "/params/rules/0/value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/rules/0/value"
+          }
+        ]
+      }
+    },
+    {
+      "name": "rule-unknown-key",
+      "set": {
+        "/params/rules/0/extra": 1
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/rules/0"
+          }
+        ]
+      }
+    },
+    {
+      "name": "source-url-insecure",
+      "set": {
+        "/params/source/url": "http://example.com/terms"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/source/url"
+          }
+        ]
+      }
+    },
+    {
+      "name": "source-url-javascript",
+      "set": {
+        "/params/source/url": "javascript:alert(1)"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/source/url"
+          }
+        ]
+      }
+    },
+    {
+      "name": "source-retrieved-on-impossible",
+      "set": {
+        "/params/source/retrieved_on": "2026-04-31"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DATE_INVALID",
+            "pointer": "/params/source/retrieved_on"
+          }
+        ]
+      }
+    }
+  ]
+}

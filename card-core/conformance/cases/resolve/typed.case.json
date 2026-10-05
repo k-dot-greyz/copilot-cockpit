@@ -1,0 +1,107 @@
+{
+  "title": "The kind schema is applied after substitution",
+  "op": "resolve",
+  "input": {
+    "cards": {
+      "defaults.base": {
+        "schema_version": 1,
+        "kind": "core.defaults",
+        "id": "defaults.base",
+        "rev": 1,
+        "status": "active",
+        "visibility": "public",
+        "owner": "human:example-owner",
+        "params": {
+          "values": {
+            "limit": 5,
+            "label": "abc",
+            "on": true
+          }
+        }
+      },
+      "typed.user": {
+        "schema_version": 1,
+        "kind": "test.typed",
+        "id": "typed.user",
+        "rev": 1,
+        "status": "active",
+        "visibility": "public",
+        "owner": "human:example-owner",
+        "params": {
+          "limit": "$defaults.limit",
+          "name": "$defaults.label",
+          "enabled": "$defaults.on"
+        }
+      }
+    },
+    "target": "typed.user",
+    "defaults": "defaults.base"
+  },
+  "expect": {
+    "ok": true,
+    "golden": "golden/resolve.typed.json",
+    "digest": "sha256:c2810b8e2c143b529a3acdf01a7a7439bff7d2de21e2b37256e0483d70d4ede1"
+  },
+  "mutations": [
+    {
+      "name": "default-wrong-type-for-field",
+      "set": {
+        "/cards/defaults.base/params/values/limit": "abc"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/limit"
+          }
+        ]
+      }
+    },
+    {
+      "name": "default-boolean-for-string-field",
+      "set": {
+        "/cards/defaults.base/params/values/label": true
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/name"
+          }
+        ]
+      }
+    },
+    {
+      "name": "literal-wrong-type",
+      "set": {
+        "/cards/typed.user/params/enabled": "yes"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/enabled"
+          }
+        ]
+      }
+    },
+    {
+      "name": "unknown-param-after-merge",
+      "set": {
+        "/cards/typed.user/params/extra": 1
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params"
+          }
+        ]
+      }
+    }
+  ]
+}

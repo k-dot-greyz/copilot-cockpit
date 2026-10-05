@@ -1,0 +1,31 @@
+{
+  "id": "thing.child",
+  "kind": "test.thing",
+  "schema_version": 1,
+  "params": {
+    "name": "parent",
+    "limits": {
+      "max": 20,
+      "min": 1
+    },
+    "tags": [
+      "a",
+      "b"
+    ],
+    "flags": {
+      "x": true
+    },
+    "extra": "yes"
+  },
+  "lineage": [
+    {
+      "id": "thing.parent",
+      "rev": 1
+    },
+    {
+      "id": "thing.child",
+      "rev": 1
+    }
+  ],
+  "defaults": null
+}

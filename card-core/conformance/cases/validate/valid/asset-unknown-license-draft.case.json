@@ -1,0 +1,72 @@
+{
+  "title": "Unknown licence is allowed while draft",
+  "op": "validate",
+  "input": {
+    "schema_version": 1,
+    "kind": "core.asset",
+    "id": "asset.cover-unlicensed.v1",
+    "rev": 1,
+    "status": "draft",
+    "visibility": "public",
+    "owner": "human:example-owner",
+    "provenance": {
+      "authored_by": [
+        "human:example-owner",
+        "ai:example-model"
+      ],
+      "method": "generated",
+      "sources": [
+        {
+          "ref": "brief.example.v1",
+          "rev": 1
+        }
+      ]
+    },
+    "artifact": {
+      "media_type": "image/png",
+      "size_bytes": 123456,
+      "sha256": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "locator": "assets/cover-draft.png",
+      "placeholder": false
+    },
+    "lineage": {
+      "parents": [
+        {
+          "id": "brief.example.v1",
+          "rev": 1
+        }
+      ],
+      "produced_by": {
+        "card": "asm.cover-art.v1",
+        "rev": 2,
+        "run": "run-0001"
+      },
+      "seed": 42
+    },
+    "license_ledger": [
+      {
+        "input": "brief.example.v1",
+        "license": "CC0-1.0",
+        "grant": "unknown",
+        "evidence": null
+      }
+    ],
+    "human_contribution": [
+      {
+        "actor": "human:example-owner",
+        "role": "edited",
+        "rev": 1,
+        "evidence": "Retouched composition and typography."
+      }
+    ],
+    "disclosure": {
+      "ai_used": "assisted",
+      "tags": [
+        "ai-assisted"
+      ]
+    }
+  },
+  "expect": {
+    "ok": true
+  }
+}

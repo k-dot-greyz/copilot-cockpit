@@ -1,0 +1,438 @@
+{
+  "title": "core.pack against real files: paths, digests, references",
+  "op": "validate",
+  "base_dir": "pack-basic",
+  "input": {
+    "schema_version": 1,
+    "kind": "core.pack",
+    "id": "pack.example.v1",
+    "rev": 1,
+    "status": "active",
+    "visibility": "public",
+    "owner": "human:example-owner",
+    "params": {
+      "defaults_ref": "defaults.prod",
+      "requires": [],
+      "cards": [
+        {
+          "id": "defaults.base",
+          "kind": "core.defaults",
+          "schema_version": 1,
+          "rev": 1,
+          "path": "cards/defaults.base.json",
+          "sha256": "sha256:0bb4dfb381d50dd6c1161430544675cc882025999eebe22e03baddfba5f88b16"
+        },
+        {
+          "id": "defaults.prod",
+          "kind": "core.defaults",
+          "schema_version": 1,
+          "rev": 1,
+          "path": "cards/defaults.prod.json",
+          "sha256": "sha256:e9e18725d409cc689023155e60180c29923afb16905da81078b2ef64d88808ae"
+        },
+        {
+          "id": "pol.example-store.v1",
+          "kind": "core.policy",
+          "schema_version": 1,
+          "rev": 1,
+          "path": "cards/pol.example-store.v1.json",
+          "sha256": "sha256:12e27a95a9d3ee3aeff47be9df1f078f0484da8747150df4ee8a4db915cceb9c"
+        }
+      ]
+    }
+  },
+  "expect": {
+    "ok": true
+  },
+  "mutations": [
+    {
+      "name": "path-dot-dot",
+      "set": {
+        "/params/cards/0/path": "../outside.json"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/cards/0/path"
+          }
+        ]
+      }
+    },
+    {
+      "name": "path-nested-dot-dot",
+      "set": {
+        "/params/cards/0/path": "cards/../../outside.json"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/cards/0/path"
+          }
+        ]
+      }
+    },
+    {
+      "name": "path-percent-encoded-dots",
+      "set": {
+        "/params/cards/0/path": "%2e%2e/outside.json"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/cards/0/path"
+          }
+        ]
+      }
+    },
+    {
+      "name": "path-backslash",
+      "set": {
+        "/params/cards/0/path": "cards\\defaults.base.json"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/cards/0/path"
+          }
+        ]
+      }
+    },
+    {
+      "name": "path-absolute",
+      "set": {
+        "/params/cards/0/path": "/etc/passwd"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/cards/0/path"
+          }
+        ]
+      }
+    },
+    {
+      "name": "path-drive-letter",
+      "set": {
+        "/params/cards/0/path": "C:/Windows/system.ini"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/cards/0/path"
+          }
+        ]
+      }
+    },
+    {
+      "name": "path-hidden-segment",
+      "set": {
+        "/params/cards/0/path": "cards/.hidden.json"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/cards/0/path"
+          }
+        ]
+      }
+    },
+    {
+      "name": "path-dot-segment",
+      "set": {
+        "/params/cards/0/path": "./cards/defaults.base.json"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/cards/0/path"
+          }
+        ]
+      }
+    },
+    {
+      "name": "path-double-slash",
+      "set": {
+        "/params/cards/0/path": "cards//defaults.base.json"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/cards/0/path"
+          }
+        ]
+      }
+    },
+    {
+      "name": "path-trailing-slash",
+      "set": {
+        "/params/cards/0/path": "cards/"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/cards/0/path"
+          }
+        ]
+      }
+    },
+    {
+      "name": "path-nul",
+      "set": {
+        "/params/cards/0/path": "cards/a\u0000b.json"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/cards/0/path"
+          }
+        ]
+      }
+    },
+    {
+      "name": "path-too-long",
+      "set": {
+        "/params/cards/0/path": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/cards/0/path"
+          }
+        ]
+      }
+    },
+    {
+      "name": "path-empty",
+      "set": {
+        "/params/cards/0/path": ""
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/cards/0/path"
+          }
+        ]
+      }
+    },
+    {
+      "name": "entry-digest-bad-format",
+      "set": {
+        "/params/cards/0/sha256": "abc"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/cards/0/sha256"
+          }
+        ]
+      }
+    },
+    {
+      "name": "cards-empty",
+      "set": {
+        "/params/cards": []
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/cards"
+          }
+        ]
+      }
+    },
+    {
+      "name": "entry-unknown-key",
+      "set": {
+        "/params/cards/0/extra": 1
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/cards/0"
+          }
+        ]
+      }
+    },
+    {
+      "name": "duplicate-id",
+      "set": {
+        "/params/cards/1/id": "defaults.base"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ID_DUP",
+            "pointer": "/params/cards/1/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "missing-file",
+      "set": {
+        "/params/cards/0/path": "cards/nope.json"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_PACK_MISSING",
+            "pointer": "/params/cards/0/path"
+          }
+        ]
+      }
+    },
+    {
+      "name": "digest-mismatch",
+      "set": {
+        "/params/cards/0/sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_HASH_MISMATCH",
+            "pointer": "/params/cards/0/sha256"
+          }
+        ]
+      }
+    },
+    {
+      "name": "entry-kind-mismatch",
+      "set": {
+        "/params/cards/2/kind": "core.defaults"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_PACK_MISMATCH",
+            "pointer": "/params/cards/2"
+          }
+        ]
+      }
+    },
+    {
+      "name": "entry-rev-mismatch",
+      "set": {
+        "/params/cards/0/rev": 2
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_PACK_MISMATCH",
+            "pointer": "/params/cards/0"
+          }
+        ]
+      }
+    },
+    {
+      "name": "entry-id-mismatch",
+      "set": {
+        "/params/cards/0/id": "defaults.other"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_PACK_MISMATCH",
+            "pointer": "/params/cards/0"
+          }
+        ]
+      }
+    },
+    {
+      "name": "defaults-ref-missing",
+      "set": {
+        "/params/defaults_ref": "defaults.nope"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_REF_MISSING",
+            "pointer": "/params/defaults_ref"
+          }
+        ]
+      }
+    },
+    {
+      "name": "defaults-ref-null-ok",
+      "set": {
+        "/params/defaults_ref": null
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "extends-target-missing",
+      "remove": [
+        "/params/cards/0"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_REF_MISSING",
+            "pointer": "/params/cards/0"
+          }
+        ]
+      }
+    },
+    {
+      "name": "requires-entry-bad",
+      "set": {
+        "/params/requires": [
+          {
+            "pack": "Bad Id",
+            "rev": 1
+          }
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/requires/0/pack"
+          }
+        ]
+      }
+    }
+  ]
+}

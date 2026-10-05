@@ -1,0 +1,268 @@
+{
+  "title": "Adapter: dex module cards, status mapped, ext.dex populated",
+  "op": "adapt",
+  "input": {
+    "dialect": "dex-card",
+    "legacy": {
+      "dex_id": "0x7D:0x11:MOD-JOINT-ENTITIES",
+      "dex_type": "entity",
+      "status": "active",
+      "module_id": "MOD-JOINT-ENTITIES",
+      "title": "Shared joint entity contracts",
+      "tags": [
+        "architecture",
+        "types",
+        "hydration"
+      ],
+      "depends_on": [],
+      "inputs": [],
+      "outputs": [
+        "PRCardEntity",
+        "TriageViewEntity",
+        "DexAssetCard"
+      ],
+      "tier": 0,
+      "acceptance": [
+        "Types are JSON-serializable (no functions, no Date objects)"
+      ],
+      "links": [
+        {
+          "rel": "parent",
+          "href": "dex-entry.md",
+          "label": "Copilot Cockpit 0x7D:0x10"
+        }
+      ],
+      "files": [
+        "src/lib/entities/index.ts"
+      ]
+    },
+    "context": {
+      "owner": "human:example-owner",
+      "visibility": "public",
+      "rev": 1
+    }
+  },
+  "expect": {
+    "ok": true,
+    "roundtrip": true,
+    "golden": "golden/adapt.dex-card.json",
+    "digest": "sha256:e66cdca8dfeb89d93d485362364eb8fb10af8ada2abff28a3303333940cfe79c"
+  },
+  "mutations": [
+    {
+      "name": "experimental-maps-to-draft",
+      "set": {
+        "/legacy/status": "experimental"
+      },
+      "expect": {
+        "ok": true,
+        "roundtrip": true,
+        "golden": "golden/adapt.dex-card-draft.json",
+        "digest": "sha256:cc36627dbc21ea61dcce4e92bdf196962fec76a1011648964e26121b3b596893"
+      }
+    },
+    {
+      "name": "archived-maps-to-retired",
+      "set": {
+        "/legacy/status": "archived"
+      },
+      "expect": {
+        "ok": true,
+        "roundtrip": true,
+        "golden": "golden/adapt.dex-card-retired.json",
+        "digest": "sha256:d0325b886b830de8198af69d7c683c3ec2c6981274faca9e76f4acbd55299de6"
+      }
+    },
+    {
+      "name": "deprecated-stays-deprecated",
+      "set": {
+        "/legacy/status": "deprecated"
+      },
+      "expect": {
+        "ok": true,
+        "roundtrip": true,
+        "golden": "golden/adapt.dex-card-deprecated.json",
+        "digest": "sha256:88707137703c27892556e7940c77d182a752ebe677a7d6a21fb7c28daefa5ed1"
+      }
+    },
+    {
+      "name": "legacy-status-wins-over-context",
+      "set": {
+        "/context/status": "draft"
+      },
+      "expect": {
+        "ok": true,
+        "roundtrip": true,
+        "golden": "golden/adapt.dex-card.json",
+        "digest": "sha256:e66cdca8dfeb89d93d485362364eb8fb10af8ada2abff28a3303333940cfe79c"
+      }
+    },
+    {
+      "name": "unknown-status",
+      "set": {
+        "/legacy/status": "weird"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_STATUS",
+            "pointer": "/legacy/status"
+          }
+        ]
+      }
+    },
+    {
+      "name": "status-wrong-case",
+      "set": {
+        "/legacy/status": "Active"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_STATUS",
+            "pointer": "/legacy/status"
+          }
+        ]
+      }
+    },
+    {
+      "name": "status-missing-and-no-context",
+      "remove": [
+        "/legacy/status"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_CONTEXT",
+            "pointer": "/context/status"
+          }
+        ]
+      }
+    },
+    {
+      "name": "module-id-not-normalisable",
+      "set": {
+        "/legacy/module_id": "mod joint"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_ID",
+            "pointer": "/legacy/module_id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "module-id-missing",
+      "remove": [
+        "/legacy/module_id"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_SHAPE",
+            "pointer": "/legacy/module_id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dex-type-missing",
+      "remove": [
+        "/legacy/dex_type"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_SHAPE",
+            "pointer": "/legacy/dex_type"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dex-id-invalid-in-output",
+      "set": {
+        "/legacy/dex_id": "7D-10"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/ext/dex/dex_id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dex-id-missing",
+      "remove": [
+        "/legacy/dex_id"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_SHAPE",
+            "pointer": "/legacy/dex_id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tag-invalid-in-output",
+      "set": {
+        "/legacy/tags": [
+          "Bad Tag"
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/tags/0"
+          }
+        ]
+      }
+    },
+    {
+      "name": "float-in-legacy",
+      "set": {
+        "/legacy/tier": 1.5
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_FLOAT",
+            "pointer": "/legacy/tier"
+          }
+        ]
+      }
+    },
+    {
+      "name": "float-nested-in-legacy",
+      "set": {
+        "/legacy/links/0/weight": 0.5
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_FLOAT",
+            "pointer": "/legacy/links/0/weight"
+          }
+        ]
+      }
+    }
+  ]
+}

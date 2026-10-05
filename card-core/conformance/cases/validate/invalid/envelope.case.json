@@ -1,0 +1,1069 @@
+{
+  "title": "Envelope rules as minimal pairs of one valid card",
+  "op": "validate",
+  "input": {
+    "schema_version": 1,
+    "kind": "core.policy",
+    "id": "pol.example-store.v1",
+    "rev": 1,
+    "status": "active",
+    "visibility": "public",
+    "owner": "human:example-owner",
+    "title": "Example store listing policy",
+    "as_of": "2026-10-01",
+    "review_by": "2026-12-01",
+    "aliases": [
+      "POL-ES-1"
+    ],
+    "tags": [
+      "policy",
+      "store"
+    ],
+    "provenance": {
+      "authored_by": [
+        "human:example-owner"
+      ],
+      "method": "authored",
+      "sources": [
+        {
+          "ref": "https://example.com/terms",
+          "rev": 1,
+          "sha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "license": "CC-BY-4.0"
+        }
+      ]
+    },
+    "ext": {
+      "dex": {
+        "dex_id": "0x7D:0x20",
+        "dex_type": "spec"
+      }
+    },
+    "params": {
+      "applies_to": "sink.example-store",
+      "source": {
+        "url": "https://example.com/terms",
+        "retrieved_on": "2026-10-01",
+        "sha256": null
+      },
+      "rules": [
+        {
+          "id": "daily-cap",
+          "effect": "limit",
+          "key": "publish.daily",
+          "value": 12
+        },
+        {
+          "id": "disclose-ai",
+          "effect": "require",
+          "key": "listing.ai_disclosure",
+          "value": true
+        }
+      ]
+    }
+  },
+  "expect": {
+    "ok": true
+  },
+  "mutations": [
+    {
+      "name": "missing-owner",
+      "remove": [
+        "/owner"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "missing-id",
+      "remove": [
+        "/id"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "missing-rev",
+      "remove": [
+        "/rev"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "missing-status",
+      "remove": [
+        "/status"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "missing-visibility",
+      "remove": [
+        "/visibility"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "missing-kind",
+      "remove": [
+        "/kind"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "missing-schema-version",
+      "remove": [
+        "/schema_version"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "unknown-top-level-key",
+      "set": {
+        "/extra": 1
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "id-uppercase-and-space",
+      "set": {
+        "/id": "Bad Id"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "id-colon",
+      "set": {
+        "/id": "spawn:master"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "id-slash",
+      "set": {
+        "/id": "a/b"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "id-leading-dot",
+      "set": {
+        "/id": ".hidden"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "id-empty",
+      "set": {
+        "/id": ""
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "id-too-long",
+      "set": {
+        "/id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "id-not-string",
+      "set": {
+        "/id": 7
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "kind-bad-grammar",
+      "set": {
+        "/kind": "Core Policy"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/kind"
+          }
+        ]
+      }
+    },
+    {
+      "name": "kind-single-segment",
+      "set": {
+        "/kind": "policy"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/kind"
+          }
+        ]
+      }
+    },
+    {
+      "name": "kind-unregistered",
+      "set": {
+        "/kind": "core.nope"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_KIND_UNKNOWN",
+            "pointer": "/kind"
+          }
+        ]
+      }
+    },
+    {
+      "name": "schema-version-unregistered",
+      "set": {
+        "/schema_version": 99
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_KIND_UNKNOWN",
+            "pointer": "/schema_version"
+          }
+        ]
+      }
+    },
+    {
+      "name": "schema-version-zero",
+      "set": {
+        "/schema_version": 0
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/schema_version"
+          }
+        ]
+      }
+    },
+    {
+      "name": "rev-zero",
+      "set": {
+        "/rev": 0
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/rev"
+          }
+        ]
+      }
+    },
+    {
+      "name": "rev-string",
+      "set": {
+        "/rev": "1"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/rev"
+          }
+        ]
+      }
+    },
+    {
+      "name": "status-hostile-enum",
+      "set": {
+        "/status": "ignore_previous_instructions"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/status"
+          }
+        ]
+      }
+    },
+    {
+      "name": "status-wrong-case",
+      "set": {
+        "/status": "Active"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/status"
+          }
+        ]
+      }
+    },
+    {
+      "name": "visibility-unknown",
+      "set": {
+        "/visibility": "world"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/visibility"
+          }
+        ]
+      }
+    },
+    {
+      "name": "owner-no-prefix",
+      "set": {
+        "/owner": "example-owner"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/owner"
+          }
+        ]
+      }
+    },
+    {
+      "name": "owner-unknown-actor-type",
+      "set": {
+        "/owner": "robot:x"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/owner"
+          }
+        ]
+      }
+    },
+    {
+      "name": "owner-uppercase",
+      "set": {
+        "/owner": "human:Example"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/owner"
+          }
+        ]
+      }
+    },
+    {
+      "name": "as-of-bad-month",
+      "set": {
+        "/as_of": "2026-13-01"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/as_of"
+          }
+        ]
+      }
+    },
+    {
+      "name": "as-of-not-iso",
+      "set": {
+        "/as_of": "10/01/2026"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/as_of"
+          }
+        ]
+      }
+    },
+    {
+      "name": "as-of-impossible-day",
+      "set": {
+        "/as_of": "2026-02-30"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DATE_INVALID",
+            "pointer": "/as_of"
+          }
+        ]
+      }
+    },
+    {
+      "name": "as-of-non-leap-feb-29",
+      "set": {
+        "/as_of": "2027-02-29"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DATE_INVALID",
+            "pointer": "/as_of"
+          }
+        ]
+      }
+    },
+    {
+      "name": "as-of-leap-feb-29-ok",
+      "set": {
+        "/as_of": "2028-02-29",
+        "/review_by": "2028-03-01"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "as-of-after-review-by",
+      "set": {
+        "/as_of": "2027-01-01"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DATE_ORDER",
+            "pointer": "/as_of"
+          }
+        ]
+      }
+    },
+    {
+      "name": "as-of-equals-review-by-ok",
+      "set": {
+        "/as_of": "2026-12-01"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "float-in-rev",
+      "set": {
+        "/rev": 1.5
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_FLOAT",
+            "pointer": "/rev"
+          }
+        ]
+      }
+    },
+    {
+      "name": "float-integral-in-rev",
+      "set": {
+        "/rev": 2.0
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_FLOAT",
+            "pointer": "/rev"
+          }
+        ]
+      }
+    },
+    {
+      "name": "int-out-of-range",
+      "set": {
+        "/rev": 9007199254740993
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_INT_RANGE",
+            "pointer": "/rev"
+          }
+        ]
+      }
+    },
+    {
+      "name": "title-oversize",
+      "set": {
+        "/title": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/title"
+          }
+        ]
+      }
+    },
+    {
+      "name": "title-empty",
+      "set": {
+        "/title": ""
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/title"
+          }
+        ]
+      }
+    },
+    {
+      "name": "title-at-limit-ok",
+      "set": {
+        "/title": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "tag-bad-grammar",
+      "set": {
+        "/tags": [
+          "Bad Tag"
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/tags/0"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tags-duplicate",
+      "set": {
+        "/tags": [
+          "a",
+          "a"
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/tags"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tags-too-many",
+      "set": {
+        "/tags": [
+          "t0",
+          "t1",
+          "t2",
+          "t3",
+          "t4",
+          "t5",
+          "t6",
+          "t7",
+          "t8",
+          "t9",
+          "t10",
+          "t11",
+          "t12",
+          "t13",
+          "t14",
+          "t15",
+          "t16",
+          "t17",
+          "t18",
+          "t19",
+          "t20",
+          "t21",
+          "t22",
+          "t23",
+          "t24",
+          "t25",
+          "t26",
+          "t27",
+          "t28",
+          "t29",
+          "t30",
+          "t31",
+          "t32"
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/tags"
+          }
+        ]
+      }
+    },
+    {
+      "name": "alias-with-space",
+      "set": {
+        "/aliases": [
+          "has space"
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/aliases/0"
+          }
+        ]
+      }
+    },
+    {
+      "name": "alias-oversize",
+      "set": {
+        "/aliases": [
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/aliases/0"
+          }
+        ]
+      }
+    },
+    {
+      "name": "aliases-duplicate",
+      "set": {
+        "/aliases": [
+          "x",
+          "x"
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/aliases"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ext-unknown-namespace",
+      "set": {
+        "/ext/evil": {
+          "x": 1
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/ext"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ext-dex-bad-id",
+      "set": {
+        "/ext/dex/dex_id": "7D-10"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/ext/dex/dex_id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ext-dex-lowercase-hex",
+      "set": {
+        "/ext/dex/dex_id": "0x7d:0x10"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/ext/dex/dex_id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ext-dex-unknown-key",
+      "set": {
+        "/ext/dex/extra": 1
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/ext/dex"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ext-dex-three-part-ok",
+      "set": {
+        "/ext/dex/dex_id": "0x7D:0x11:MOD-NAME"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "ext-dex-legacy-map-range",
+      "set": {
+        "/ext/dex/legacy_map": {
+          "midi_1_0_bank": 128,
+          "midi_1_0_prog": 1
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/ext/dex/legacy_map/midi_1_0_bank"
+          }
+        ]
+      }
+    },
+    {
+      "name": "provenance-bad-method",
+      "set": {
+        "/provenance/method": "magic"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/provenance/method"
+          }
+        ]
+      }
+    },
+    {
+      "name": "provenance-no-authors",
+      "set": {
+        "/provenance/authored_by": []
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/provenance/authored_by"
+          }
+        ]
+      }
+    },
+    {
+      "name": "provenance-author-not-actor",
+      "set": {
+        "/provenance/authored_by": [
+          "nobody"
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/provenance/authored_by/0"
+          }
+        ]
+      }
+    },
+    {
+      "name": "provenance-source-bad-sha",
+      "set": {
+        "/provenance/sources/0/sha256": "sha256:xyz"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/provenance/sources/0/sha256"
+          }
+        ]
+      }
+    },
+    {
+      "name": "provenance-source-ref-bad",
+      "set": {
+        "/provenance/sources/0/ref": "http://insecure.example.com/x"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/provenance/sources/0/ref"
+          }
+        ]
+      }
+    },
+    {
+      "name": "provenance-source-license-space",
+      "set": {
+        "/provenance/sources/0/license": "not a license"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/provenance/sources/0/license"
+          }
+        ]
+      }
+    },
+    {
+      "name": "provenance-unknown-key",
+      "set": {
+        "/provenance/note": "x"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/provenance"
+          }
+        ]
+      }
+    },
+    {
+      "name": "key-non-ascii",
+      "set": {
+        "/params/\u00e9": 1
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_KEY_NONASCII",
+            "pointer": "/params/\u00e9"
+          }
+        ]
+      }
+    },
+    {
+      "name": "string-contains-del",
+      "set": {
+        "/title": "a\u007fb"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ENCODING",
+            "pointer": "/title"
+          }
+        ]
+      }
+    },
+    {
+      "name": "string-lone-surrogate",
+      "set": {
+        "/title": "a\ud800b"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ENCODING",
+            "pointer": "/title"
+          }
+        ]
+      }
+    },
+    {
+      "name": "nesting-too-deep",
+      "limits": {
+        "max_nesting_depth": 2
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_TOO_DEEP",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "nesting-at-limit-ok",
+      "limits": {
+        "max_nesting_depth": 4
+      },
+      "expect": {
+        "ok": true
+      }
+    }
+  ]
+}
