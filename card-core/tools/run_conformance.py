@@ -18,6 +18,7 @@ import json
 import shlex
 import subprocess
 import sys
+import types
 from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -225,9 +226,13 @@ def load_limits(root: Path) -> dict:
 class InProcessImpl:
     name = "reference (in-process)"
 
-    def __init__(self, root: Path, mutate: Callable[[dict], None] | None = None):
+    def __init__(self, root: Path, mutate: Callable[[dict], None] | None = None, source: str | None = None):
         sys.path.insert(0, str(HERE))
-        import cardcore_ref  # noqa: PLC0415
+        if source is None:
+            import cardcore_ref  # noqa: PLC0415
+        else:
+            cardcore_ref = types.ModuleType("cardcore_ref_mutant")
+            exec(compile(source, "<mutant>", "exec"), cardcore_ref.__dict__)  # noqa: S102
 
         self._ref = cardcore_ref.Ref(registry_paths(root), mutate=mutate)
 
@@ -377,7 +382,35 @@ WEAKENINGS: dict[str, Callable[[dict], None]] = {
 }
 
 
-def selftest(root: Path, rows: list[Row], limits_base: dict) -> bool:
+def run_mutants(root: Path, rows: list[Row], limits_base: dict, verbose: bool) -> bool:
+    """Source-level mutants of the reference implementation must each turn a row red."""
+    sys.path.insert(0, str(HERE))
+    import ref_mutants  # noqa: PLC0415
+
+    source = (HERE / "cardcore_ref.py").read_text(encoding="utf-8")
+    survivors, stale = [], []
+    for name, old, new in ref_mutants.MUTANTS:
+        if old not in source:
+            stale.append(name)
+            continue
+        impl = InProcessImpl(root, source=source.replace(old, new))
+        results = run_rows(rows, impl, root, limits_base)
+        red = sum(1 for _, passed, _ in results if not passed)
+        if verbose:
+            print(f"    mutant '{name}': {red} rows went red")
+        if red == 0:
+            survivors.append(name)
+    total = len(ref_mutants.MUTANTS)
+    killed = total - len(survivors) - len(stale)
+    print(f"  implementation mutants: {killed}/{total} killed")
+    for name in stale:
+        print(f"    STALE (snippet no longer in source): {name}")
+    for name in survivors:
+        print(f"    SURVIVED (no row notices): {name}")
+    return not survivors and not stale
+
+
+def selftest(root: Path, rows: list[Row], limits_base: dict, verbose: bool = False) -> bool:
     ok = True
     real = InProcessImpl(root)
 
@@ -418,6 +451,8 @@ def selftest(root: Path, rows: list[Row], limits_base: dict) -> bool:
         print(f"  canary schema weakening '{name}': {len(failing)} rows went red")
         if not failing:
             ok = False
+    if not run_mutants(root, rows, limits_base, verbose):
+        ok = False
     return ok
 
 
@@ -467,7 +502,7 @@ def main(argv: list[str] | None = None) -> int:
             print("--selftest needs the in-process reference implementation", file=sys.stderr)
             return 2
         print("selftest: the suite must not be a rubber stamp")
-        good = selftest(root, rows, limits_base)
+        good = selftest(root, rows, limits_base, args.verbose)
         print("selftest:", "OK, every canary was caught" if good else "FAILED, the suite has no teeth")
         return 0 if good else 1
 

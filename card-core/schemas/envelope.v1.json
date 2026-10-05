@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cardcore://schemas/envelope.v1.json",
+  "title": "Card Core envelope",
+  "description": "Top-level fields every card and asset carries. Open on purpose: card.v1 and asset.v1 close the object. The visibility enum is ordered most public first; the resolve visibility ratchet depends on that order. See SPEC.md section 4.",
+  "type": "object",
+  "required": ["schema_version", "kind", "id", "rev", "status", "visibility", "owner"],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+    "kind": { "$ref": "cardcore://schemas/core.v1.json#/$defs/kind" },
+    "id": { "$ref": "cardcore://schemas/core.v1.json#/$defs/id" },
+    "rev": { "$ref": "cardcore://schemas/core.v1.json#/$defs/rev" },
+    "status": { "enum": ["draft", "active", "deprecated", "retired"] },
+    "visibility": { "enum": ["public", "internal", "private"] },
+    "owner": { "$ref": "cardcore://schemas/core.v1.json#/$defs/actor" },
+    "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "as_of": { "$ref": "cardcore://schemas/core.v1.json#/$defs/date" },
+    "review_by": { "$ref": "cardcore://schemas/core.v1.json#/$defs/date" },
+    "aliases": {
+      "type": "array",
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[!-~]{1,200}$" }
+    },
+    "tags": {
+      "type": "array",
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": { "$ref": "cardcore://schemas/core.v1.json#/$defs/tag" }
+    },
+    "provenance": { "$ref": "cardcore://schemas/core.v1.json#/$defs/provenance" },
+    "ext": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dex": { "$ref": "cardcore://schemas/ext/dex.v1.json" }
+      }
+    }
+  }
+}

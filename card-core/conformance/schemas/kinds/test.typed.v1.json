@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cardcore://conformance/kinds/test.typed.v1.json",
+  "title": "test.typed (conformance only)",
+  "description": "Typed params, used to prove the kind schema applies after substitution.",
+  "allOf": [
+    { "$ref": "cardcore://schemas/card.v1.json" },
+    {
+      "properties": {
+        "kind": { "const": "test.typed" },
+        "params": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "limit": { "type": "integer" },
+            "name": { "type": "string", "maxLength": 200 },
+            "enabled": { "type": "boolean" }
+          }
+        }
+      }
+    }
+  ]
+}

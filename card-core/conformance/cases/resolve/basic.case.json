@@ -245,6 +245,115 @@
       }
     },
     {
+      "name": "parent-envelope-invalid",
+      "set": {
+        "/cards/thing.parent/owner": "nobody"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/cards/thing.parent/owner"
+          }
+        ]
+      }
+    },
+    {
+      "name": "child-envelope-invalid",
+      "set": {
+        "/cards/thing.child/rev": 0
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/cards/thing.child/rev"
+          }
+        ]
+      }
+    },
+    {
+      "name": "parent-params-not-an-object",
+      "set": {
+        "/cards/thing.parent/params": []
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/cards/thing.parent/params"
+          }
+        ]
+      }
+    },
+    {
+      "name": "kind-missing-from-both-cards",
+      "remove": [
+        "/cards/thing.parent/kind",
+        "/cards/thing.child/kind"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/cards/thing.parent"
+          }
+        ]
+      }
+    },
+    {
+      "name": "schema-version-missing-from-both-cards",
+      "remove": [
+        "/cards/thing.parent/schema_version",
+        "/cards/thing.child/schema_version"
+      ],
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/cards/thing.parent"
+          }
+        ]
+      }
+    },
+    {
+      "name": "kind-not-registered",
+      "set": {
+        "/cards/thing.parent/kind": "test.nope",
+        "/cards/thing.child/kind": "test.nope"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_KIND_UNKNOWN",
+            "pointer": "/cards/thing.parent/kind"
+          }
+        ]
+      }
+    },
+    {
+      "name": "schema-version-not-registered",
+      "set": {
+        "/cards/thing.parent/schema_version": 7,
+        "/cards/thing.child/schema_version": 7
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_KIND_UNKNOWN",
+            "pointer": "/cards/thing.parent/schema_version"
+          }
+        ]
+      }
+    },
+    {
       "name": "chain-longer-than-limit",
       "limits": {
         "extends_max_depth": 1

@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cardcore://schemas/asset.v1.json",
+  "title": "Card Core asset",
+  "description": "A produced or imported item. Cannot extend and has no params. The three status rules are facts no jurisdiction can change. See SPEC.md section 4.2.",
+  "allOf": [
+    { "$ref": "cardcore://schemas/envelope.v1.json" },
+    {
+      "type": "object",
+      "required": ["provenance", "artifact", "lineage", "license_ledger", "human_contribution", "disclosure"],
+      "properties": {
+        "kind": { "const": "core.asset" },
+        "artifact": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["media_type", "size_bytes", "sha256", "locator", "placeholder"],
+          "properties": {
+            "media_type": { "$ref": "cardcore://schemas/core.v1.json#/$defs/media_type" },
+            "size_bytes": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+            "sha256": {
+              "anyOf": [
+                { "$ref": "cardcore://schemas/core.v1.json#/$defs/sha256" },
+                { "type": "null" }
+              ]
+            },
+            "locator": {
+              "anyOf": [
+                { "$ref": "cardcore://schemas/core.v1.json#/$defs/path" },
+                { "type": "null" }
+              ]
+            },
+            "placeholder": { "type": "boolean" }
+          },
+          "allOf": [
+            {
+              "if": { "properties": { "placeholder": { "const": true } }, "required": ["placeholder"] },
+              "then": {
+                "properties": {
+                  "sha256": { "type": "null" },
+                  "locator": { "type": "null" },
+                  "size_bytes": { "const": 0 }
+                }
+              }
+            },
+            {
+              "if": { "properties": { "placeholder": { "const": false } }, "required": ["placeholder"] },
+              "then": {
+                "properties": {
+                  "sha256": { "$ref": "cardcore://schemas/core.v1.json#/$defs/sha256" },
+                  "locator": { "$ref": "cardcore://schemas/core.v1.json#/$defs/path" }
+                }
+              }
+            }
+          ]
+        },
+        "lineage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["parents", "produced_by", "seed"],
+          "properties": {
+            "parents": {
+              "type": "array",
+              "maxItems": 64,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "rev"],
+                "properties": {
+                  "id": { "$ref": "cardcore://schemas/core.v1.json#/$defs/id" },
+                  "rev": { "$ref": "cardcore://schemas/core.v1.json#/$defs/rev" },
+                  "sha256": { "$ref": "cardcore://schemas/core.v1.json#/$defs/sha256" }
+                }
+              }
+            },
+            "produced_by": {
+              "anyOf": [
+                { "type": "null" },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["card", "rev", "run"],
+                  "properties": {
+                    "card": { "$ref": "cardcore://schemas/core.v1.json#/$defs/id" },
+                    "rev": { "$ref": "cardcore://schemas/core.v1.json#/$defs/rev" },
+                    "run": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,64}$" }
+                  }
+                }
+              ]
+            },
+            "seed": { "type": ["integer", "null"] }
+          }
+        },
+        "license_ledger": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["input", "license", "grant", "evidence"],
+            "properties": {
+              "input": { "$ref": "cardcore://schemas/core.v1.json#/$defs/id" },
+              "license": { "$ref": "cardcore://schemas/core.v1.json#/$defs/license" },
+              "grant": { "enum": ["owned", "licensed", "open", "unknown"] },
+              "evidence": {
+                "anyOf": [
+                  { "type": "null" },
+                  { "type": "string", "minLength": 1, "maxLength": 500 }
+                ]
+              }
+            }
+          }
+        },
+        "human_contribution": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["actor", "role", "rev", "evidence"],
+            "properties": {
+              "actor": { "$ref": "cardcore://schemas/core.v1.json#/$defs/actor" },
+              "role": { "enum": ["authored", "edited", "selected", "arranged", "approved"] },
+              "rev": {
+                "anyOf": [
+                  { "type": "null" },
+                  { "$ref": "cardcore://schemas/core.v1.json#/$defs/rev" }
+                ]
+              },
+              "evidence": {
+                "anyOf": [
+                  { "type": "null" },
+                  { "type": "string", "minLength": 1, "maxLength": 500 }
+                ]
+              }
+            }
+          }
+        },
+        "disclosure": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ai_used", "tags"],
+          "properties": {
+            "ai_used": { "enum": ["none", "assisted", "generated", "unknown"] },
+            "tags": {
+              "type": "array",
+              "maxItems": 16,
+              "uniqueItems": true,
+              "items": { "$ref": "cardcore://schemas/core.v1.json#/$defs/tag" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": ["license_ledger"],
+        "properties": {
+          "license_ledger": {
+            "contains": {
+              "type": "object",
+              "required": ["grant"],
+              "properties": { "grant": { "const": "unknown" } }
+            }
+          }
+        }
+      },
+      "then": { "properties": { "status": { "const": "draft" } } }
+    },
+    {
+      "if": {
+        "required": ["disclosure"],
+        "properties": {
+          "disclosure": {
+            "required": ["ai_used"],
+            "properties": { "ai_used": { "const": "unknown" } }
+          }
+        }
+      },
+      "then": { "properties": { "status": { "const": "draft" } } }
+    },
+    {
+      "if": {
+        "required": ["disclosure", "human_contribution"],
+        "properties": {
+          "disclosure": {
+            "required": ["ai_used"],
+            "properties": { "ai_used": { "enum": ["assisted", "generated"] } }
+          },
+          "human_contribution": { "maxItems": 0 }
+        }
+      },
+      "then": { "properties": { "status": { "const": "draft" } } }
+    }
+  ],
+  "unevaluatedProperties": false
+}

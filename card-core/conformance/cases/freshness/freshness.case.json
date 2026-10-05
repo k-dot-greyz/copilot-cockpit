@@ -88,7 +88,7 @@
         "errors": [
           {
             "code": "E_STALE",
-            "pointer": "/review_by"
+            "pointer": "/card/review_by"
           }
         ]
       }
@@ -103,7 +103,7 @@
         "errors": [
           {
             "code": "E_STALE",
-            "pointer": "/review_by"
+            "pointer": "/card/review_by"
           }
         ]
       }

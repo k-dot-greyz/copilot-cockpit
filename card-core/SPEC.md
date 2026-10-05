@@ -47,7 +47,7 @@ Every card and asset MUST have these top-level fields.
 | `id` | string | grammar below. Unique within a pack. |
 | `rev` | integer | at least 1. Increases whenever content changes. |
 | `status` | string | `draft`, `active`, `deprecated` or `retired` |
-| `visibility` | string | `public`, `internal` or `private` |
+| `visibility` | string | `public`, `internal` or `private`, ordered from most to least public |
 | `owner` | string | actor grammar below |
 
 Optional envelope fields:
@@ -175,12 +175,12 @@ Lint runs in stages. Stage 1 checks the bytes (`E_TOO_LARGE`, `E_BOM`, invalid U
 
 Input: a map of cards, a target id, and optionally a defaults card id.
 
-1. Build the chain from the target through `extends` to the root. A missing target is `E_REF_MISSING`. A repeated id is `E_EXTENDS_CYCLE`. More cards than `extends_max_depth` is `E_EXTENDS_DEPTH`. A parent with another `kind` or `schema_version` is `E_EXTENDS_KIND`.
+1. Every card used MUST pass the envelope check (`E_SCHEMA`, pointer prefixed `/cards/<id>`). Build the chain from the target through `extends` to the root. A missing target is `E_REF_MISSING`. A repeated id is `E_EXTENDS_CYCLE`. More cards than `extends_max_depth` is `E_EXTENDS_DEPTH`. A parent with another `kind` or `schema_version` is `E_EXTENDS_KIND`.
 2. Visibility ratchet: a card MUST NOT be more public than any ancestor. The order is `private` < `internal` < `public`. Violation is `E_VISIBILITY_WIDEN`. The ratchet applies to every `extends` chain, including a defaults chain.
 3. Merge `params` from the root to the target. Objects merge recursively. Any other value, including an array, is replaced by the child value. The marker `{"$unset": true}` removes an inherited key: in a root card it is `E_UNSET_ORPHAN`, and for a key the merged parent does not have it is `E_UNSET_MISSING`. Any other object key starting with `$` is `E_DOLLAR_KEY`. For a kind with `allow_tokens` false, markers and `$` keys are not interpreted here or in step 4; the merge is otherwise identical.
 4. Defaults. If the merged `params` contains tokens, a defaults card is required. A defaults id that is absent, unknown or not a `core.defaults` card is `E_DEFAULT_MISSING` at `/defaults`. The defaults card is itself resolved by steps 1 to 3 (it may extend another defaults card; its values MUST NOT contain tokens, which is a schema error). A string that is exactly `$defaults.<dotted key>` is replaced by the value, keeping its type. A missing key or missing defaults card is `E_DEFAULT_MISSING`. A string that contains `$defaults.` without being exactly a token is `E_DEFAULT_PARTIAL`. If any value is used, the target MUST NOT be more public than any card in the defaults chain (`E_VISIBILITY_WIDEN`).
 5. Build the resolved card: the target envelope without `extends`, with the merged and substituted `params`. Validate it with `validate` (including the kind schema). Failures are reported with pointers into the resolved card, such as `/params/limit`.
-6. Pointers. Errors found before merging point into the input: `/target`, `/defaults`, `/cards/<id>/extends`, `/cards/<id>/visibility`, or `/cards/<id>/params/<path>` for `$unset` and `$` keys. Errors found after merging point into the merged params, `/params/<path>`, for tokens; errors in the resolved defaults card use the same form prefixed with `/defaults`. For `$unset` and `$` keys the path ends at the offending key. `E_EXTENDS_CYCLE` points at the `extends` of the card that closes the loop. `E_EXTENDS_DEPTH` points at `/target`. `E_VISIBILITY_WIDEN` points at the `visibility` of the card that is too public.
+6. Pointers. Errors found before merging point into the input: `/target`, `/defaults`, `/cards/<id>/extends`, `/cards/<id>/visibility`, or `/cards/<id>/params/<path>` for `$unset` and `$` keys. Errors found after merging point into the merged params, `/params/<path>`, for tokens; errors in the resolved defaults card use the same form prefixed with `/defaults`. For `$unset` and `$` keys the path ends at the offending key. `E_EXTENDS_CYCLE` points at the `extends` of the card that closes the loop. `E_EXTENDS_DEPTH` points at `/target`, or at `/defaults` for a defaults chain. `E_VISIBILITY_WIDEN` points at the `visibility` of the card that is too public.
 7. Output:
 
 ```
@@ -191,7 +191,7 @@ Input: a map of cards, a target id, and optionally a defaults card id.
 
 ### 8.4 freshness
 
-Input: a card and an `as_of` date supplied by the caller. A card with `review_by` is stale when `as_of` is after `review_by` (`E_STALE`, pointer `/review_by`). `review_by` is inclusive: on that date the card is fresh. A card with no `review_by` is fresh. A malformed or impossible `as_of` is `E_DATE_INVALID` at `/as_of`.
+Input: a card and an `as_of` date supplied by the caller. A card with `review_by` is stale when `as_of` is after `review_by` (`E_STALE`, pointer `/card/review_by`). `review_by` is inclusive: on that date the card is fresh. A card with no `review_by` is fresh. A malformed or impossible `as_of`, or a `review_by` that is not a real date, is `E_DATE_INVALID` at `/as_of` or `/card/review_by`. Pointers refer to the request, as everywhere else.
 
 ### 8.5 limits
 
@@ -257,11 +257,18 @@ request:  {"op", "input", "base_dir", "registries": [paths], "limits": {...}}
 response: {"ok": true, "output": ...}  or  {"ok": false, "errors": [{"code","pointer"}]}
 ```
 
-Operations: `lint`, `validate`, `resolve`, `freshness`, `adapt`, `unwrap`.
+Operations: `lint`, `validate`, `resolve`, `freshness`, `adapt`, `unwrap`. An unknown operation is `E_OP_UNKNOWN`.
 
 ### 11.1 The suite must have teeth
 
-`--selftest` proves the suite is not a rubber stamp. It must go red when the expectations are flipped, when a digest is corrupted, and when each of these schema weakenings is applied in memory: remove the card closure, remove the envelope `required` list, remove the asset conditionals, widen the id pattern, and remove length limits. If any canary stays green, the suite itself is broken.
+`--selftest` proves the suite is not a rubber stamp. Every canary must be caught:
+
+- Flipping the expectation of every row turns every row red.
+- Corrupting a digest turns the row red.
+- Each of these schema weakenings, applied in memory, turns at least one row red: remove the card and asset closure, remove the envelope `required` list, remove the asset conditionals, widen the id pattern, widen the path pattern, widen the date pattern, and remove length limits.
+- Each source-level mutant of the reference implementation (`tools/ref_mutants.py`) turns at least one row red. A mutant that survives is a behaviour no fixture pins; a mutant whose snippet no longer matches the source is stale. Both fail the selftest.
+
+If any canary stays green, the suite itself is broken. The selftest needs the in-process reference implementation. Another implementation proves itself by passing the suite; it can port the mutants if it wants the same assurance.
 
 ## 12. Error codes
 

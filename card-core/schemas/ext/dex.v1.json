@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cardcore://schemas/ext/dex.v1.json",
+  "title": "Extension: dex",
+  "description": "Registry addressing metadata. See SPEC.md section 7.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["dex_id", "dex_type"],
+  "properties": {
+    "dex_id": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^0x[0-9A-F]{2}:0x[0-9A-F]{2}(:[A-Za-z0-9][A-Za-z0-9_-]*)?$"
+    },
+    "dex_type": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,31}$" },
+    "midi_2_0_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resource_type", "property_exchange_id"],
+      "properties": {
+        "resource_type": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "property_exchange_id": { "type": "string", "maxLength": 200, "pattern": "^[!-~]+$" }
+      }
+    },
+    "legacy_map": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["midi_1_0_bank", "midi_1_0_prog"],
+      "properties": {
+        "midi_1_0_bank": { "type": "integer", "minimum": 0, "maximum": 127 },
+        "midi_1_0_prog": { "type": "integer", "minimum": 0, "maximum": 127 }
+      }
+    }
+  }
+}

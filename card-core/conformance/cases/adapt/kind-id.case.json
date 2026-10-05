@@ -160,6 +160,33 @@
       }
     },
     {
+      "name": "id-too-long",
+      "set": {
+        "/legacy/id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ADAPT_ID",
+            "pointer": "/legacy/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "id-at-limit-ok",
+      "set": {
+        "/legacy/id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expect": {
+        "ok": true,
+        "roundtrip": true,
+        "golden": "golden/adapt.kind-id-long.json",
+        "digest": "sha256:af2639d8cfa01bbdd5acdfa1fdff1dd5213cc77610ae3fb5b631edcf292248ac"
+      }
+    },
+    {
       "name": "id-missing",
       "remove": [
         "/legacy/id"

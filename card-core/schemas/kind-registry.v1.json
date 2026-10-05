@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cardcore://schemas/kind-registry.v1.json",
+  "title": "Card Core kind registry",
+  "description": "Maps (kind, schema_version) to a class and a schema. See SPEC.md section 6.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "kinds"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "kinds": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "schema_version",
+          "class",
+          "schema"
+        ],
+        "properties": {
+          "kind": {
+            "$ref": "cardcore://schemas/core.v1.json#/$defs/kind"
+          },
+          "schema_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "class": {
+            "enum": [
+              "card",
+              "asset"
+            ]
+          },
+          "schema": {
+            "type": "string",
+            "pattern": "^cardcore://[!-~]+$"
+          },
+          "allow_tokens": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "envelope": {
+      "type": "string",
+      "pattern": "^cardcore://[!-~]+$"
+    },
+    "classes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "card": {
+          "type": "string",
+          "pattern": "^cardcore://[!-~]+$"
+        },
+        "asset": {
+          "type": "string",
+          "pattern": "^cardcore://[!-~]+$"
+        }
+      }
+    }
+  }
+}

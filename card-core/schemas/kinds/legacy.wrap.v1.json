@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cardcore://schemas/kinds/legacy.wrap.v1.json",
+  "title": "legacy.wrap",
+  "description": "Carries an existing artifact verbatim. See SPEC.md section 10.",
+  "allOf": [
+    { "$ref": "cardcore://schemas/card.v1.json" },
+    {
+      "properties": {
+        "kind": { "const": "legacy.wrap" },
+        "params": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["dialect", "original_kind", "original"],
+          "properties": {
+            "dialect": { "enum": ["kind-id", "schema-string", "dex-card", "dex-frontmatter"] },
+            "original_kind": { "type": "string", "minLength": 1, "maxLength": 128 },
+            "original": { "type": "object", "maxProperties": 256 }
+          }
+        }
+      }
+    }
+  ]
+}

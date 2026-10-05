@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "envelope": "cardcore://schemas/envelope.v1.json",
+  "classes": {
+    "card": "cardcore://schemas/card.v1.json",
+    "asset": "cardcore://schemas/asset.v1.json"
+  },
+  "kinds": [
+    {
+      "kind": "core.defaults",
+      "schema_version": 1,
+      "class": "card",
+      "schema": "cardcore://schemas/kinds/core.defaults.v1.json",
+      "allow_tokens": false
+    },
+    {
+      "kind": "core.policy",
+      "schema_version": 1,
+      "class": "card",
+      "schema": "cardcore://schemas/kinds/core.policy.v1.json"
+    },
+    {
+      "kind": "core.pack",
+      "schema_version": 1,
+      "class": "card",
+      "schema": "cardcore://schemas/kinds/core.pack.v1.json",
+      "allow_tokens": false
+    },
+    {
+      "kind": "core.asset",
+      "schema_version": 1,
+      "class": "asset",
+      "schema": "cardcore://schemas/asset.v1.json"
+    },
+    {
+      "kind": "demand.opportunity",
+      "schema_version": 1,
+      "class": "card",
+      "schema": "cardcore://schemas/kinds/demand.opportunity.v1.json"
+    },
+    {
+      "kind": "legacy.wrap",
+      "schema_version": 1,
+      "class": "card",
+      "schema": "cardcore://schemas/kinds/legacy.wrap.v1.json",
+      "allow_tokens": false
+    }
+  ]
+}
