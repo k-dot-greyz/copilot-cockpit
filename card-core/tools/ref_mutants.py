@@ -69,4 +69,13 @@ MUTANTS = [
     ("ids lowercased with unicode folding", "        new_id = text.translate(_ASCII_LOWER).replace(", "        new_id = text.lower().replace("),
     ("pointers keep lone surrogates", '    return _LONE_SURROGATE.sub("\\ufffd", text)', "    return text"),
     ("huge integer literals crash the parser", "parse_constant=constant, parse_int=parse_int)", "parse_constant=constant)"),
+    ("duplicates in replaced values unreported",
+     '                    errors.append(_e("E_DUP_KEY", path + [key]))\n                    shadowed(old, path + [key], depth)\n                for key, val in node.items():\n                    if not key.isascii():',
+     '                    errors.append(_e("E_DUP_KEY", path + [key]))\n                for key, val in node.items():\n                    if not key.isascii():'),
+    ("duplicates nested in replaced values partly unreported",
+     '                    shadowed(old, path + [key], depth)\n                for key, val in node.items():\n                    shadowed(val,',
+     '                for key, val in node.items():\n                    shadowed(val,'),
+    ("duplicates in children of replaced values unreported",
+     '                for key, val in node.items():\n                    shadowed(val, path + [key], depth)',
+     '                pass'),
 ]

@@ -70,6 +70,44 @@
       }
     },
     {
+      "name": "duplicate-key-in-child-of-replaced-value",
+      "raw": "raw/dup-key-replaced-child.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a"
+          },
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a/x/b"
+          }
+        ]
+      }
+    },
+    {
+      "name": "duplicate-key-in-twice-replaced-value",
+      "raw": "raw/dup-key-replaced-twice.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a"
+          },
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a/b"
+          },
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a/b/c"
+          }
+        ]
+      }
+    },
+    {
       "name": "duplicate-key-three-times",
       "raw": "raw/dup-key-three.raw",
       "expect": {

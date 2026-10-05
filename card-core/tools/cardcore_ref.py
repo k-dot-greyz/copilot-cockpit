@@ -232,13 +232,15 @@ class Ref:
             text = data.decode("utf-8")
         except UnicodeDecodeError:
             return None, [_e("E_ENCODING")]
-        dup_map: dict[int, list[str]] = {}
+        dup_map: dict[int, list[tuple[str, Any]]] = {}
 
         def hook(pairs):
             obj, dupes = {}, []
             for key, val in pairs:
                 if key in obj:
-                    dupes.append(key)
+                    # Keep the value this duplicate replaces: it stays alive, so its id()
+                    # cannot be reused, and duplicates nested inside it are still reported.
+                    dupes.append((key, obj[key]))
                 obj[key] = val
             if dupes:
                 dup_map[id(obj)] = dupes
@@ -275,14 +277,33 @@ class Ref:
         def bad_string(s: str) -> bool:
             return any(ord(c) == 0x7F or 0xD800 <= ord(c) <= 0xDFFF for c in s)
 
+        def shadowed(node, path, depth):
+            """Report duplicates inside a value that a later duplicate key replaced."""
+            if isinstance(node, dict):
+                depth += 1
+                if depth > max_depth:
+                    return
+                for key, old in (dup_map or {}).get(id(node), []):
+                    errors.append(_e("E_DUP_KEY", path + [key]))
+                    shadowed(old, path + [key], depth)
+                for key, val in node.items():
+                    shadowed(val, path + [key], depth)
+            elif isinstance(node, list):
+                depth += 1
+                if depth > max_depth:
+                    return
+                for i, val in enumerate(node):
+                    shadowed(val, path + [i], depth)
+
         def walk(node, path, depth):
             if isinstance(node, dict):
                 depth += 1
                 if depth > max_depth:
                     too_deep[0] = True
                     return
-                for key in (dup_map or {}).get(id(node), []):
+                for key, old in (dup_map or {}).get(id(node), []):
                     errors.append(_e("E_DUP_KEY", path + [key]))
+                    shadowed(old, path + [key], depth)
                 for key, val in node.items():
                     if not key.isascii():
                         errors.append(_e("E_KEY_NONASCII", path + [key]))
