@@ -3,7 +3,7 @@
 ## CC-PR31 — Rust conformance target (feat PR #31)
 
 **Feat:** [copilot-cockpit#31](https://github.com/k-dot-greyz/copilot-cockpit/pull/31) (`claude/dazzling-faraday-fir1wp`)  
-**Test PR:** (linked coverage PR targeting the feat branch)  
+**Test PR:** [#32](https://github.com/k-dot-greyz/copilot-cockpit/pull/32) (`greyzxcursor/ux-security-test-coverage-b79d` → feat branch)  
 **Harness:** `card-core/tests/test_protocol_ux_security_pr31.py` + existing `test_conformance.py` (427 rows)
 
 ### Stories implemented (80/20)
