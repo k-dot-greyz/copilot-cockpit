@@ -7,6 +7,7 @@ Universal metadata for cards and assets, plus the conformance suite that proves 
 - `conformance/` is the normative test: language-neutral JSON rows, plus the expected outputs.
 - `tools/` holds the reference implementation (Python), the harness, and helpers.
 - `rust/` is a second implementation (Rust). It passes the same suite through the stdin/stdout protocol.
+- **[docs/WORKBENCH.md](docs/WORKBENCH.md)** is a proposal for a read-only web workbench, with a WebAssembly engine spike. Nothing in it is built yet.
 
 ## What it gives you
 
@@ -92,6 +93,7 @@ card-core/
     setup-toolchain.sh          optional, pinned toolchain bootstrap for cloud sessions
   tests/test_conformance.py     pytest wrapper
   rust/                         second implementation: Cargo.toml, src/, tests/
+  docs/WORKBENCH.md             proposal: read-only web workbench (not built)
 ```
 
 ## Where this lives
