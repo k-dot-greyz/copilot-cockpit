@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "description": "Sub-path glitch.cards routes (installers, spec raw, dex proxy). Top-level slugs live in slugs.json.",
+  "redirects": [
+    {
+      "source": "/env-doctor/run",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/env-doctor/main/env-doctor.sh"
+    },
+    {
+      "source": "/zenOS/install",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/zenOS/main/install.sh"
+    },
+    {
+      "source": "/zenos/install",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/zenOS/main/install.sh"
+    },
+    {
+      "source": "/zenOS/termux",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/zenOS/main/install_termux.sh"
+    },
+    {
+      "source": "/zenos/termux",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/zenOS/main/install_termux.sh"
+    },
+    {
+      "source": "/card-core/spec",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/copilot-cockpit/main/card-core/SPEC.md"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/cards/dex/:id",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/copilot-cockpit/main/dex/cards/:id.json"
+    },
+    {
+      "source": "/cards/index",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/copilot-cockpit/main/dex/cards/index.json"
+    },
+    {
+      "source": "/.well-known/dex-card",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/copilot-cockpit/main/dex-entry.md"
+    }
+  ]
+}

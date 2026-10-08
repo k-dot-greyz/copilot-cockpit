@@ -12,7 +12,8 @@
     "astro": "astro",
     "test:unit": "vitest run",
     "test": "npm run test:unit",
-    "test:ux": "playwright test"
+    "test:ux": "playwright test",
+    "sync:glitch-cards": "node scripts/sync-glitch-cards-vercel.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^5.0.7",

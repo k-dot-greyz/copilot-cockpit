@@ -1,5 +1,392 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "framework": "astro"
+  "framework": "astro",
+  "redirects": [
+    {
+      "source": "/env-doctor",
+      "destination": "https://github.com/k-dot-greyz/env-doctor",
+      "permanent": false
+    },
+    {
+      "source": "/env-doctor/",
+      "destination": "https://github.com/k-dot-greyz/env-doctor",
+      "permanent": false
+    },
+    {
+      "source": "/zenOS",
+      "destination": "https://github.com/k-dot-greyz/zenOS",
+      "permanent": false
+    },
+    {
+      "source": "/zenOS/",
+      "destination": "https://github.com/k-dot-greyz/zenOS",
+      "permanent": false
+    },
+    {
+      "source": "/zenos",
+      "destination": "https://github.com/k-dot-greyz/zenOS",
+      "permanent": false
+    },
+    {
+      "source": "/zenos/",
+      "destination": "https://github.com/k-dot-greyz/zenOS",
+      "permanent": false
+    },
+    {
+      "source": "/copilot-cockpit",
+      "destination": "https://github.com/k-dot-greyz/copilot-cockpit",
+      "permanent": false
+    },
+    {
+      "source": "/copilot-cockpit/",
+      "destination": "https://github.com/k-dot-greyz/copilot-cockpit",
+      "permanent": false
+    },
+    {
+      "source": "/cockpit",
+      "destination": "https://github.com/k-dot-greyz/copilot-cockpit",
+      "permanent": false
+    },
+    {
+      "source": "/cockpit/",
+      "destination": "https://github.com/k-dot-greyz/copilot-cockpit",
+      "permanent": false
+    },
+    {
+      "source": "/cc",
+      "destination": "https://github.com/k-dot-greyz/copilot-cockpit",
+      "permanent": false
+    },
+    {
+      "source": "/cc/",
+      "destination": "https://github.com/k-dot-greyz/copilot-cockpit",
+      "permanent": false
+    },
+    {
+      "source": "/card-core",
+      "destination": "https://github.com/k-dot-greyz/copilot-cockpit/tree/main/card-core",
+      "permanent": false
+    },
+    {
+      "source": "/card-core/",
+      "destination": "https://github.com/k-dot-greyz/copilot-cockpit/tree/main/card-core",
+      "permanent": false
+    },
+    {
+      "source": "/glitchworks-tarot",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-tarot",
+      "permanent": false
+    },
+    {
+      "source": "/glitchworks-tarot/",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-tarot",
+      "permanent": false
+    },
+    {
+      "source": "/tarot",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-tarot",
+      "permanent": false
+    },
+    {
+      "source": "/tarot/",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-tarot",
+      "permanent": false
+    },
+    {
+      "source": "/oracle",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-tarot",
+      "permanent": false
+    },
+    {
+      "source": "/oracle/",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-tarot",
+      "permanent": false
+    },
+    {
+      "source": "/aether",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-tarot",
+      "permanent": false
+    },
+    {
+      "source": "/aether/",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-tarot",
+      "permanent": false
+    },
+    {
+      "source": "/GlitchLab",
+      "destination": "https://github.com/k-dot-greyz/GlitchLab",
+      "permanent": false
+    },
+    {
+      "source": "/GlitchLab/",
+      "destination": "https://github.com/k-dot-greyz/GlitchLab",
+      "permanent": false
+    },
+    {
+      "source": "/glitchlab",
+      "destination": "https://github.com/k-dot-greyz/GlitchLab",
+      "permanent": false
+    },
+    {
+      "source": "/glitchlab/",
+      "destination": "https://github.com/k-dot-greyz/GlitchLab",
+      "permanent": false
+    },
+    {
+      "source": "/glitchworks-manifesto",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-manifesto",
+      "permanent": false
+    },
+    {
+      "source": "/glitchworks-manifesto/",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-manifesto",
+      "permanent": false
+    },
+    {
+      "source": "/manifesto",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-manifesto",
+      "permanent": false
+    },
+    {
+      "source": "/manifesto/",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-manifesto",
+      "permanent": false
+    },
+    {
+      "source": "/dev-master",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-manifesto",
+      "permanent": false
+    },
+    {
+      "source": "/dev-master/",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-manifesto",
+      "permanent": false
+    },
+    {
+      "source": "/rolodex",
+      "destination": "https://github.com/k-dot-greyz/rolodex",
+      "permanent": false
+    },
+    {
+      "source": "/rolodex/",
+      "destination": "https://github.com/k-dot-greyz/rolodex",
+      "permanent": false
+    },
+    {
+      "source": "/glitch-that-shit",
+      "destination": "https://github.com/k-dot-greyz/glitch-that-shit",
+      "permanent": false
+    },
+    {
+      "source": "/glitch-that-shit/",
+      "destination": "https://github.com/k-dot-greyz/glitch-that-shit",
+      "permanent": false
+    },
+    {
+      "source": "/gts",
+      "destination": "https://github.com/k-dot-greyz/glitch-that-shit",
+      "permanent": false
+    },
+    {
+      "source": "/gts/",
+      "destination": "https://github.com/k-dot-greyz/glitch-that-shit",
+      "permanent": false
+    },
+    {
+      "source": "/zenClip",
+      "destination": "https://github.com/k-dot-greyz/zenClip",
+      "permanent": false
+    },
+    {
+      "source": "/zenClip/",
+      "destination": "https://github.com/k-dot-greyz/zenClip",
+      "permanent": false
+    },
+    {
+      "source": "/zenclip",
+      "destination": "https://github.com/k-dot-greyz/zenClip",
+      "permanent": false
+    },
+    {
+      "source": "/zenclip/",
+      "destination": "https://github.com/k-dot-greyz/zenClip",
+      "permanent": false
+    },
+    {
+      "source": "/git-butler",
+      "destination": "https://github.com/k-dot-greyz/git-butler",
+      "permanent": false
+    },
+    {
+      "source": "/git-butler/",
+      "destination": "https://github.com/k-dot-greyz/git-butler",
+      "permanent": false
+    },
+    {
+      "source": "/git-watchdog",
+      "destination": "https://github.com/k-dot-greyz/git-watchdog",
+      "permanent": false
+    },
+    {
+      "source": "/git-watchdog/",
+      "destination": "https://github.com/k-dot-greyz/git-watchdog",
+      "permanent": false
+    },
+    {
+      "source": "/dinit",
+      "destination": "https://github.com/k-dot-greyz/dinit",
+      "permanent": false
+    },
+    {
+      "source": "/dinit/",
+      "destination": "https://github.com/k-dot-greyz/dinit",
+      "permanent": false
+    },
+    {
+      "source": "/visual-wiki",
+      "destination": "https://github.com/k-dot-greyz/visual-wiki",
+      "permanent": false
+    },
+    {
+      "source": "/visual-wiki/",
+      "destination": "https://github.com/k-dot-greyz/visual-wiki",
+      "permanent": false
+    },
+    {
+      "source": "/credits",
+      "destination": "https://github.com/k-dot-greyz/credits",
+      "permanent": false
+    },
+    {
+      "source": "/credits/",
+      "destination": "https://github.com/k-dot-greyz/credits",
+      "permanent": false
+    },
+    {
+      "source": "/referencedocs",
+      "destination": "https://github.com/k-dot-greyz/referencedocs",
+      "permanent": false
+    },
+    {
+      "source": "/referencedocs/",
+      "destination": "https://github.com/k-dot-greyz/referencedocs",
+      "permanent": false
+    },
+    {
+      "source": "/env-doctor/run",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/env-doctor/main/env-doctor.sh",
+      "permanent": false
+    },
+    {
+      "source": "/env-doctor/run/",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/env-doctor/main/env-doctor.sh",
+      "permanent": false
+    },
+    {
+      "source": "/zenOS/install",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/zenOS/main/install.sh",
+      "permanent": false
+    },
+    {
+      "source": "/zenOS/install/",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/zenOS/main/install.sh",
+      "permanent": false
+    },
+    {
+      "source": "/zenos/install",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/zenOS/main/install.sh",
+      "permanent": false
+    },
+    {
+      "source": "/zenos/install/",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/zenOS/main/install.sh",
+      "permanent": false
+    },
+    {
+      "source": "/zenOS/termux",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/zenOS/main/install_termux.sh",
+      "permanent": false
+    },
+    {
+      "source": "/zenOS/termux/",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/zenOS/main/install_termux.sh",
+      "permanent": false
+    },
+    {
+      "source": "/zenos/termux",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/zenOS/main/install_termux.sh",
+      "permanent": false
+    },
+    {
+      "source": "/zenos/termux/",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/zenOS/main/install_termux.sh",
+      "permanent": false
+    },
+    {
+      "source": "/card-core/spec",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/copilot-cockpit/main/card-core/SPEC.md",
+      "permanent": false
+    },
+    {
+      "source": "/card-core/spec/",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/copilot-cockpit/main/card-core/SPEC.md",
+      "permanent": false
+    }
+  ],
+  "headers": [
+    {
+      "source": "/ecosystem/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, stale-while-revalidate=600"
+        }
+      ]
+    },
+    {
+      "source": "/cards/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    },
+    {
+      "source": "/.well-known/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=3600"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/cards/dex/:id",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/copilot-cockpit/main/dex/cards/:id.json"
+    },
+    {
+      "source": "/cards/index",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/copilot-cockpit/main/dex/cards/index.json"
+    },
+    {
+      "source": "/.well-known/dex-card",
+      "destination": "https://raw.githubusercontent.com/k-dot-greyz/copilot-cockpit/main/dex-entry.md"
+    }
+  ]
 }

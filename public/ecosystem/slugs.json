@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "host": "glitch.cards",
+  "updated": "2026-10-08",
+  "slugs": [
+    {
+      "slug": "env-doctor",
+      "repo": "k-dot-greyz/env-doctor",
+      "summary": "dev-master / zenOS environment doctor (bash)",
+      "redirect": "https://github.com/k-dot-greyz/env-doctor",
+      "hydration": {
+        "readme": "https://raw.githubusercontent.com/k-dot-greyz/env-doctor/main/README.md"
+      },
+      "api_mounts": ["GET /api/v1/procedures/0x7D:env-doctor/hydrate"]
+    },
+    {
+      "slug": "zenOS",
+      "aliases": ["zenos"],
+      "repo": "k-dot-greyz/zenOS",
+      "summary": "zenOS core monorepo-adjacent runtime",
+      "redirect": "https://github.com/k-dot-greyz/zenOS",
+      "hydration": {
+        "readme": "https://raw.githubusercontent.com/k-dot-greyz/zenOS/main/README.md"
+      },
+      "api_mounts": ["POST /api/v1/agents/context/compose", "POST /api/v1/rituals/morning/draw"]
+    },
+    {
+      "slug": "copilot-cockpit",
+      "aliases": ["cockpit", "cc"],
+      "repo": "k-dot-greyz/copilot-cockpit",
+      "summary": "Copilot agent surface dashboard (this site)",
+      "redirect": "https://github.com/k-dot-greyz/copilot-cockpit",
+      "hydration": {
+        "dex_entry": "https://raw.githubusercontent.com/k-dot-greyz/copilot-cockpit/main/dex-entry.md",
+        "readme": "https://raw.githubusercontent.com/k-dot-greyz/copilot-cockpit/main/README.md"
+      },
+      "api_mounts": [
+        "GET /api/v1/triage/summary",
+        "POST /api/v1/triage/nuke",
+        "GET /ecosystem/slugs.json"
+      ]
+    },
+    {
+      "slug": "card-core",
+      "repo": "k-dot-greyz/copilot-cockpit",
+      "path_in_repo": "card-core/",
+      "summary": "Card Core v1 spec, conformance suite, Rust + Python engines",
+      "redirect": "https://github.com/k-dot-greyz/copilot-cockpit/tree/main/card-core",
+      "hydration": {
+        "spec": "https://raw.githubusercontent.com/k-dot-greyz/copilot-cockpit/main/card-core/SPEC.md",
+        "decision_log": "https://raw.githubusercontent.com/k-dot-greyz/copilot-cockpit/main/card-core/docs/TEST_COVERAGE_DECISION_LOG.md"
+      },
+      "api_mounts": ["POST /api/v1/policies/evaluate", "POST /api/v1/assets/attest", "POST /api/v1/decisions/log"]
+    },
+    {
+      "slug": "glitchworks-tarot",
+      "aliases": ["tarot", "oracle", "aether"],
+      "repo": "k-dot-greyz/glitchworks-tarot",
+      "summary": "Cyber-mystic tarot generator (Aether Deck)",
+      "redirect": "https://github.com/k-dot-greyz/glitchworks-tarot",
+      "api_mounts": ["GET /api/v1/oracle/daily-spread"]
+    },
+    {
+      "slug": "GlitchLab",
+      "aliases": ["glitchlab"],
+      "repo": "k-dot-greyz/GlitchLab",
+      "summary": "WebGL glitch art tool",
+      "redirect": "https://github.com/k-dot-greyz/GlitchLab"
+    },
+    {
+      "slug": "glitchworks-manifesto",
+      "aliases": ["manifesto"],
+      "repo": "k-dot-greyz/glitchworks-manifesto",
+      "summary": "GlitchWorks public manifesto & governance",
+      "redirect": "https://github.com/k-dot-greyz/glitchworks-manifesto"
+    },
+    {
+      "slug": "dev-master",
+      "repo": "k-dot-greyz/glitchworks-manifesto",
+      "summary": "Private monorepo guard — public redirect only",
+      "redirect": "https://github.com/k-dot-greyz/glitchworks-manifesto",
+      "security_note": "Never expose private dev-master URL"
+    },
+    {
+      "slug": "rolodex",
+      "repo": "k-dot-greyz/rolodex",
+      "summary": "Alias rolodex web app",
+      "redirect": "https://github.com/k-dot-greyz/rolodex"
+    },
+    {
+      "slug": "glitch-that-shit",
+      "aliases": ["gts"],
+      "repo": "k-dot-greyz/glitch-that-shit",
+      "summary": "Privacy-first glitch browser extension",
+      "redirect": "https://github.com/k-dot-greyz/glitch-that-shit"
+    },
+    {
+      "slug": "zenClip",
+      "aliases": ["zenclip"],
+      "repo": "k-dot-greyz/zenClip",
+      "summary": "Clipboard media → MIDI pipeline",
+      "redirect": "https://github.com/k-dot-greyz/zenClip"
+    },
+    {
+      "slug": "git-butler",
+      "repo": "k-dot-greyz/git-butler",
+      "summary": "Policy-as-code git / PR helpers",
+      "redirect": "https://github.com/k-dot-greyz/git-butler"
+    },
+    {
+      "slug": "git-watchdog",
+      "repo": "k-dot-greyz/git-watchdog",
+      "summary": "Repo hygiene watchdog",
+      "redirect": "https://github.com/k-dot-greyz/git-watchdog"
+    },
+    {
+      "slug": "dinit",
+      "repo": "k-dot-greyz/dinit",
+      "summary": "macOS machine hydrate bootstrap",
+      "redirect": "https://github.com/k-dot-greyz/dinit"
+    },
+    {
+      "slug": "visual-wiki",
+      "repo": "k-dot-greyz/visual-wiki",
+      "summary": "Visual knowledge garden for agents",
+      "redirect": "https://github.com/k-dot-greyz/visual-wiki"
+    },
+    {
+      "slug": "credits",
+      "repo": "k-dot-greyz/credits",
+      "summary": "greyZ credits ledger for CV hydration",
+      "redirect": "https://github.com/k-dot-greyz/credits"
+    },
+    {
+      "slug": "referencedocs",
+      "repo": "k-dot-greyz/referencedocs",
+      "summary": "Reference docs library",
+      "redirect": "https://github.com/k-dot-greyz/referencedocs",
+      "api_mounts": ["GET /api/v1/procedures/{dex_id}/hydrate"]
+    }
+  ]
+}
