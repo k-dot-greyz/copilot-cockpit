@@ -2,6 +2,7 @@ name: card-core-rust-mutants
 
 # Optional manual gate: rebuilds the Rust crate once per source mutant (~1h+).
 # Complements run_conformance.py --selftest for the Python reference.
+# rust_mutants.py builds --offline, so this job runs cargo fetch first.
 
 on:
   workflow_dispatch:
@@ -15,6 +16,9 @@ on:
         required: false
         default: "2"
         type: string
+
+permissions:
+  contents: read
 
 jobs:
   mutants:
@@ -31,6 +35,18 @@ jobs:
           rustup default stable
           rustc --version
 
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: card-core-rust-mutants-${{ runner.os }}-${{ hashFiles('card-core/rust/Cargo.lock') }}
+          restore-keys: card-core-rust-mutants-${{ runner.os }}-
+
+      - name: Fetch crate deps
+        run: cargo fetch --locked --manifest-path card-core/rust/Cargo.toml
+
       - name: Setup Python (hosts the conformance harness)
         uses: actions/setup-python@v5
         with:
@@ -42,10 +58,13 @@ jobs:
         run: pip install -r card-core/requirements.txt
 
       - name: Run Rust mutants
+        env:
+          MUTANTS_JOBS: ${{ inputs.jobs }}
+          MUTANTS_ONLY: ${{ inputs.only }}
         run: |
           set -euo pipefail
-          args=(python card-core/tools/rust_mutants.py --jobs "${{ inputs.jobs }}")
-          if [ -n "${{ inputs.only }}" ]; then
-            args+=(--only "${{ inputs.only }}")
+          args=(python card-core/tools/rust_mutants.py --jobs "$MUTANTS_JOBS")
+          if [ -n "${MUTANTS_ONLY:-}" ]; then
+            args+=(--only "$MUTANTS_ONLY")
           fi
           "${args[@]}"

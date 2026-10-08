@@ -39,17 +39,25 @@ fn code_of(response: &Value) -> &str {
 
 #[test]
 fn malformed_requests_get_a_typed_answer() {
-    for request in ["", "not json", "[]", "{\"op\": 1}", "{\"op\": \"lint\"}"] {
+    for (request, want) in [
+        ("", "E_IMPL_PROTOCOL"),
+        ("not json", "E_IMPL_PROTOCOL"),
+        ("[]", "E_IMPL_PROTOCOL"),
+        ("1", "E_IMPL_PROTOCOL"),
+        ("null", "E_IMPL_PROTOCOL"),
+        ("{\"op\": 1}", "E_IMPL_CRASH"),
+        ("{\"op\": \"lint\"}", "E_IMPL_CRASH"),
+    ] {
         let (response, status) = ask(request);
         assert_eq!(status, 0, "{request:?}");
-        assert!(matches!(code_of(&response), "E_IMPL_PROTOCOL" | "E_IMPL_CRASH"), "{request:?}: {response}");
+        assert_eq!(code_of(&response), want, "{request:?}: {response}");
     }
 }
 
 #[test]
 fn unknown_operation_is_e_op_unknown() {
     let request =
-        json!({"op": "frobnicate", "input": null, "base_dir": null, "registries": registries(), "limits": limits()});
+        json!({"op": "validate; rm -rf /", "input": null, "base_dir": null, "registries": registries(), "limits": limits()});
     let (response, status) = ask(&request.to_string());
     assert_eq!(status, 0);
     assert_eq!(code_of(&response), "E_OP_UNKNOWN");
