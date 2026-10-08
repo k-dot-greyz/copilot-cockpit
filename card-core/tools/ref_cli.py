@@ -13,13 +13,25 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cardcore_ref import Ref  # noqa: E402
 
 
+def _protocol_error(code: str, pointer: str) -> dict:
+    return {"ok": False, "errors": [{"code": code, "pointer": pointer[:200]}]}
+
+
 def main() -> int:
-    request = json.load(sys.stdin)
+    raw = sys.stdin.read()
+    try:
+        request = json.loads(raw)
+    except json.JSONDecodeError:
+        json.dump(_protocol_error("E_IMPL_PROTOCOL", "request is not a JSON object"), sys.stdout)
+        return 0
+    if not isinstance(request, dict):
+        json.dump(_protocol_error("E_IMPL_PROTOCOL", "request is not a JSON object"), sys.stdout)
+        return 0
     try:
         ref = Ref(request["registries"])
         response = ref.run(request["op"], request["input"], request.get("base_dir"), request["limits"])
     except Exception as exc:  # report a crash as a typed failure, never a traceback
-        response = {"ok": False, "errors": [{"code": "E_IMPL_CRASH", "pointer": f"{type(exc).__name__}: {exc}"[:200]}]}
+        response = _protocol_error("E_IMPL_CRASH", f"{type(exc).__name__}: {exc}")
     json.dump(response, sys.stdout)
     return 0
 

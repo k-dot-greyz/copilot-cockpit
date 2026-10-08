@@ -170,6 +170,19 @@ def test_cc31_sec_crash_path_stdout_is_json_not_traceback():
     assert body["errors"][0]["code"] == "E_IMPL_CRASH"
 
 
+def test_cc31_sad_ref_cli_malformed_protocol_single_line_exit_zero():
+    """CC31-S-03 (high): Python ref_cli matches Rust: malformed stdin → JSON error, exit 0."""
+    cmd = REF_CLI.cmd
+    for bad in ["", "not json", "[]", '{"op": 1}']:
+        stdout, code, stderr = _protocol_raw(cmd, bad)
+        assert code == 0, bad
+        assert stdout.count("\n") <= 1
+        assert "Traceback" not in stdout
+        body = json.loads(stdout.strip())
+        assert body["ok"] is False
+        assert body["errors"][0]["code"] in {"E_IMPL_PROTOCOL", "E_IMPL_CRASH"}
+
+
 def test_cc31_sad_unknown_op_is_typed_not_shell_injection():
     """CC31-S-01 (high): bizarre op strings are E_OP_UNKNOWN, not interpreted by the host shell."""
     request = {

@@ -1,0 +1,51 @@
+name: card-core-rust-mutants
+
+# Optional manual gate: rebuilds the Rust crate once per source mutant (~1h+).
+# Complements run_conformance.py --selftest for the Python reference.
+
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: Run mutants whose name contains this text (optional)
+        required: false
+        type: string
+      jobs:
+        description: Parallel conformance runners (builds stay serial)
+        required: false
+        default: "2"
+        type: string
+
+jobs:
+  mutants:
+    name: Rust source mutants
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustc --version
+
+      - name: Setup Python (hosts the conformance harness)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: card-core/requirements.txt
+
+      - name: Install harness dependencies
+        run: pip install -r card-core/requirements.txt
+
+      - name: Run Rust mutants
+        run: |
+          set -euo pipefail
+          args=(python card-core/tools/rust_mutants.py --jobs "${{ inputs.jobs }}")
+          if [ -n "${{ inputs.only }}" ]; then
+            args+=(--only "${{ inputs.only }}")
+          fi
+          "${args[@]}"

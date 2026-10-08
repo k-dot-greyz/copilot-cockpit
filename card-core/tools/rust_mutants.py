@@ -6,7 +6,8 @@ conformance suite through the stdin/stdout protocol. A mutant that leaves every 
 that no fixture pins; a snippet that no longer matches the source is stale. Both are failures.
 
 This is the Rust counterpart of `run_conformance.py --selftest` for the reference implementation.
-It rebuilds the crate once per mutant, so it is a manual check, not part of CI:
+It rebuilds the crate once per mutant, so it is not on the default CI path. Run locally or via the
+**card-core-rust-mutants** GitHub Actions workflow (`workflow_dispatch`):
 
     python card-core/tools/rust_mutants.py [--jobs 4] [--only TEXT]
 """

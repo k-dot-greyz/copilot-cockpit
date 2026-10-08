@@ -17,6 +17,7 @@
 | CC31-H-04 | Happy | High | Same curated rows on Rust | Curated rows pass via Rust protocol |
 | CC31-S-01 | Sad | High | Agentic op injection / shell metacharacters | `E_OP_UNKNOWN`, exit 0, no host command execution |
 | CC31-S-02 | Sad | High | Malformed protocol on Rust | One JSON line, exit 0, `E_IMPL_PROTOCOL` or `E_IMPL_CRASH` |
+| CC31-S-03 | Sad | High | Malformed protocol on Python `ref_cli` | Same contract as CC31-S-02 (symmetric hosts) |
 | CC31-SEC-01 | Security | Critical | `lint` + attacker-controlled `raw_path` | Response never contains raw file bytes (Python) |
 | CC31-SEC-02 | Security | High | Missing registry path | stdout is JSON `E_IMPL_CRASH`, no traceback |
 | CC31-SEC-03 | Security | Critical | Same lint exfiltration vector on Rust | No secret payload in stdout/stderr |
@@ -40,6 +41,6 @@
 
 ### Documentation / follow-up todos
 
-- [ ] Issue: wire `rust_mutants.py` into optional CI workflow_dispatch job.
-- [ ] Issue: align `ref_cli.py` malformed stdin with Rust (`E_IMPL_PROTOCOL` + exit 0) if product wants symmetric hosts.
-- [ ] Add `CARD_CORE_RUST_BIN` / `CARD_CORE_BUILD_RUST=1` to contributor docs for local Rust parity (Python CI skips Rust tests without a release binary).
+- [x] **card-core-rust-mutants** workflow (`workflow_dispatch`) runs `tools/rust_mutants.py`.
+- [x] `ref_cli.py` malformed stdin → `E_IMPL_PROTOCOL` + exit 0 (CC31-S-03).
+- [x] `CARD_CORE_RUST_BIN` / `CARD_CORE_BUILD_RUST=1` documented in `card-core/README.md`.

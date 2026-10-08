@@ -34,6 +34,10 @@ python -m pytest card-core/tests -q                    # every row as its own te
 cargo test --manifest-path card-core/rust/Cargo.toml   # the Rust implementation, same suite
 ```
 
+**Rust parity in pytest** (`tests/test_protocol_ux_security_pr31.py`): Rust-specific cases run when a release `cardcore` binary exists. Point at one with `CARD_CORE_RUST_BIN=/path/to/cardcore`, or set `CARD_CORE_BUILD_RUST=1` to build `card-core/rust/target/release/cardcore` first (needs Rust ≥ the crate's `rust-version`, currently 1.85). Without either, those tests skip; CI's **Conformance (Rust)** job always builds and runs the full suite.
+
+**Rust source mutants** (`tools/rust_mutants.py`): same idea as `run_conformance.py --selftest` for the Rust crate. Run locally, or trigger the **card-core-rust-mutants** GitHub Actions workflow (`workflow_dispatch`, optional name filter). Expect a long run (rebuild per mutant).
+
 Useful flags: `--case TEXT` and `--op validate|lint|resolve|freshness|adapt` filter rows, `--list` prints row ids, `-v` shows every failure.
 
 ## How the suite is built
