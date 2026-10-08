@@ -1,1 +1,3 @@
-export const KNOWN_TEAM_MEMBERS = ['k-dot-greyz', 'kasparsgreizis'];
+import { defaultCockpit } from './load';
+
+export const KNOWN_TEAM_MEMBERS = defaultCockpit.team.humanLogins;

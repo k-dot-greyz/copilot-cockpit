@@ -1,0 +1,6 @@
+{
+  "id": "nuke-flood",
+  "title": "Nuke flood PRs",
+  "kind": "nuke",
+  "confirm": true
+}

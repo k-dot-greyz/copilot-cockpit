@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://glitchworks.dev/schemas/cockpit_config.schema.json",
+  "title": "CockpitConfig",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["dex_id", "schema", "title", "target", "auth", "team", "flood"],
+  "properties": {
+    "dex_id": { "type": "string" },
+    "schema": { "const": "cockpit_config" },
+    "title": { "type": "string" },
+    "target": {
+      "type": "object",
+      "required": ["owner", "repo"],
+      "properties": {
+        "owner": { "type": "string", "minLength": 1 },
+        "repo": { "type": "string", "minLength": 1 }
+      }
+    },
+    "auth": {
+      "type": "object",
+      "required": ["tokenKey"],
+      "properties": { "tokenKey": { "type": "string", "minLength": 1 } }
+    },
+    "storage": {
+      "type": "object",
+      "properties": { "targetOverrideKey": { "type": "string" } }
+    },
+    "team": {
+      "type": "object",
+      "required": ["humanLogins"],
+      "properties": {
+        "humanLogins": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+      }
+    },
+    "flood": {
+      "type": "object",
+      "required": ["minCount"],
+      "properties": { "minCount": { "type": "integer", "minimum": 2 } }
+    },
+    "rateLimit": {
+      "type": "object",
+      "properties": { "warnRemaining": { "type": "integer", "minimum": 1 } }
+    }
+  }
+}

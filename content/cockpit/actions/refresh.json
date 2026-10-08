@@ -1,0 +1,6 @@
+{
+  "id": "refresh",
+  "title": "Refresh PRs",
+  "kind": "refresh",
+  "confirm": false
+}

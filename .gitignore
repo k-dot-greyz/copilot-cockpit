@@ -24,3 +24,4 @@ pnpm-debug.log*
 .idea/
 test-results/
 dist-export/
+packages/cockpit-core/target/

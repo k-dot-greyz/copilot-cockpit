@@ -14,10 +14,10 @@ child_epics:
     title: "COCKPIT-PIPELINE-002"
     spec: "docs/epics/COCKPIT-PIPELINE-002.md"
     cards: "dex/cards/"
-  - dex_id: "0x7D:0x12"
-    title: "COCKPIT-HARDENING-003"
-    spec: "docs/epics/COCKPIT-HARDENING-003.md"
-    cards: "dex/cards/"
+  - dex_id: "0x7D:0x13"
+    title: "COCKPIT-UX-004"
+    spec: "docs/epics/COCKPIT-UX-004.md"
+    cards: "content/cockpit/"
 ---
 
 # Copilot Cockpit — dex entry

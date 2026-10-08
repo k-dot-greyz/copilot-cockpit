@@ -1,5 +1,10 @@
 // Triage logic — pure functions, no API calls
 import type { PR } from './github';
+import { extractIssueRefs } from './issue-refs';
+import { assignLanes } from './lanes/match';
+import { defaultCockpit } from './config/load';
+
+export { extractIssueRefs };
 
 export type PRCategory =
   | 'human-ready'
@@ -36,17 +41,6 @@ export interface TriageStats {
   newestPR: string;
   checks: { success: number; failure: number; pending: number; none: number };
   reviews: { approved: number; changesRequested: number; required: number; none: number };
-}
-
-/**
- * Finds all issue references in a pull request title using the `#<number>` pattern.
- *
- * @param title - The pull request title to scan for `#<number>` references
- * @returns An array of extracted issue numbers (empty if none found)
- */
-export function extractIssueRefs(title: string): number[] {
-  const matches = title.matchAll(/#(\d+)/g);
-  return [...matches].map((m) => parseInt(m[1]));
 }
 
 /**
@@ -111,7 +105,7 @@ export function detectFlood(prs: PR[], minCount = 10): FloodPattern[] {
  * @returns An object with arrays of PRs for each dashboard category
  */
 export function categorizePRs(prs: PR[]): CategorizedPRs {
-  const floods = detectFlood(prs);
+  const floods = detectFlood(prs, defaultCockpit.flood.minCount);
   const floodPRNumbers = new Set<number>();
   for (const flood of floods) {
     for (const pr of flood.prs) {
@@ -119,47 +113,15 @@ export function categorizePRs(prs: PR[]): CategorizedPRs {
     }
   }
 
+  const assigned = assignLanes(prs, defaultCockpit.lanes, floodPRNumbers);
   const result: CategorizedPRs = {
-    'human-ready': [],
-    'human-draft': [],
-    'bot-flood': [],
-    'bot-tests': [],
-    'bot-other': [],
-    external: [],
+    'human-ready': assigned['human-ready'] ?? [],
+    'human-draft': assigned['human-draft'] ?? [],
+    'bot-flood': assigned['bot-flood'] ?? [],
+    'bot-tests': assigned['bot-tests'] ?? [],
+    'bot-other': assigned['bot-other'] ?? [],
+    external: assigned['external'] ?? [],
   };
-
-  for (const pr of prs) {
-    if (floodPRNumbers.has(pr.number)) {
-      result['bot-flood'].push(pr);
-    } else if (pr.authorType === 'human') {
-      if (pr.isDraft) {
-        result['human-draft'].push(pr);
-      } else {
-        result['human-ready'].push(pr);
-      }
-    } else if (pr.authorType === 'bot') {
-      // Check if it's a test/coverage PR
-      const isTest =
-        pr.title.startsWith('test(') ||
-        pr.headRefName.includes('security') ||
-        pr.headRefName.includes('coverage') ||
-        pr.headRefName.includes('ux-security');
-      if (isTest) {
-        result['bot-tests'].push(pr);
-      } else {
-        result['bot-other'].push(pr);
-      }
-    } else {
-      result['external'].push(pr);
-    }
-  }
-
-  // Sort each group: newest first
-  for (const key of Object.keys(result) as PRCategory[]) {
-    result[key].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-  }
 
   return result;
 }

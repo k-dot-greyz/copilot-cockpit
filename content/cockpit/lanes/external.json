@@ -1,0 +1,10 @@
+{
+  "id": "external",
+  "title": "External",
+  "emoji": "👥",
+  "accent": "external",
+  "order": 4,
+  "matchPriority": 1,
+  "match": "all",
+  "matchers": [{ "type": "authorType", "value": "external" }]
+}

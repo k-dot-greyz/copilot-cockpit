@@ -2,6 +2,7 @@ import type { PR, PRApiResponse } from '../github';
 
 export function makePR(overrides: Partial<PR> & Pick<PR, 'number'>): PR {
   return {
+    id: `pr-${overrides.number}`,
     title: 'Test PR',
     author: 'k-dot-greyz',
     authorType: 'human',
@@ -12,6 +13,7 @@ export function makePR(overrides: Partial<PR> & Pick<PR, 'number'>): PR {
     reviewDecision: null,
     labels: [],
     url: `https://github.com/o/r/pull/${overrides.number}`,
+    issueRefs: [],
     checksStatus: 'none',
     mergeable: 'UNKNOWN',
     state: 'OPEN',

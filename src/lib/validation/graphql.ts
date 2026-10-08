@@ -1,4 +1,5 @@
 import { classifyAuthor } from './author-classification';
+import { extractIssueRefs } from '../issue-refs';
 import { sanitizeGithubIssueUrl, sanitizePrUrl } from './pr-url';
 import type { PR, PRDetail } from '../github';
 
@@ -9,6 +10,7 @@ import type { PR, PRDetail } from '../github';
 export function validateAndMapGraphQLPR(node: any): PR {
   if (!node || typeof node !== 'object') {
     return {
+      id: 'pr-0',
       number: 0,
       title: 'Malformed PR',
       author: 'unknown',
@@ -20,6 +22,7 @@ export function validateAndMapGraphQLPR(node: any): PR {
       reviewDecision: null,
       labels: [],
       url: '#',
+      issueRefs: [],
       checksStatus: 'none',
       mergeable: 'UNKNOWN',
       state: 'OPEN',
@@ -79,6 +82,7 @@ export function validateAndMapGraphQLPR(node: any): PR {
   const deletions = typeof node.deletions === 'number' && node.deletions >= 0 ? node.deletions : 0;
 
   return {
+    id: `pr-${number}`,
     number,
     title,
     author,
@@ -90,6 +94,7 @@ export function validateAndMapGraphQLPR(node: any): PR {
     reviewDecision,
     labels,
     url,
+    issueRefs: extractIssueRefs(title),
     checksStatus,
     mergeable,
     state,

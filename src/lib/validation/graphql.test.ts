@@ -38,6 +38,7 @@ describe('validateAndMapGraphQLPR', () => {
     const result = validateAndMapGraphQLPR(rawNode);
 
     expect(result).toEqual({
+      id: 'pr-42',
       number: 42,
       title: 'Add support for GraphQL',
       author: 'k-dot-greyz',
@@ -49,6 +50,7 @@ describe('validateAndMapGraphQLPR', () => {
       reviewDecision: 'APPROVED',
       labels: ['enhancement', 'triage'],
       url: 'https://github.com/k-dot-greyz/dev-master/pull/42',
+      issueRefs: [],
       checksStatus: 'success',
       mergeable: 'MERGEABLE',
       state: 'OPEN',
@@ -81,6 +83,7 @@ describe('validateAndMapGraphQLPR', () => {
     const result = validateAndMapGraphQLPR(rawNode);
 
     expect(result).toEqual({
+      id: 'pr-0',
       number: 0,
       title: '',
       author: 'unknown',
@@ -92,6 +95,7 @@ describe('validateAndMapGraphQLPR', () => {
       reviewDecision: null,
       labels: [],
       url: '#',
+      issueRefs: [],
       checksStatus: 'none',
       mergeable: 'UNKNOWN',
       state: 'OPEN',

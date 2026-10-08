@@ -1,0 +1,13 @@
+{
+  "id": "human-draft",
+  "title": "Drafts",
+  "emoji": "📝",
+  "accent": "draft",
+  "order": 1,
+  "matchPriority": 1,
+  "match": "all",
+  "matchers": [
+    { "type": "authorType", "value": "human" },
+    { "type": "isDraft", "value": true }
+  ]
+}

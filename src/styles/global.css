@@ -1,3 +1,5 @@
+@import '../../dex/06-tools/glitch-islands/glitch-islands.css';
+
 /* ============================================
    Copilot Cockpit — zenOS Dark Theme
    GlitchWorks aesthetic · Glassmorphism · CRT
@@ -38,6 +40,8 @@
   --accent-blue: #60a5fa;
   --accent-blue-dim: rgba(96, 165, 250, 0.12);
   --accent-cyan: #22d3ee;
+  --color-glitch-cyan: #00e5ff;
+  --color-glitch-magenta: #ff00aa;
 
   /* Semantic */
   --status-draft: var(--accent-amber);
@@ -605,4 +609,218 @@ code {
   .pr-card { grid-template-columns: auto 1fr; }
   .pr-card__actions { grid-column: 1 / -1; }
   .header { flex-direction: column; gap: var(--space-md); align-items: flex-start; }
+  .lane-board { grid-template-columns: 1fr; }
+}
+
+/* -- Skip link -- */
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0.5rem;
+  z-index: 200;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 0.5rem 1rem;
+}
+.skip-link:focus {
+  left: 0.5rem;
+}
+
+/* -- CRT scanline overlay -- */
+.app-shell::after {
+  content: '';
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    rgba(0, 0, 0, 0.08) 3px
+  );
+  opacity: 0.35;
+  z-index: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-shell::after { display: none; }
+}
+
+.app-shell {
+  padding-bottom: 5.5rem;
+}
+
+/* -- Repo chip -- */
+.repo-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: var(--bg-input);
+  color: var(--text-secondary);
+}
+.repo-chip input {
+  width: 14ch;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+}
+
+/* -- Kanban lanes -- */
+.lane-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-md);
+  align-items: start;
+  margin-top: var(--space-lg);
+}
+
+.lane-column {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  min-height: 12rem;
+  padding: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.lane-column__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.lane-column__title {
+  font-size: 0.8rem;
+  color: var(--text-primary);
+}
+
+.lane-column[data-accent='flood'] { border-color: var(--border-danger); }
+.lane-column[data-accent='ready'] { border-color: rgba(52, 211, 153, 0.25); }
+.lane-column[data-accent='draft'] { border-color: rgba(251, 191, 36, 0.25); }
+
+.lane-column .pr-card {
+  padding: var(--space-sm);
+}
+
+.pr-card--focused {
+  outline: 2px solid var(--color-glitch-cyan);
+  outline-offset: 1px;
+}
+
+/* -- Duplicate alert -- */
+.duplicate-alert {
+  border: 1px solid var(--border-active);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  background: var(--accent-purple-dim);
+  margin-bottom: var(--space-lg);
+}
+
+.duplicate-alert__row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-md);
+  align-items: center;
+  margin-top: var(--space-sm);
+}
+
+/* -- Command palette -- */
+.palette {
+  max-width: 640px;
+  width: 92%;
+  padding: 0;
+  overflow: hidden;
+}
+
+.palette__search {
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  border-radius: 0;
+  padding: 1rem 1.25rem;
+  font-size: 1rem;
+}
+
+.palette__list {
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.palette-item {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  width: 100%;
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.palette-item[aria-selected='true'],
+.palette-item:hover {
+  background: var(--accent-purple-dim);
+}
+
+.palette-item__kind {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+/* -- Status bar -- */
+.status-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: 0.45rem 1.25rem;
+  background: rgba(10, 10, 15, 0.92);
+  border-top: 1px solid var(--border-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.status-bar kbd { margin-left: 0.25rem; }
+
+/* -- Help overlay -- */
+.help-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.4rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+/* -- Sticky selection bar -- */
+.selection-bar {
+  position: sticky;
+  top: 0.75rem;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-lg);
 }

@@ -23,4 +23,10 @@ export interface PRCardEntity {
   url: string;
   /** Issue refs extracted from title, deduped */
   issueRefs: number[];
+  checksStatus: 'success' | 'failure' | 'pending' | 'none';
+  mergeable: 'MERGEABLE' | 'CONFLICTING' | 'UNKNOWN';
+  state: 'OPEN' | 'CLOSED' | 'MERGED';
+  commentsCount: number;
+  additions: number;
+  deletions: number;
 }

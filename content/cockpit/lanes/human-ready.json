@@ -1,0 +1,13 @@
+{
+  "id": "human-ready",
+  "title": "Ready for Review",
+  "emoji": "🔥",
+  "accent": "ready",
+  "order": 0,
+  "matchPriority": 1,
+  "match": "all",
+  "matchers": [
+    { "type": "authorType", "value": "human" },
+    { "type": "isDraft", "value": false }
+  ]
+}

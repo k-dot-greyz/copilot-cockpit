@@ -1,0 +1,10 @@
+{
+  "id": "bot-flood",
+  "title": "Bot Flood",
+  "emoji": "🚨",
+  "accent": "flood",
+  "order": 5,
+  "matchPriority": 0,
+  "match": "all",
+  "matchers": [{ "type": "flood" }]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "bot-tests",
+  "title": "Bot Test / Security",
+  "emoji": "🧪",
+  "accent": "bot",
+  "order": 2,
+  "matchPriority": 1,
+  "match": "any",
+  "require": { "authorType": "bot" },
+  "matchers": [
+    { "type": "titlePrefix", "value": "test(" },
+    { "type": "refContains", "value": "security" },
+    { "type": "refContains", "value": "coverage" },
+    { "type": "refContains", "value": "ux-security" }
+  ]
+}

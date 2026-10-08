@@ -42,6 +42,38 @@ describe('shouldHandleRefreshShortcut', () => {
     ).toBe(false);
   });
 
+  it('ignores shortcuts when focus is in type=text or search inputs', () => {
+    const text = { tagName: 'INPUT', type: 'text' } as EventTarget;
+    const search = { tagName: 'INPUT', type: 'search' } as EventTarget;
+    const password = { tagName: 'INPUT', type: 'password' } as EventTarget;
+    expect(
+      shouldHandleRefreshShortcut('r', text, { isClosing: false, loading: false })
+    ).toBe(false);
+    expect(
+      shouldHandleRefreshShortcut('r', search, { isClosing: false, loading: false })
+    ).toBe(false);
+    expect(
+      shouldHandleRefreshShortcut('r', password, { isClosing: false, loading: false })
+    ).toBe(false);
+  });
+
+  it('allows refresh when a checkbox, radio, or button-like input is focused', () => {
+    for (const type of ['checkbox', 'radio', 'button', 'submit', 'reset']) {
+      const input = { tagName: 'INPUT', type } as EventTarget;
+      expect(
+        shouldHandleRefreshShortcut('r', input, { isClosing: false, loading: false }),
+        `type=${type} should not block R`
+      ).toBe(true);
+    }
+  });
+
+  it('ignores shortcuts when focus is in a contenteditable element', () => {
+    const editable = { tagName: 'DIV', isContentEditable: true } as EventTarget;
+    expect(
+      shouldHandleRefreshShortcut('r', editable, { isClosing: false, loading: false })
+    ).toBe(false);
+  });
+
   it('ignores shortcuts when focus is in a textarea', () => {
     const textarea = { tagName: 'TEXTAREA' } as EventTarget;
     expect(

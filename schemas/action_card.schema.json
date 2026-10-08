@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://glitchworks.dev/schemas/action_card.schema.json",
+  "title": "ActionCard",
+  "type": "object",
+  "required": ["id", "title", "kind"],
+  "properties": {
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "kind": { "type": "string" },
+    "confirm": { "type": "boolean" }
+  }
+}

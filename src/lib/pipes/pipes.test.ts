@@ -25,6 +25,16 @@ describe('hydratePRCard', () => {
     expect(entity.issueRefs).toEqual([526]);
     expect(entity.url).toBe('https://github.com/k-dot-greyz/dev-master/pull/42');
     expect(entity.authorType).toBe('human');
+    expect(entity.checksStatus).toBe('none');
+    expect(entity.mergeable).toBe('UNKNOWN');
+    expect(entity.state).toBe('OPEN');
+  });
+
+  it('classifies humans from the cockpit team card, not a hardcoded login list', () => {
+    const entity = hydratePRCard(
+      makeApiPR({ user: { login: 'kasparsgreizis', type: 'User' } }) as never
+    );
+    expect(entity.authorType).toBe('human');
   });
 
   it('sanitizes hostile URLs', () => {

@@ -1,0 +1,10 @@
+{
+  "id": "bot-other",
+  "title": "Bot — Other",
+  "emoji": "🤖",
+  "accent": "bot",
+  "order": 3,
+  "matchPriority": 1,
+  "match": "all",
+  "matchers": [{ "type": "authorType", "value": "bot" }]
+}
