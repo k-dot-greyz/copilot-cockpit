@@ -1,5 +1,218 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "framework": "astro"
+  "framework": "astro",
+  "redirects": [
+    {
+      "source": "/env-doctor",
+      "destination": "https://github.com/k-dot-greyz/env-doctor",
+      "permanent": false
+    },
+    {
+      "source": "/env-doctor/",
+      "destination": "https://github.com/k-dot-greyz/env-doctor",
+      "permanent": false
+    },
+    {
+      "source": "/zenOS",
+      "destination": "https://github.com/k-dot-greyz/zenOS",
+      "permanent": false
+    },
+    {
+      "source": "/zenOS/",
+      "destination": "https://github.com/k-dot-greyz/zenOS",
+      "permanent": false
+    },
+    {
+      "source": "/zenos",
+      "destination": "https://github.com/k-dot-greyz/zenOS",
+      "permanent": false
+    },
+    {
+      "source": "/zenos/",
+      "destination": "https://github.com/k-dot-greyz/zenOS",
+      "permanent": false
+    },
+    {
+      "source": "/copilot-cockpit",
+      "destination": "https://github.com/k-dot-greyz/copilot-cockpit",
+      "permanent": false
+    },
+    {
+      "source": "/copilot-cockpit/",
+      "destination": "https://github.com/k-dot-greyz/copilot-cockpit",
+      "permanent": false
+    },
+    {
+      "source": "/cockpit",
+      "destination": "https://github.com/k-dot-greyz/copilot-cockpit",
+      "permanent": false
+    },
+    {
+      "source": "/cockpit/",
+      "destination": "https://github.com/k-dot-greyz/copilot-cockpit",
+      "permanent": false
+    },
+    {
+      "source": "/card-core",
+      "destination": "https://github.com/k-dot-greyz/copilot-cockpit/tree/main/card-core",
+      "permanent": false
+    },
+    {
+      "source": "/card-core/",
+      "destination": "https://github.com/k-dot-greyz/copilot-cockpit/tree/main/card-core",
+      "permanent": false
+    },
+    {
+      "source": "/glitchworks-tarot",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-tarot",
+      "permanent": false
+    },
+    {
+      "source": "/glitchworks-tarot/",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-tarot",
+      "permanent": false
+    },
+    {
+      "source": "/tarot",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-tarot",
+      "permanent": false
+    },
+    {
+      "source": "/tarot/",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-tarot",
+      "permanent": false
+    },
+    {
+      "source": "/oracle",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-tarot",
+      "permanent": false
+    },
+    {
+      "source": "/oracle/",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-tarot",
+      "permanent": false
+    },
+    {
+      "source": "/GlitchLab",
+      "destination": "https://github.com/k-dot-greyz/GlitchLab",
+      "permanent": false
+    },
+    {
+      "source": "/GlitchLab/",
+      "destination": "https://github.com/k-dot-greyz/GlitchLab",
+      "permanent": false
+    },
+    {
+      "source": "/glitchlab",
+      "destination": "https://github.com/k-dot-greyz/GlitchLab",
+      "permanent": false
+    },
+    {
+      "source": "/glitchlab/",
+      "destination": "https://github.com/k-dot-greyz/GlitchLab",
+      "permanent": false
+    },
+    {
+      "source": "/glitchworks-manifesto",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-manifesto",
+      "permanent": false
+    },
+    {
+      "source": "/glitchworks-manifesto/",
+      "destination": "https://github.com/k-dot-greyz/glitchworks-manifesto",
+      "permanent": false
+    },
+    {
+      "source": "/zenClip",
+      "destination": "https://github.com/k-dot-greyz/zenClip",
+      "permanent": false
+    },
+    {
+      "source": "/zenClip/",
+      "destination": "https://github.com/k-dot-greyz/zenClip",
+      "permanent": false
+    },
+    {
+      "source": "/zenclip",
+      "destination": "https://github.com/k-dot-greyz/zenClip",
+      "permanent": false
+    },
+    {
+      "source": "/zenclip/",
+      "destination": "https://github.com/k-dot-greyz/zenClip",
+      "permanent": false
+    },
+    {
+      "source": "/git-butler",
+      "destination": "https://github.com/k-dot-greyz/git-butler",
+      "permanent": false
+    },
+    {
+      "source": "/git-butler/",
+      "destination": "https://github.com/k-dot-greyz/git-butler",
+      "permanent": false
+    },
+    {
+      "source": "/git-watchdog",
+      "destination": "https://github.com/k-dot-greyz/git-watchdog",
+      "permanent": false
+    },
+    {
+      "source": "/git-watchdog/",
+      "destination": "https://github.com/k-dot-greyz/git-watchdog",
+      "permanent": false
+    },
+    {
+      "source": "/dinit",
+      "destination": "https://github.com/k-dot-greyz/dinit",
+      "permanent": false
+    },
+    {
+      "source": "/dinit/",
+      "destination": "https://github.com/k-dot-greyz/dinit",
+      "permanent": false
+    },
+    {
+      "source": "/visual-wiki",
+      "destination": "https://github.com/k-dot-greyz/visual-wiki",
+      "permanent": false
+    },
+    {
+      "source": "/visual-wiki/",
+      "destination": "https://github.com/k-dot-greyz/visual-wiki",
+      "permanent": false
+    },
+    {
+      "source": "/credits",
+      "destination": "https://github.com/k-dot-greyz/credits",
+      "permanent": false
+    },
+    {
+      "source": "/credits/",
+      "destination": "https://github.com/k-dot-greyz/credits",
+      "permanent": false
+    },
+    {
+      "source": "/referencedocs",
+      "destination": "https://github.com/k-dot-greyz/referencedocs",
+      "permanent": false
+    },
+    {
+      "source": "/referencedocs/",
+      "destination": "https://github.com/k-dot-greyz/referencedocs",
+      "permanent": false
+    }
+  ],
+  "headers": [
+    {
+      "source": "/ecosystem/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, stale-while-revalidate=600"
+        }
+      ]
+    }
+  ]
 }
