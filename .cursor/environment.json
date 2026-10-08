@@ -1,0 +1,28 @@
+{
+  "name": "copilot-cockpit",
+  "user": "ubuntu",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "install": "chmod +x scripts/*.sh vendor/env-doctor/env-doctor.sh 2>/dev/null || true && bash scripts/hydrate-tools.sh",
+  "start": "bash scripts/start.sh",
+  "terminals": [
+    {
+      "name": "dev",
+      "command": "npm run dev"
+    }
+  ],
+  "ports": [
+    {
+      "name": "astro",
+      "port": 4321
+    }
+  ],
+  "repositoryDependencies": [
+    "https://github.com/k-dot-greyz/env-doctor",
+    "https://github.com/k-dot-greyz/git-butler",
+    "https://github.com/k-dot-greyz/neuro-spicy-devkit",
+    "https://github.com/k-dot-greyz/dinit"
+  ]
+}
