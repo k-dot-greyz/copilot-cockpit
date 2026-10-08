@@ -16,7 +16,8 @@ import re
 from pathlib import Path
 from typing import Any
 
-from jsonschema import Draft202012Validator
+from jsonschema import Draft202012Validator, validators
+from jsonschema.exceptions import ValidationError
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT202012
 
@@ -47,12 +48,72 @@ DIALECTS: dict[str, dict[str, Any]] = {
 }
 
 
+def _ecma_pattern(pattern: str) -> str:
+    """Translate an ASCII-subset ECMA-262 pattern to Python `re` syntax.
+
+    SPEC.md section 4.1: `$` matches only at the very end of the string. Python
+    lets `$` match before a final newline, so an unescaped `$` outside a
+    character class becomes `\\Z`. Patterns are restricted to an ASCII subset
+    (no `.`, `\\d`, `\\w`, `\\s`, lookarounds or flags), where the two
+    dialects otherwise agree.
+    """
+    out: list[str] = []
+    in_class = escaped = False
+    for ch in pattern:
+        if escaped:
+            out.append(ch)
+            escaped = False
+        elif ch == "\\":
+            out.append(ch)
+            escaped = True
+        elif in_class:
+            out.append(ch)
+            in_class = ch != "]"
+        elif ch == "[":
+            out.append(ch)
+            in_class = True
+        elif ch == "$":
+            out.append("\\Z")
+        else:
+            out.append(ch)
+    return "".join(out)
+
+
+def _pattern_keyword(validator, pattern, instance, schema):
+    if validator.is_type(instance, "string") and not re.search(_ecma_pattern(pattern), instance):
+        yield ValidationError(f"{instance!r} does not match {pattern!r}")
+
+
+# Draft 2020-12 with the SPEC.md section 4.1 `pattern` semantics.
+CardValidator = validators.extend(Draft202012Validator, {"pattern": _pattern_keyword})
+
+
+# SPEC.md section 5: equality is exact JSON equality. Python's `==` treats True as 1 and 1.0 as 1.
+def _same(a: Any, b: Any) -> bool:
+    if type(a) is not type(b):
+        return False
+    if isinstance(a, dict):
+        return a.keys() == b.keys() and all(_same(a[k], b[k]) for k in a)
+    if isinstance(a, list):
+        return len(a) == len(b) and all(_same(x, y) for x, y in zip(a, b))
+    return a == b
+
+
+# SPEC.md section 10: only A to Z are lowercased. str.lower() would fold the Kelvin sign into `k`.
+_ASCII_LOWER = {c: c + 32 for c in range(ord("A"), ord("Z") + 1)}
+
+
 class _NonFinite(Exception):
     pass
 
 
+_LONE_SURROGATE = re.compile("[\ud800-\udfff]")
+
+
 def _ptr(tokens) -> str:
-    return "".join("/" + str(t).replace("~", "~0").replace("/", "~1") for t in tokens)
+    # SPEC.md section 8: a pointer never contains a lone surrogate; it is written as U+FFFD.
+    text = "".join("/" + str(t).replace("~", "~0").replace("/", "~1") for t in tokens)
+    return _LONE_SURROGATE.sub("\ufffd", text)
 
 
 def _e(code: str, tokens=()) -> dict:
@@ -104,6 +165,10 @@ class Ref:
                 if path.name in ("index.json", "limits.json"):
                     continue
                 schema = json.loads(path.read_text(encoding="utf-8"))
+                # The dialect is fixed by CardValidator. A `$schema` key would make
+                # jsonschema pick plain Draft 2020-12 again when it follows a `$ref`
+                # to this resource, silently dropping the `pattern` semantics.
+                schema.pop("$schema", None)
                 self.schemas[schema["$id"]] = schema
         if mutate is not None:
             mutate(self.schemas)
@@ -114,8 +179,8 @@ class Ref:
         if not self.envelope_id or "card" not in self.class_ids or "asset" not in self.class_ids:
             raise ValueError("registry must define envelope and classes")
         core = self._schema_by_suffix("/core.v1.json")["$defs"]
-        self._dotted = re.compile(core["dotted_key"]["pattern"])
-        self._id_re = re.compile(core["id"]["pattern"])
+        self._dotted = re.compile(_ecma_pattern(core["dotted_key"]["pattern"]))
+        self._id_re = re.compile(_ecma_pattern(core["id"]["pattern"]))
         self._id_max = core["id"].get("maxLength")
         order = self.schemas[self.envelope_id]["properties"]["visibility"]["enum"]
         self._rank = {v: len(order) - 1 - i for i, v in enumerate(order)}
@@ -130,7 +195,7 @@ class Ref:
 
     def _validator(self, sid: str) -> Draft202012Validator:
         if sid not in self._validators:
-            self._validators[sid] = Draft202012Validator(self.schemas[sid], registry=self.registry)
+            self._validators[sid] = CardValidator(self.schemas[sid], registry=self.registry)
         return self._validators[sid]
 
     def _schema_errors(self, sid: str, instance: Any) -> list[dict]:
@@ -167,13 +232,15 @@ class Ref:
             text = data.decode("utf-8")
         except UnicodeDecodeError:
             return None, [_e("E_ENCODING")]
-        dup_map: dict[int, list[str]] = {}
+        dup_map: dict[int, list[tuple[str, Any]]] = {}
 
         def hook(pairs):
             obj, dupes = {}, []
             for key, val in pairs:
                 if key in obj:
-                    dupes.append(key)
+                    # Keep the value this duplicate replaces: it stays alive, so its id()
+                    # cannot be reused, and duplicates nested inside it are still reported.
+                    dupes.append((key, obj[key]))
                 obj[key] = val
             if dupes:
                 dup_map[id(obj)] = dupes
@@ -182,8 +249,15 @@ class Ref:
         def constant(name):
             raise _NonFinite(name)
 
+        def parse_int(literal):
+            # Python refuses integer literals over 4300 digits. SPEC.md section 5 reads them at
+            # any length, and anything this long is out of range whatever the limit is.
+            if len(literal.lstrip("-")) > 40:
+                return -(limits["int_max"] + 1) if literal.startswith("-") else limits["int_max"] + 1
+            return int(literal)
+
         try:
-            value = json.loads(text, object_pairs_hook=hook, parse_constant=constant)
+            value = json.loads(text, object_pairs_hook=hook, parse_constant=constant, parse_int=parse_int)
         except _NonFinite:
             return None, [_e("E_NONFINITE")]
         except RecursionError:
@@ -203,14 +277,33 @@ class Ref:
         def bad_string(s: str) -> bool:
             return any(ord(c) == 0x7F or 0xD800 <= ord(c) <= 0xDFFF for c in s)
 
+        def shadowed(node, path, depth):
+            """Report duplicates inside a value that a later duplicate key replaced."""
+            if isinstance(node, dict):
+                depth += 1
+                if depth > max_depth:
+                    return
+                for key, old in (dup_map or {}).get(id(node), []):
+                    errors.append(_e("E_DUP_KEY", path + [key]))
+                    shadowed(old, path + [key], depth)
+                for key, val in node.items():
+                    shadowed(val, path + [key], depth)
+            elif isinstance(node, list):
+                depth += 1
+                if depth > max_depth:
+                    return
+                for i, val in enumerate(node):
+                    shadowed(val, path + [i], depth)
+
         def walk(node, path, depth):
             if isinstance(node, dict):
                 depth += 1
                 if depth > max_depth:
                     too_deep[0] = True
                     return
-                for key in (dup_map or {}).get(id(node), []):
+                for key, old in (dup_map or {}).get(id(node), []):
                     errors.append(_e("E_DUP_KEY", path + [key]))
+                    shadowed(old, path + [key], depth)
                 for key, val in node.items():
                     if not key.isascii():
                         errors.append(_e("E_KEY_NONASCII", path + [key]))
@@ -345,7 +438,7 @@ class Ref:
                 parsed[i] = value
         for i, value in parsed.items():  # stage 4: file envelope equals entry
             for field in ("id", "kind", "schema_version", "rev"):
-                if not isinstance(value, dict) or value.get(field) != entries[i][field]:
+                if not isinstance(value, dict) or not _same(value.get(field), entries[i][field]):
                     errors.append(_e("E_PACK_MISMATCH", head + [i]))
                     break
         if errors:
@@ -386,7 +479,8 @@ class Ref:
             card = cards[cur]
             if prev is not None:
                 child = cards[prev]
-                if (card.get("kind"), card.get("schema_version")) != (child.get("kind"), child.get("schema_version")):
+                if not (_same(card.get("kind"), child.get("kind"))
+                        and _same(card.get("schema_version"), child.get("schema_version"))):
                     return [], [_e("E_EXTENDS_KIND", ["cards", prev, "extends"])]
             chain.append((cur, card))
             parent = card.get("extends")
@@ -402,6 +496,9 @@ class Ref:
             errs = self._schema_errors(self.envelope_id, card)
             if errs:
                 errors.extend(_prefix(errs, ["cards", cid]))
+                continue
+            if card["id"] != cid:
+                errors.append(_e("E_ID_MISMATCH", ["cards", cid, "id"]))
                 continue
             entry = self.kinds.get((card["kind"], card["schema_version"]))
             if entry is None:
@@ -443,7 +540,7 @@ class Ref:
                 errors.append(_e("E_DOLLAR_KEY", here))
                 continue
             if tokens_ok and isinstance(val, dict) and UNSET in val:
-                if val == {UNSET: True}:
+                if len(val) == 1 and val[UNSET] is True:
                     if key in out:
                         del out[key]
                     else:
@@ -621,7 +718,7 @@ class Ref:
         text = source
         if spec.get("strip") and text.startswith(spec["strip"]):
             text = text[len(spec["strip"]):]
-        new_id = text.lower().replace(":", ".")
+        new_id = text.translate(_ASCII_LOWER).replace(":", ".")
         if (self._id_max is not None and len(new_id) > self._id_max) or not self._id_re.fullmatch(new_id):
             return _fail([_e("E_ADAPT_ID", ["legacy"] + src_path)])
         ctx = inp.get("context")

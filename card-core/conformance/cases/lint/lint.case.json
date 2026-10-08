@@ -36,6 +36,199 @@
       }
     },
     {
+      "name": "duplicate-key-in-replaced-value",
+      "raw": "raw/dup-key-replaced.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a"
+          },
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a/b"
+          }
+        ]
+      }
+    },
+    {
+      "name": "duplicate-key-in-replaced-array-value",
+      "raw": "raw/dup-key-replaced-array.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a"
+          },
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a/0/b"
+          }
+        ]
+      }
+    },
+    {
+      "name": "duplicate-key-in-child-of-replaced-value",
+      "raw": "raw/dup-key-replaced-child.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a"
+          },
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a/x/b"
+          }
+        ]
+      }
+    },
+    {
+      "name": "duplicate-key-in-twice-replaced-value",
+      "raw": "raw/dup-key-replaced-twice.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a"
+          },
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a/b"
+          },
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a/b/c"
+          }
+        ]
+      }
+    },
+    {
+      "name": "duplicate-key-beyond-depth-limit-is-not-reported",
+      "raw": "raw/dup-key-too-deep.raw",
+      "limits": {
+        "max_nesting_depth": 2
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_TOO_DEEP",
+            "pointer": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "duplicate-key-at-depth-limit-is-reported",
+      "raw": "raw/dup-key-too-deep.raw",
+      "limits": {
+        "max_nesting_depth": 3
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a/b/c"
+          }
+        ]
+      }
+    },
+    {
+      "name": "del-in-key",
+      "raw": "raw/del-in-key.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ENCODING",
+            "pointer": "/k\u007f"
+          }
+        ]
+      }
+    },
+    {
+      "name": "control-character-in-string",
+      "raw": "raw/control-in-string.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_PARSE"
+          }
+        ]
+      }
+    },
+    {
+      "name": "raw-newline-in-string",
+      "raw": "raw/newline-in-string.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_PARSE"
+          }
+        ]
+      }
+    },
+    {
+      "name": "raw-tab-in-string",
+      "raw": "raw/tab-in-string.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_PARSE"
+          }
+        ]
+      }
+    },
+    {
+      "name": "escaped-control-characters-are-fine",
+      "raw": "raw/escaped-controls.raw",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "surrogate-pair-escape-is-one-character",
+      "raw": "raw/surrogate-pair.raw",
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "reversed-surrogate-pair-is-lone",
+      "raw": "raw/surrogate-reversed.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_ENCODING",
+            "pointer": "/a"
+          }
+        ]
+      }
+    },
+    {
+      "name": "duplicate-key-three-times",
+      "raw": "raw/dup-key-three.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DUP_KEY",
+            "pointer": "/a"
+          }
+        ]
+      }
+    },
+    {
       "name": "bom",
       "raw": "raw/bom.raw",
       "expect": {
@@ -225,6 +418,49 @@
         "errors": [
           {
             "code": "E_ENCODING",
+            "pointer": "/a"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lone-surrogate-key",
+      "raw": "raw/lone-surrogate-key.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_KEY_NONASCII",
+            "pointer": "/\ufffd"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lone-surrogate-key-nested",
+      "raw": "raw/lone-surrogate-key-nested.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_KEY_NONASCII",
+            "pointer": "/\ufffd"
+          },
+          {
+            "code": "E_FLOAT",
+            "pointer": "/\ufffd/a"
+          }
+        ]
+      }
+    },
+    {
+      "name": "huge-integer-literal",
+      "raw": "raw/huge-int.raw",
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_INT_RANGE",
             "pointer": "/a"
           }
         ]

@@ -206,6 +206,81 @@
       }
     },
     {
+      "name": "century-is-not-a-leap-year",
+      "set": {
+        "/as_of": "2100-02-29"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DATE_INVALID",
+            "pointer": "/as_of"
+          }
+        ]
+      }
+    },
+    {
+      "name": "year-zero",
+      "set": {
+        "/as_of": "0000-01-01"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DATE_INVALID",
+            "pointer": "/as_of"
+          }
+        ]
+      }
+    },
+    {
+      "name": "review-by-year-zero",
+      "set": {
+        "/card/review_by": "0000-01-01"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DATE_INVALID",
+            "pointer": "/card/review_by"
+          }
+        ]
+      }
+    },
+    {
+      "name": "as-of-trailing-newline",
+      "set": {
+        "/as_of": "2026-12-01\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DATE_INVALID",
+            "pointer": "/as_of"
+          }
+        ]
+      }
+    },
+    {
+      "name": "review-by-trailing-newline",
+      "set": {
+        "/card/review_by": "2026-12-01\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DATE_INVALID",
+            "pointer": "/card/review_by"
+          }
+        ]
+      }
+    },
+    {
       "name": "as-of-empty",
       "set": {
         "/as_of": ""

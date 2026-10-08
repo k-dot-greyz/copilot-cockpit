@@ -1,0 +1,37 @@
+{
+  "title": "Pack entry vs file envelope compares exactly: rev true in the file is not rev 1 in the entry",
+  "op": "validate",
+  "base_dir": "pack-strict",
+  "input": {
+    "schema_version": 1,
+    "kind": "core.pack",
+    "id": "pack.strict.v1",
+    "rev": 1,
+    "status": "active",
+    "visibility": "public",
+    "owner": "human:example-owner",
+    "params": {
+      "defaults_ref": null,
+      "requires": [],
+      "cards": [
+        {
+          "id": "defaults.base",
+          "kind": "core.defaults",
+          "schema_version": 1,
+          "rev": 1,
+          "path": "cards/defaults.base.json",
+          "sha256": "sha256:b112a96a293031df4a74a4f69c393218000d2221888dc6cbcc3dcddb47dd7f9f"
+        }
+      ]
+    }
+  },
+  "expect": {
+    "ok": false,
+    "errors": [
+      {
+        "code": "E_PACK_MISMATCH",
+        "pointer": "/params/cards/0"
+      }
+    ]
+  }
+}

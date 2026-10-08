@@ -46,3 +46,57 @@ jobs:
 
       - name: Run pytest wrapper
         run: python -m pytest card-core/tests -q
+
+  rust:
+    name: Conformance (Rust)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: card-core/rust
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        run: |
+          rustup toolchain install stable --profile minimal --component clippy --component rustfmt
+          rustup default stable
+          rustc --version
+          cargo --version
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            card-core/rust/target
+          key: card-core-rust-${{ runner.os }}-${{ hashFiles('card-core/rust/Cargo.lock') }}
+          restore-keys: card-core-rust-${{ runner.os }}-
+
+      - name: Setup Python (hosts the conformance harness)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: card-core/requirements.txt
+
+      - name: Install harness dependencies
+        working-directory: .
+        run: pip install -r card-core/requirements.txt
+
+      - name: Format
+        run: cargo fmt --check
+
+      - name: Lint
+        run: cargo clippy --all-targets --locked -- -D warnings
+
+      - name: Unit and integration tests
+        run: cargo test --locked
+
+      - name: Build release binary
+        run: cargo build --release --locked
+
+      - name: Run conformance suite against the Rust binary
+        working-directory: .
+        run: python card-core/tools/run_conformance.py --impl-cmd "card-core/rust/target/release/cardcore protocol"

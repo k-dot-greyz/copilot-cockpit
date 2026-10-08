@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "kind": "core.defaults",
+  "id": "defaults.base",
+  "rev": true,
+  "status": "active",
+  "visibility": "public",
+  "owner": "human:example-owner",
+  "params": {
+    "values": {
+      "model.tier": "mid",
+      "budget.tokens": 4000
+    }
+  }
+}

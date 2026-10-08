@@ -66,7 +66,10 @@ Cards add `extends` (an id), `refs` (up to 64 of `rel`, `id`, optional `rev`) an
 
 ### 4.1 Grammars
 
-All patterns are ASCII and anchored.
+All patterns are ASCII and anchored. They use the ECMA-262 subset JSON Schema defines for `pattern`: literals, character classes, groups, alternation, quantifiers and the anchors `^` and `$`. Two rules remove the places where regex dialects disagree:
+
+- `$` matches only at the very end of the string, never before a final newline. `pol.example` followed by a newline is therefore not an id, and neither is a date, a digest or a path with a trailing newline. An implementation whose regex engine lets `$` match before a final newline (Python's `re` does) MUST translate it, for example to `\Z`.
+- Patterns MUST NOT use `.`, `\d`, `\w`, `\s`, lookarounds, backreferences or flags. A schema that needs one is a schema bug.
 
 | Name | Pattern | Limit |
 | --- | --- | --- |
@@ -102,10 +105,11 @@ Whether an asset may be sold, listed or called exclusive is a policy decision ma
 ## 5. Numbers, strings and size
 
 - Numbers are integers. A JSON number with a fraction or exponent is rejected, including `2.0` and `1e3` (`E_FLOAT`). Fractions are basis points (`_bps`), money is cents (`_cents`). This keeps canonical JSON identical across languages.
-- Integers MUST be within plus or minus 9007199254740991 (`E_INT_RANGE`).
+- Integers MUST be within plus or minus 9007199254740991 (`E_INT_RANGE`). An integer literal is read at any length, so a literal of five thousand digits is `E_INT_RANGE` at its own pointer, not a parse failure.
 - Object keys MUST be ASCII (`E_KEY_NONASCII`).
 - Strings MUST be valid Unicode and MUST NOT contain U+007F or lone surrogates (`E_ENCODING`).
-- Any string shaped like a date (`NNNN-NN-NN`) anywhere in a card MUST be a real calendar date (`E_DATE_INVALID`).
+- Any string shaped like a date (`NNNN-NN-NN`) anywhere in a card MUST be a real calendar date (`E_DATE_INVALID`): proleptic Gregorian, years 0001 to 9999, with leap years every fourth year except centuries not divisible by 400.
+- Wherever this specification compares two values for equality, the comparison is exact JSON equality: the types must match, so `true` is not `1` and `1.0` is not `1`.
 - Duplicate object keys are rejected (`E_DUP_KEY`). JSON allows them; parsers silently keep the last, which hides merge damage.
 - Documents are UTF-8 without a byte-order mark (`E_BOM`), at most `max_json_bytes` (`E_TOO_LARGE`) and nested at most `max_nesting_depth` (`E_TOO_DEEP`). `NaN` and `Infinity` are rejected (`E_NONFINITE`).
 
@@ -136,7 +140,7 @@ Kind registry: `schemas/index.json` maps each `(kind, schema_version)` to a `cla
 
 ## 8. Operations
 
-An implementation provides these operations. Inputs and outputs are JSON. Every failure is a list of `{code, pointer}` where `pointer` is an RFC 6901 pointer into the input. Codes are stable; messages are advisory.
+An implementation provides these operations. Inputs and outputs are JSON. Every failure is a list of `{code, pointer}` where `pointer` is an RFC 6901 pointer into the input. A pointer never contains a lone surrogate: each one is written as U+FFFD, so an implementation that cannot hold a lone surrogate in a string still reports the same pointer. Codes are stable; messages are advisory.
 
 ```
 raw bytes --lint--> value --validate--> ok
@@ -152,7 +156,7 @@ raw bytes --lint--> value --validate--> ok
 
 Parses bytes into a value and applies every rule in section 5 that can be checked on text or value. Returns the value or the lint errors. Lint errors are returned alone: if lint fails, no later check runs.
 
-Lint runs in stages. Stage 1 checks the bytes (`E_TOO_LARGE`, `E_BOM`, invalid UTF-8 as `E_ENCODING`) and stops at the first failure. Stage 2 parses; `E_PARSE` stops the stage, otherwise duplicate keys and `NaN` or `Infinity` are reported. Stage 3 walks the value and accumulates `E_FLOAT`, `E_INT_RANGE`, `E_KEY_NONASCII`, `E_ENCODING` and `E_TOO_DEEP`. For duplicate and non-ASCII keys the pointer is the pointer of the key itself; for other value errors it is the pointer of the offending value; for `E_TOO_DEEP` and the byte-level errors it is the empty pointer.
+Lint runs in stages. Stage 1 checks the bytes (`E_TOO_LARGE`, `E_BOM`, invalid UTF-8 as `E_ENCODING`) and stops at the first failure. Stage 2 parses; `E_PARSE` stops the stage, otherwise duplicate keys and `NaN` or `Infinity` are reported. Every duplicate key is reported wherever it occurs, including inside a value that a later duplicate of the same key replaced. Stage 3 walks the value and accumulates `E_FLOAT`, `E_INT_RANGE`, `E_KEY_NONASCII`, `E_ENCODING` and `E_TOO_DEEP`. A document that is malformed and also nested more than a thousand levels deep is `E_PARSE` or `E_TOO_DEEP`, whichever the implementation's parser reaches first; the suite does not pin which. A well-formed document nested beyond the limit is always `E_TOO_DEEP`, however deep. For duplicate and non-ASCII keys the pointer is the pointer of the key itself; for other value errors it is the pointer of the offending value; for `E_TOO_DEEP` and the byte-level errors it is the empty pointer.
 
 ### 8.2 validate
 
@@ -175,9 +179,9 @@ Lint runs in stages. Stage 1 checks the bytes (`E_TOO_LARGE`, `E_BOM`, invalid U
 
 Input: a map of cards, a target id, and optionally a defaults card id.
 
-1. Every card used MUST pass the envelope check (`E_SCHEMA`, pointer prefixed `/cards/<id>`). Build the chain from the target through `extends` to the root. A missing target is `E_REF_MISSING`. A repeated id is `E_EXTENDS_CYCLE`. More cards than `extends_max_depth` is `E_EXTENDS_DEPTH`. A parent with another `kind` or `schema_version` is `E_EXTENDS_KIND`.
+1. Every card used MUST pass the envelope check (`E_SCHEMA`, pointer prefixed `/cards/<id>`), and its `id` MUST equal its key in `cards` (`E_ID_MISMATCH` at `/cards/<key>/id`). Build the chain from the target through `extends` to the root. A missing target is `E_REF_MISSING`. A repeated id is `E_EXTENDS_CYCLE`. More cards than `extends_max_depth` is `E_EXTENDS_DEPTH`. A parent with another `kind` or `schema_version` is `E_EXTENDS_KIND`.
 2. Visibility ratchet: a card MUST NOT be more public than any ancestor. The order is `private` < `internal` < `public`. Violation is `E_VISIBILITY_WIDEN`. The ratchet applies to every `extends` chain, including a defaults chain.
-3. Merge `params` from the root to the target. Objects merge recursively. Any other value, including an array, is replaced by the child value. The marker `{"$unset": true}` removes an inherited key: in a root card it is `E_UNSET_ORPHAN`, and for a key the merged parent does not have it is `E_UNSET_MISSING`. Any other object key starting with `$` is `E_DOLLAR_KEY`. For a kind with `allow_tokens` false, markers and `$` keys are not interpreted here or in step 4; the merge is otherwise identical.
+3. Merge `params` from the root to the target. Objects merge recursively. Any other value, including an array, is replaced by the child value. The marker is exactly the object `{"$unset": true}`, with the boolean `true` and no other key; it removes an inherited key: in a root card it is `E_UNSET_ORPHAN`, and for a key the merged parent does not have it is `E_UNSET_MISSING`. Any other object key starting with `$` is `E_DOLLAR_KEY`, and so is an object that has a `$unset` key but is not exactly the marker (`{"$unset": 1}`, `{"$unset": null}`, `{"$unset": true, "x": 1}`), at the pointer of its `$unset` key. For a kind with `allow_tokens` false, markers and `$` keys are not interpreted here or in step 4; the merge is otherwise identical.
 4. Defaults. If the merged `params` contains tokens, a defaults card is required. A defaults id that is absent, unknown or not a `core.defaults` card is `E_DEFAULT_MISSING` at `/defaults`. The defaults card is itself resolved by steps 1 to 3 (it may extend another defaults card; its values MUST NOT contain tokens, which is a schema error). A string that is exactly `$defaults.<dotted key>` is replaced by the value, keeping its type. A missing key or missing defaults card is `E_DEFAULT_MISSING`. A string that contains `$defaults.` without being exactly a token is `E_DEFAULT_PARTIAL`. If any value is used, the target MUST NOT be more public than any card in the defaults chain (`E_VISIBILITY_WIDEN`).
 5. Build the resolved card: the target envelope without `extends`, with the merged and substituted `params`. Validate it with `validate` (including the kind schema). Failures are reported with pointers into the resolved card, such as `/params/limit`.
 6. Pointers. Errors found before merging point into the input: `/target`, `/defaults`, `/cards/<id>/extends`, `/cards/<id>/visibility`, or `/cards/<id>/params/<path>` for `$unset` and `$` keys. Errors found after merging point into the merged params, `/params/<path>`, for tokens; errors in the resolved defaults card use the same form prefixed with `/defaults`. For `$unset` and `$` keys the path ends at the offending key. `E_EXTENDS_CYCLE` points at the `extends` of the card that closes the loop. `E_EXTENDS_DEPTH` points at `/target`, or at `/defaults` for a defaults chain. `E_VISIBILITY_WIDEN` points at the `visibility` of the card that is too public.
@@ -211,7 +215,7 @@ Output envelope: `kind` `legacy.wrap`, `schema_version` 1, `id` normalised from 
 
 A legacy payload that is not an object is `E_ADAPT_SHAPE` at `/legacy`. Each dialect has required fields (table below); one that is missing or not a string is `E_ADAPT_SHAPE` at that field.
 
-Id normalisation: lowercase, then each `:` becomes `.`. If the result does not match the id grammar, `E_ADAPT_ID`. Uppercase input is therefore normalised, not rejected.
+Id normalisation: ASCII-lowercase (`A` to `Z` only; no other character changes case), then each `:` becomes `.`. If the result does not match the id grammar, `E_ADAPT_ID`. ASCII uppercase input is therefore normalised, not rejected; a non-ASCII letter is never folded, so it fails the grammar.
 
 Status mapping for dex-style statuses: `active` to `active`, `deprecated` to `deprecated`, `experimental` to `draft`, `archived` to `retired`. Anything else is `E_ADAPT_STATUS`. A legacy status wins over `context.status`.
 
@@ -293,6 +297,7 @@ If any canary stays green, the suite itself is broken. The selftest needs the in
 | `E_HASH_MISMATCH` | validate (pack) | file digest differs from entry |
 | `E_PACK_MISMATCH` | validate (pack) | file envelope differs from entry |
 | `E_REF_MISSING` | validate (pack), resolve | referenced id not found |
+| `E_ID_MISMATCH` | resolve | a card's `id` differs from its key in `cards` |
 | `E_EXTENDS_CYCLE` | resolve | `extends` loop |
 | `E_EXTENDS_DEPTH` | resolve | chain longer than the limit |
 | `E_EXTENDS_KIND` | resolve | parent has another kind or version |

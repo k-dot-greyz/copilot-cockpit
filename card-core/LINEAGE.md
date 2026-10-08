@@ -4,7 +4,8 @@ This directory is the single source of truth for Card Core v1: the specification
 
 - **Consumers** copy `schemas/` pinned to a git commit or tag. They do not fork the core schemas. A consumer's own kinds live in the consumer's own tree and are registered in its own kind registry.
 - **Changes** start in `SPEC.md`. Then a fixture that fails, then the schema or code that makes it pass. A schema change without a fixture change is a defect.
-- **Hydrators and runners** in other languages are conformance targets. Passing `conformance/` is what makes one of them correct; there is no second source of truth.
+- **Hydrators and runners** in other languages are conformance targets. Passing `conformance/` is what makes one of them correct; there is no second source of truth. `tools/cardcore_ref.py` (Python) and `rust/` (Rust) are two such targets, and neither outranks the other.
+- **When two implementations disagree,** the specification decides. If it does not, that is a specification bug: write the rule in `SPEC.md`, add a row that fails for the wrong implementation, then fix it.
 
 ## Home
 

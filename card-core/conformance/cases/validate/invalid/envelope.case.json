@@ -557,6 +557,64 @@
       }
     },
     {
+      "name": "as-of-century-is-not-a-leap-year",
+      "set": {
+        "/as_of": "2100-02-29"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DATE_INVALID",
+            "pointer": "/as_of"
+          }
+        ]
+      }
+    },
+    {
+      "name": "as-of-every-400-years-is-a-leap-year-ok",
+      "set": {
+        "/as_of": "2000-02-29"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "as-of-year-zero",
+      "set": {
+        "/as_of": "0000-01-01"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_DATE_INVALID",
+            "pointer": "/as_of"
+          }
+        ]
+      }
+    },
+    {
+      "name": "as-of-year-one-ok",
+      "set": {
+        "/as_of": "0001-01-01"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "name": "as-of-year-9999-ok",
+      "set": {
+        "/as_of": "9999-12-31",
+        "/review_by": "9999-12-31"
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
       "name": "as-of-after-review-by",
       "set": {
         "/as_of": "2027-01-01"
@@ -1037,6 +1095,145 @@
           {
             "code": "E_ENCODING",
             "pointer": "/title"
+          }
+        ]
+      }
+    },
+    {
+      "name": "id-trailing-newline",
+      "set": {
+        "/id": "pol.example\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/id"
+          }
+        ]
+      }
+    },
+    {
+      "name": "kind-trailing-newline",
+      "set": {
+        "/kind": "core.policy\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/kind"
+          }
+        ]
+      }
+    },
+    {
+      "name": "owner-trailing-newline",
+      "set": {
+        "/owner": "human:example-owner\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/owner"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tag-trailing-newline",
+      "set": {
+        "/tags": [
+          "policy\n"
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/tags/0"
+          }
+        ]
+      }
+    },
+    {
+      "name": "alias-trailing-newline",
+      "set": {
+        "/aliases": [
+          "POL-ES-1\n"
+        ]
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/aliases/0"
+          }
+        ]
+      }
+    },
+    {
+      "name": "as-of-trailing-newline",
+      "set": {
+        "/as_of": "2026-10-01\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/as_of"
+          }
+        ]
+      }
+    },
+    {
+      "name": "review-by-trailing-newline",
+      "set": {
+        "/review_by": "2026-12-01\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/review_by"
+          }
+        ]
+      }
+    },
+    {
+      "name": "provenance-sha256-trailing-newline",
+      "set": {
+        "/provenance/sources/0/sha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/provenance/sources/0/sha256"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ext-dex-id-trailing-newline",
+      "set": {
+        "/ext/dex/dex_id": "0x7D:0x10\n"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/ext/dex/dex_id"
           }
         ]
       }

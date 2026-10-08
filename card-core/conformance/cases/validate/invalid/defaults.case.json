@@ -142,6 +142,21 @@
       }
     },
     {
+      "name": "key-trailing-newline",
+      "set": {
+        "/params/values/model.tier\n": "x"
+      },
+      "expect": {
+        "ok": false,
+        "errors": [
+          {
+            "code": "E_SCHEMA",
+            "pointer": "/params/values"
+          }
+        ]
+      }
+    },
+    {
       "name": "key-trailing-dot",
       "set": {
         "/params/values/model.": "x"

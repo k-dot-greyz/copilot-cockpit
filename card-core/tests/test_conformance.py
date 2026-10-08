@@ -49,6 +49,53 @@ def test_digest_parity_between_python_and_jq():
         assert via_jq == rc.digest(rc.load_json(golden)), golden.name
 
 
+def _patterns(node):
+    if isinstance(node, dict):
+        for key, val in node.items():
+            if key == "pattern" and isinstance(val, str):
+                yield val
+            else:
+                yield from _patterns(val)
+    elif isinstance(node, list):
+        for val in node:
+            yield from _patterns(val)
+
+
+def _forbidden(pattern: str) -> list[str]:
+    """Constructs SPEC.md section 4.1 forbids: `.`, \\d \\w \\s, lookarounds, backreferences, flags."""
+    found, in_class, i = [], False, 0
+    while i < len(pattern):
+        ch = pattern[i]
+        if ch == "\\":
+            nxt = pattern[i + 1 : i + 2]
+            if nxt and (nxt in "dDwWsSbB" or nxt.isdigit()):
+                found.append("\\" + nxt)
+            i += 2
+            continue
+        if in_class:
+            in_class = ch != "]"
+        elif ch == "[":
+            in_class = True
+        elif ch == ".":
+            found.append(".")
+        elif pattern.startswith("(?", i):
+            found.append("(?")
+        i += 1
+    return found
+
+
+def test_schema_patterns_stay_in_the_spec_subset():
+    """Regex dialects disagree on these constructs, so a schema that used one would be a schema bug."""
+    schemas = sorted((ROOT / "schemas").rglob("*.json")) + sorted((ROOT / "conformance" / "schemas").rglob("*.json"))
+    assert schemas
+    seen = 0
+    for path in schemas:
+        for pattern in _patterns(rc.load_json(path)):
+            seen += 1
+            assert _forbidden(pattern) == [], f"{path.name}: {pattern!r} uses {_forbidden(pattern)}"
+    assert seen > 10
+
+
 def test_external_protocol_matches_in_process():
     """A sample of every op through the stdin/stdout protocol gives the same verdicts."""
     external = rc.CommandImpl(ROOT, f"{sys.executable} {ROOT / 'tools' / 'ref_cli.py'}")
