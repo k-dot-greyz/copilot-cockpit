@@ -26,7 +26,7 @@
     },
     {
       "slug": "copilot-cockpit",
-      "aliases": ["cockpit"],
+      "aliases": ["cockpit", "cc"],
       "repo": "k-dot-greyz/copilot-cockpit",
       "summary": "Copilot agent surface dashboard (this site)",
       "redirect": "https://github.com/k-dot-greyz/copilot-cockpit",
@@ -54,7 +54,7 @@
     },
     {
       "slug": "glitchworks-tarot",
-      "aliases": ["tarot", "oracle"],
+      "aliases": ["tarot", "oracle", "aether"],
       "repo": "k-dot-greyz/glitchworks-tarot",
       "summary": "Cyber-mystic tarot generator (Aether Deck)",
       "redirect": "https://github.com/k-dot-greyz/glitchworks-tarot",
@@ -69,9 +69,30 @@
     },
     {
       "slug": "glitchworks-manifesto",
+      "aliases": ["manifesto"],
       "repo": "k-dot-greyz/glitchworks-manifesto",
       "summary": "GlitchWorks public manifesto & governance",
       "redirect": "https://github.com/k-dot-greyz/glitchworks-manifesto"
+    },
+    {
+      "slug": "dev-master",
+      "repo": "k-dot-greyz/glitchworks-manifesto",
+      "summary": "Private monorepo guard — public redirect only",
+      "redirect": "https://github.com/k-dot-greyz/glitchworks-manifesto",
+      "security_note": "Never expose private dev-master URL"
+    },
+    {
+      "slug": "rolodex",
+      "repo": "k-dot-greyz/rolodex",
+      "summary": "Alias rolodex web app",
+      "redirect": "https://github.com/k-dot-greyz/rolodex"
+    },
+    {
+      "slug": "glitch-that-shit",
+      "aliases": ["gts"],
+      "repo": "k-dot-greyz/glitch-that-shit",
+      "summary": "Privacy-first glitch browser extension",
+      "redirect": "https://github.com/k-dot-greyz/glitch-that-shit"
     },
     {
       "slug": "zenClip",

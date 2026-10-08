@@ -27,5 +27,15 @@ describe("glitch.cards ecosystem slugs", () => {
     const slugs = new Set(registry.slugs.map((s) => s.slug));
     expect(slugs.has("env-doctor")).toBe(true);
     expect(slugs.has("zenOS")).toBe(true);
+    expect(slugs.has("dev-master")).toBe(true);
+  });
+
+  it("path-routes manifest has dex rewrites", () => {
+    const paths = JSON.parse(
+      readFileSync(join(root, "public/ecosystem/path-routes.json"), "utf8"),
+    );
+    const rewriteSources = paths.rewrites.map((r: { source: string }) => r.source);
+    expect(rewriteSources).toContain("/cards/dex/:id");
+    expect(rewriteSources).toContain("/.well-known/dex-card");
   });
 });
