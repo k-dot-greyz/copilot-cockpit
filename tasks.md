@@ -8,7 +8,7 @@
 
 | Step | Actor action | System response |
 |------|--------------|-----------------|
-| 1 | Open dashboard (no stored token) | Token modal — PAT with `repo` scope, stored in `localStorage` only |
+| 1 | Open dashboard (no stored token) | Token modal — PAT with `repo` scope, stored in `sessionStorage` only |
 | 2 | Click **Connect** | `validateToken` → modal closes, `@username` in header |
 | 3 | — (automatic) | Paginated fetch of open PRs from `k-dot-greyz/dev-master` with progress bar |
 | 4 | Scan stat bar | Total · Ready · Drafts · Human · Bot · 🚨 Flood (if any) |
@@ -83,3 +83,24 @@ Follow-up tracking after extraction of `StickHRPG` into standalone `stickhrpg-de
 - [ ] `ISSUE-COCKPIT-004`: Configure real browser Playwright E2E suite (`tests/e2e-dashboard.spec.ts`) with Chromium and webServer fixture.
 - [ ] `ISSUE-COCKPIT-005`: Complete full parity reconciliation between `PRCardEntity` and GraphQL rich fields.
 - [ ] `ISSUE-COCKPIT-006`: Implement OAuth rate limit backoff and error recovery toast banner in `PRDashboard`.
+
+---
+
+## Epic: COCKPIT-REVIEW-FOLLOWUP-003 — Review Hardening Follow-up (PR #14)
+
+Completed in [#14](https://github.com/k-dot-greyz/copilot-cockpit/pull/14) after [#8](https://github.com/k-dot-greyz/copilot-cockpit/pull/8).
+
+- [x] Avatar URL sanitization (`sanitizeGithubAvatarUrl` — restrict to `avatars.githubusercontent.com`)
+- [x] Pin GitHub Actions to commit SHAs in CI workflow
+- [x] Document OAuth login flow, PR filters, and Inspect drawer in README
+- [x] Extract `getFocusWrapIndex` focus-trap utility with unit tests
+- [x] Issue + avatar URL security regression suites in `tests/security.spec.ts`
+- [x] Update dex-entry tags (`oauth`, `graphql`, `pr-triage`)
+
+---
+
+## Epic: COCKPIT-DEPLOY-001 — Vercel
+
+- [x] vercel.json config
+- [ ] Deploy from main branch
+- [ ] Custom domain (TBD: cockpit.glitchworks.tech?)
