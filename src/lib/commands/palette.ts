@@ -3,7 +3,8 @@ import type { ActionCard } from '../config/cockpit';
 
 export type PaletteItem =
   | { kind: 'action'; id: string; label: string }
-  | { kind: 'pr'; id: string; label: string; prNumber: number };
+  | { kind: 'pr'; id: string; label: string; prNumber: number }
+  | { kind: 'tarot'; id: string; label: string; prNumber: number };
 
 function haystack(pr: PR): string {
   return `#${pr.number} ${pr.title} ${pr.author} ${pr.headRefName}`.toLowerCase();
@@ -27,8 +28,15 @@ export function searchPalette(query: string, prs: PR[], actions: ActionCard[]): 
       prNumber: pr.number,
     }));
 
-  if (!q) {
-    return [...actionItems, ...prItems];
-  }
-  return [...actionItems, ...prItems];
+  const tarotItems: PaletteItem[] =
+    q.includes('tarot') || q.includes('spread') || q.includes('divin')
+      ? prs.map((pr) => ({
+          kind: 'tarot' as const,
+          id: `tarot-${pr.number}`,
+          label: `🔮 Tarot Spread: #${pr.number} ${pr.title}`,
+          prNumber: pr.number,
+        }))
+      : [];
+
+  return [...actionItems, ...prItems, ...tarotItems];
 }

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+echo "=== Running Vitest ==="
+npx vitest run
+echo "=== Running Playwright UX Stories ==="
+npx playwright test
+echo "=== Running Rust Cockpit-Core Tests ==="
+cargo test --manifest-path packages/cockpit-core/Cargo.toml --quiet
+echo "=== All Cockpit Tests Passed ==="

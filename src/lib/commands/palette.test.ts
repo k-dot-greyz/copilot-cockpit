@@ -35,4 +35,10 @@ describe('searchPalette', () => {
     const items = searchPalette('nuke', prs, actions);
     expect(items[0]).toMatchObject({ id: 'nuke-flood', kind: 'action' });
   });
+
+  it('generates tarot spread items when searching for tarot or spread', () => {
+    const items = searchPalette('tarot', prs, actions);
+    expect(items.some((i) => i.kind === 'tarot' && i.prNumber === 42)).toBe(true);
+    expect(items.some((i) => i.kind === 'tarot' && i.prNumber === 7)).toBe(true);
+  });
 });

@@ -7,12 +7,14 @@ export function CockpitPRCard({
   focused,
   onToggle,
   onInspect,
+  onOpenTarot,
 }: {
   pr: PR;
   selected: boolean;
   focused: boolean;
   onToggle: (n: number) => void;
   onInspect: (n: number) => void;
+  onOpenTarot?: (n: number) => void;
 }) {
   const authorBadgeClass =
     pr.authorType === 'human'
@@ -58,8 +60,16 @@ export function CockpitPRCard({
         </div>
       </div>
       <div className="pr-card__actions">
-        <button className="btn btn--sm btn--primary" type="button" onClick={() => onInspect(pr.number)}>
-          Inspect
+        <button
+          className="btn btn--sm btn--primary glitch-rgb"
+          type="button"
+          title="Open Tarot Spread"
+          onClick={() => (onOpenTarot ? onOpenTarot(pr.number) : onInspect(pr.number))}
+        >
+          🔮 Tarot
+        </button>
+        <button className="btn btn--sm" type="button" title="Inspect Diff" onClick={() => onInspect(pr.number)}>
+          Diff
         </button>
         <a className="btn btn--sm" href={pr.url} target="_blank" rel="noopener noreferrer" title="Open on GitHub">
           ↗

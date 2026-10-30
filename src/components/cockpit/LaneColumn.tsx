@@ -10,6 +10,7 @@ export function LaneColumn({
   onToggle,
   onSelectAll,
   onInspect,
+  onOpenTarot,
 }: {
   lane: LaneCard;
   prs: PR[];
@@ -18,6 +19,7 @@ export function LaneColumn({
   onToggle: (n: number) => void;
   onSelectAll: (ids: number[]) => void;
   onInspect: (n: number) => void;
+  onOpenTarot?: (n: number) => void;
 }) {
   const selectedInLane = prs.filter((p) => selectedPRs.has(p.number)).length;
   return (
@@ -53,6 +55,7 @@ export function LaneColumn({
           focused={focusedNumber === pr.number}
           onToggle={onToggle}
           onInspect={onInspect}
+          onOpenTarot={onOpenTarot}
         />
       ))}
     </section>

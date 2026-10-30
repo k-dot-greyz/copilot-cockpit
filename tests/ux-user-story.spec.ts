@@ -13,6 +13,7 @@ import {
 import { searchPalette } from '../src/lib/commands/palette';
 import { numbersToCloseKeepingOldest } from '../src/lib/duplicates';
 import { makePR } from '../src/lib/fixtures/pr';
+import { mapPRToTarotSpread } from '../src/lib/tarot/spread-mapper';
 
 test.describe('Story: maintainer connects PAT and loads open PRs', () => {
   test('categorization separates human-ready vs bot flood lanes', () => {
@@ -82,5 +83,23 @@ test.describe('Story: maintainer uses command palette to find a PR', () => {
       { id: 'close-selected', title: 'Close selected PRs', kind: 'close', confirm: true },
     ]);
     expect(items.some((i) => i.kind === 'pr' && i.prNumber === 99)).toBe(true);
+  });
+});
+
+test.describe('Story: maintainer opens tarot divination spread for decision review', () => {
+  test('maps PR into 3-card spread with explainer arcana', () => {
+    const pr = makePR({
+      number: 19,
+      title: 'chore(cleanup): extract stickhrpg',
+      checksStatus: 'success',
+      mergeable: 'MERGEABLE',
+      reviewDecision: 'APPROVED',
+    });
+    const spread = mapPRToTarotSpread(pr);
+    expect(spread.cards.origin.position).toBe('origin');
+    expect(spread.cards.crucible.position).toBe('crucible');
+    expect(spread.cards.oracle.position).toBe('oracle');
+    expect(spread.explainer.verdict).toBeDefined();
+    expect(spread.orientation).toBe('upright');
   });
 });
