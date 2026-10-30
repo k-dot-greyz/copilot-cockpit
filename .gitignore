@@ -25,3 +25,4 @@ pnpm-debug.log*
 test-results/
 dist-export/
 packages/cockpit-core/target/
+.worktrees/
