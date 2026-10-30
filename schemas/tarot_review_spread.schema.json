@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://glitchworks.dev/schemas/tarot_review_spread.schema.json",
+  "title": "TarotReviewSpread",
+  "type": "object",
+  "required": ["spread_id", "pr_number", "orientation", "cards", "explainer"],
+  "properties": {
+    "spread_id": { "type": "string" },
+    "pr_number": { "type": "integer" },
+    "orientation": { "enum": ["upright", "reversed"] },
+    "cards": {
+      "type": "object",
+      "required": ["origin", "crucible", "oracle"],
+      "properties": {
+        "origin": { "$ref": "#/$defs/TarotCardSpreadSlot" },
+        "crucible": { "$ref": "#/$defs/TarotCardSpreadSlot" },
+        "oracle": { "$ref": "#/$defs/TarotCardSpreadSlot" }
+      }
+    },
+    "explainer": {
+      "type": "object",
+      "required": ["summary", "risk_level", "verdict", "key_files"],
+      "properties": {
+        "summary": { "type": "string" },
+        "risk_level": { "enum": ["low", "moderate", "high", "critical"] },
+        "verdict": { "type": "string" },
+        "key_files": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "TarotCardSpreadSlot": {
+      "type": "object",
+      "required": [
+        "id",
+        "position",
+        "title",
+        "arcana",
+        "archetype",
+        "element",
+        "status",
+        "is_reversed",
+        "glyphs"
+      ],
+      "properties": {
+        "id": { "type": "string" },
+        "position": { "enum": ["origin", "crucible", "oracle"] },
+        "title": { "type": "string" },
+        "arcana": { "type": "string" },
+        "archetype": { "type": "string" },
+        "element": { "enum": ["void", "fire", "water", "aether", "electric", "dark"] },
+        "status": { "type": "string" },
+        "is_reversed": { "type": "boolean" },
+        "glyphs": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": { "type": ["string", "number", "boolean", "null"] }
+        },
+        "action": {
+          "type": "object",
+          "properties": {
+            "label": { "type": "string" },
+            "kind": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

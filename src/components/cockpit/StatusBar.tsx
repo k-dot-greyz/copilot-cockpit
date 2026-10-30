@@ -15,6 +15,7 @@ export function StatusBar({
       <span>
         {selectedCount} selected
         <kbd className="kbd">⌘K</kbd> command
+        <kbd className="kbd">T</kbd> tarot
         <kbd className="kbd">?</kbd> help
         <kbd className="kbd">R</kbd> refresh
       </span>

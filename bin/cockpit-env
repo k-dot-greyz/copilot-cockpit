@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Source this file to add worktree bin/ to PATH:
+#   source bin/cockpit-env
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PATH="$SCRIPT_DIR:$PATH"
+echo "copilot-cockpit environment loaded. PATH prepended with: $SCRIPT_DIR"

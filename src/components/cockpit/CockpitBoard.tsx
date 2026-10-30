@@ -31,6 +31,7 @@ import { ConfirmModal } from './ConfirmModal';
 import { ShortcutHelp } from './ShortcutHelp';
 import { RepoChip } from './RepoChip';
 import { StatusBar } from './StatusBar';
+import { TarotSpreadModal } from './TarotSpreadModal';
 import { loadDemoPrs } from '../../lib/fixtures/demo-board';
 
 const CLIENT_ID = import.meta.env.PUBLIC_GITHUB_CLIENT_ID || '';
@@ -93,6 +94,7 @@ export default function CockpitBoard() {
   const [paletteIndex, setPaletteIndex] = useState(0);
   const [helpOpen, setHelpOpen] = useState(false);
   const [focusedNumber, setFocusedNumber] = useState<number | null>(null);
+  const [activeTarotNumber, setActiveTarotNumber] = useState<number | null>(null);
   const [confirm, setConfirm] = useState<{
     title: string;
     body: string;
@@ -270,6 +272,17 @@ export default function CockpitBoard() {
     [token, owner, repo, prs]
   );
 
+  const handleOpenTarot = useCallback(
+    (num: number) => {
+      setFocusedNumber(num);
+      setActiveTarotNumber(num);
+      if (detailData?.number !== num) {
+        void handleViewDetail(num);
+      }
+    },
+    [detailData, handleViewDetail]
+  );
+
   const handleToggle = (n: number) => {
     setSelectedPRs((prev) => {
       const next = new Set(prev);
@@ -327,6 +340,15 @@ export default function CockpitBoard() {
       void handleViewDetail(item.prNumber);
       return;
     }
+    if (item.kind === 'tarot') {
+      handleOpenTarot(item.prNumber);
+      return;
+    }
+    if (item.id === 'open-tarot') {
+      const targetNum = focusedNumber || prs[0]?.number;
+      if (targetNum) handleOpenTarot(targetNum);
+      return;
+    }
     if (item.id === 'refresh') void loadPRs();
     if (item.id === 'close-selected') {
       setConfirm({
@@ -359,6 +381,7 @@ export default function CockpitBoard() {
         setHelpOpen(false);
         setConfirm(null);
         setDetailData(null);
+        setActiveTarotNumber(null);
         return;
       }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -376,6 +399,11 @@ export default function CockpitBoard() {
       if (e.key === '?' && !paletteOpen) {
         e.preventDefault();
         setHelpOpen((v) => !v);
+        return;
+      }
+      if ((e.key === 't' || e.key === 'T') && focusedNumber && !paletteOpen) {
+        e.preventDefault();
+        handleOpenTarot(focusedNumber);
         return;
       }
       if (
@@ -569,6 +597,7 @@ export default function CockpitBoard() {
                 onToggle={handleToggle}
                 onSelectAll={handleSelectAll}
                 onInspect={handleViewDetail}
+                onOpenTarot={handleOpenTarot}
               />
             ))}
           </div>
@@ -582,6 +611,38 @@ export default function CockpitBoard() {
               setDetailError(null);
             }}
           />
+
+          {activeTarotNumber !== null && (
+            <TarotSpreadModal
+              pr={prs.find((p) => p.number === activeTarotNumber) ?? null}
+              detail={detailData?.number === activeTarotNumber ? detailData : null}
+              onClose={() => setActiveTarotNumber(null)}
+              onAction={(actionKind, prNumber) => {
+                setActiveTarotNumber(null);
+                if (actionKind === 'merge') {
+                  const url = prs.find((p) => p.number === prNumber)?.url;
+                  if (url) window.open(url, '_blank');
+                } else if (actionKind === 'nuke') {
+                  const numbers = floods.flatMap((f) => f.prs.map((p) => p.number));
+                  setConfirm({
+                    title: 'Nuke flood',
+                    body: `Close ${numbers.length} flood PRs and delete branches?`,
+                    confirmLabel: `Nuke ${numbers.length}`,
+                    numbers: numbers.length > 0 ? numbers : [prNumber],
+                    deleteBranches: true,
+                  });
+                } else if (actionKind === 'block' || actionKind === 'resolve') {
+                  setConfirm({
+                    title: 'Close PR',
+                    body: `Close PR #${prNumber} and delete its branch?`,
+                    confirmLabel: 'Close PR',
+                    numbers: [prNumber],
+                    deleteBranches: true,
+                  });
+                }
+              }}
+            />
+          )}
         </>
       )}
 

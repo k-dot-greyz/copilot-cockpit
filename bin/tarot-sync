@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+TAROT_DECK="$ROOT_DIR/repos/glitchworks-tarot/src/default_deck.json"
+TARGET_DIR="$ROOT_DIR/content/cockpit/tarot"
+TARGET_FILE="$TARGET_DIR/major_arcana.json"
+
+if [ ! -f "$TAROT_DECK" ]; then
+  echo "Error: glitchworks-tarot deck not found at $TAROT_DECK" >&2
+  exit 1
+fi
+
+mkdir -p "$TARGET_DIR"
+cp "$TAROT_DECK" "$TARGET_FILE"
+
+COUNT=$(node -e "const d = JSON.parse(fs.readFileSync('$TARGET_FILE')); console.log(d.length);")
+echo "Synced $COUNT tarot cards from glitchworks-tarot to $TARGET_FILE"

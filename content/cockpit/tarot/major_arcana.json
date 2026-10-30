@@ -1,0 +1,172 @@
+[
+  {
+    "id": "000",
+    "name": "The Fool",
+    "sub": "Infinite Potential",
+    "type": "void",
+    "stats": {"atk": 10, "def": 10, "spd": 90},
+    "desc": "A blank slate. Beginning of a journey.",
+    "image": "text-indigo-400",
+    "icon": "Sparkles"
+  },
+  {
+    "id": "001",
+    "name": "The Magician",
+    "sub": "Manifestation",
+    "type": "fire",
+    "stats": {"atk": 85, "def": 40, "spd": 70},
+    "desc": "As above, so below. Converting will into reality.",
+    "image": "text-red-400",
+    "icon": "Flame"
+  },
+  {
+    "id": "002",
+    "name": "High Priestess",
+    "sub": "Intuition",
+    "type": "water",
+    "stats": {"atk": 20, "def": 95, "spd": 60},
+    "desc": "Mystery behind the veil. Trust the silence.",
+    "image": "text-blue-400",
+    "icon": "Droplets"
+  },
+  {
+    "id": "003",
+    "name": "The Empress",
+    "sub": "Creation",
+    "type": "wind",
+    "stats": {"atk": 40, "def": 80, "spd": 50},
+    "desc": "Fertility of mind. Nature in digital bloom.",
+    "image": "text-emerald-400",
+    "icon": "Sparkles"
+  },
+  {
+    "id": "004",
+    "name": "The Emperor",
+    "sub": "Authority",
+    "type": "electric",
+    "stats": {"atk": 80, "def": 80, "spd": 40},
+    "desc": "Structure and solidity. Foundation of empires.",
+    "image": "text-yellow-400",
+    "icon": "Zap"
+  },
+  {
+    "id": "005",
+    "name": "The Hierophant",
+    "sub": "Protocol",
+    "type": "void",
+    "stats": {"atk": 30, "def": 90, "spd": 30},
+    "desc": "Systemic knowledge. Bridge to divine API.",
+    "image": "text-indigo-200",
+    "icon": "Shield"
+  },
+  {
+    "id": "006",
+    "name": "The Lovers",
+    "sub": "Alignment",
+    "type": "fire",
+    "stats": {"atk": 60, "def": 40, "spd": 60},
+    "desc": "Harmony of opposing forces. Shared frequency.",
+    "image": "text-pink-400",
+    "icon": "Sparkles"
+  },
+  {
+    "id": "007",
+    "name": "The Chariot",
+    "sub": "Willpower",
+    "type": "wind",
+    "stats": {"atk": 75, "def": 60, "spd": 95},
+    "desc": "Victory through discipline. Moving forward.",
+    "image": "text-teal-400",
+    "icon": "Wind"
+  },
+  {
+    "id": "008",
+    "name": "Strength",
+    "sub": "Fortitude",
+    "type": "fire",
+    "stats": {"atk": 70, "def": 90, "spd": 40},
+    "desc": "Inner power control. Taming the glitch within.",
+    "image": "text-orange-400",
+    "icon": "Shield"
+  },
+  {
+    "id": "009",
+    "name": "The Hermit",
+    "sub": "Introspection",
+    "type": "void",
+    "stats": {"atk": 30, "def": 90, "spd": 20},
+    "desc": "Seeking light within. Solitude is wisdom.",
+    "image": "text-purple-400",
+    "icon": "Eye"
+  },
+  {
+    "id": "010",
+    "name": "Wheel of Fortune",
+    "sub": "Entropy",
+    "type": "electric",
+    "stats": {"atk": 50, "def": 50, "spd": 50},
+    "desc": "Spin of the system. Cycles of data.",
+    "image": "text-amber-400",
+    "icon": "RotateCcw"
+  },
+  {
+    "id": "011",
+    "name": "Justice",
+    "sub": "Equilibrium",
+    "type": "void",
+    "stats": {"atk": 60, "def": 60, "spd": 60},
+    "desc": "Fairness. Cause and effect in sync.",
+    "image": "text-blue-200",
+    "icon": "Shield"
+  },
+  {
+    "id": "013",
+    "name": "Death",
+    "sub": "Transformation",
+    "type": "dark",
+    "stats": {"atk": 99, "def": 10, "spd": 50},
+    "desc": "End of a cycle. Clearing the old.",
+    "image": "text-gray-400",
+    "icon": "Skull"
+  },
+  {
+    "id": "017",
+    "name": "The Star",
+    "sub": "Hope",
+    "type": "electric",
+    "stats": {"atk": 50, "def": 50, "spd": 80},
+    "desc": "Renewal. The calm after the storm.",
+    "image": "text-yellow-200",
+    "icon": "Star"
+  },
+  {
+    "id": "018",
+    "name": "The Moon",
+    "sub": "Illusion",
+    "type": "water",
+    "stats": {"atk": 40, "def": 30, "spd": 70},
+    "desc": "Navigating the shadows of the network.",
+    "image": "text-blue-100",
+    "icon": "Eye"
+  },
+  {
+    "id": "019",
+    "name": "The Sun",
+    "sub": "Radiance",
+    "type": "fire",
+    "stats": {"atk": 90, "def": 70, "spd": 80},
+    "desc": "Absolute clarity. Peak performance.",
+    "image": "text-yellow-500",
+    "icon": "Sparkles"
+  },
+  {
+    "id": "404",
+    "name": "The Glitch",
+    "sub": "Anomaly",
+    "type": "dark",
+    "stats": {"atk": 99, "def": 99, "spd": 99},
+    "desc": "Systematic error. Reality is a suggestion.",
+    "image": "text-pink-600",
+    "icon": "Zap"
+  }
+]

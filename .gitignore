@@ -5,6 +5,7 @@ dist/
 
 # dependencies
 node_modules/
+node_modules
 
 # logs
 npm-debug.log*
@@ -26,3 +27,4 @@ test-results/
 dist-export/
 packages/cockpit-core/target/
 .worktrees/
+repos/

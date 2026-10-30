@@ -9,6 +9,7 @@ import refresh from '../../../content/cockpit/actions/refresh.json' with { type:
 import nukeFlood from '../../../content/cockpit/actions/nuke-flood.json' with { type: 'json' };
 import closeSelected from '../../../content/cockpit/actions/close-selected.json' with { type: 'json' };
 import selectDuplicates from '../../../content/cockpit/actions/select-duplicate-copies.json' with { type: 'json' };
+import openTarot from '../../../content/cockpit/actions/open-tarot.json' with { type: 'json' };
 import { parseCockpit, type CockpitConfig, type ParsedCockpit } from './cockpit';
 
 export const TARGET_OVERRIDE_KEY = 'cockpit-target-override';
@@ -17,7 +18,7 @@ export function loadDefaultCockpit(targetOverride?: { owner: string; repo: strin
   return parseCockpit({
     config: configJson as CockpitConfig,
     lanes: [humanReady, humanDraft, botTests, botOther, external, botFlood],
-    actions: [refresh, nukeFlood, closeSelected, selectDuplicates],
+    actions: [refresh, nukeFlood, closeSelected, selectDuplicates, openTarot],
     targetOverride,
   });
 }

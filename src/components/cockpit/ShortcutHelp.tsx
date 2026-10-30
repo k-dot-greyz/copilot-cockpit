@@ -18,6 +18,8 @@ export function ShortcutHelp({ onClose }: { onClose: () => void }) {
           <span>Toggle select</span>
           <kbd className="kbd">I</kbd>
           <span>Inspect</span>
+          <kbd className="kbd">T</kbd>
+          <span>Tarot divination spread</span>
           <kbd className="kbd">?</kbd>
           <span>This help</span>
           <kbd className="kbd">Esc</kbd>
