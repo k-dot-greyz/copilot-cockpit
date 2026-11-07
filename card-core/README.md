@@ -34,13 +34,17 @@ python -m pytest card-core/tests -q                    # every row as its own te
 cargo test --manifest-path card-core/rust/Cargo.toml   # the Rust implementation, same suite
 ```
 
+**Rust parity in pytest** (`tests/test_protocol_ux_security_pr31.py`): Rust-specific cases run when a release `cardcore` binary exists. Point at one with `CARD_CORE_RUST_BIN=/path/to/cardcore`, or set `CARD_CORE_BUILD_RUST=1` to build `card-core/rust/target/release/cardcore` first (needs Rust ≥ the crate's `rust-version`, currently 1.85). Without either, those tests skip. CI's **Conformance (Python)** job skips them on purpose (no Rust toolchain). CI's **Conformance (Rust)** job builds the release binary, runs the full suite through `run_conformance.py --impl-cmd … protocol`, then re-runs this pytest file with `CARD_CORE_RUST_BIN` so hostile-stdin, no-exfil and dual-impl JSON equality actually gate merge.
+
+**Rust source mutants** (`tools/rust_mutants.py`): same idea as `run_conformance.py --selftest` for the Rust crate. The script builds `--offline`; run locally after a normal `cargo build`, or trigger **card-core-rust-mutants** (`workflow_dispatch`, optional name filter) which runs `cargo fetch` first. Expect a long run (rebuild per mutant).
+
 Useful flags: `--case TEXT` and `--op validate|lint|resolve|freshness|adapt` filter rows, `--list` prints row ids, `-v` shows every failure.
 
 ## How the suite is built
 
 - **Negatives are minimal pairs.** A case file has one passing input and a list of mutations. Each mutation changes one thing and names the error it must produce. A rule that no mutation exercises is a rule nobody tests.
 - **Goldens are authored, not generated.** Expected outputs and their digests are written independently of the implementation. `tools/digest.sh` computes a digest with `jq` and `sha256sum`; the suite checks it against Python's own. There is deliberately no flag that regenerates goldens from an implementation.
-- **The suite tests itself.** `--selftest` flips every expectation, corrupts digests, weakens the schemas and mutates the reference implementation's source. All of them must turn rows red. This found missing fixtures and real bugs while the suite was being written. `tools/rust_mutants.py` does the same to the Rust crate; it rebuilds once per mutant, so it is run by hand.
+- **The suite tests itself.** `--selftest` flips every expectation, corrupts digests, weakens the schemas and mutates the reference implementation's source. All of them must turn rows red. This found missing fixtures and real bugs while the suite was being written. `tools/rust_mutants.py` does the same to the Rust crate; it rebuilds once per mutant, so it is run by hand or via the **card-core-rust-mutants** `workflow_dispatch` job (which runs `cargo fetch`, because the script itself is `--offline`).
 
 ## Implementations
 

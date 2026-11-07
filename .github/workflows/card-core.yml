@@ -6,10 +6,12 @@ on:
     paths:
       - "card-core/**"
       - ".github/workflows/card-core.yml"
+      - ".github/workflows/card-core-rust-mutants.yml"
   pull_request:
     paths:
       - "card-core/**"
       - ".github/workflows/card-core.yml"
+      - ".github/workflows/card-core-rust-mutants.yml"
 
 jobs:
   conformance:
@@ -100,3 +102,9 @@ jobs:
       - name: Run conformance suite against the Rust binary
         working-directory: .
         run: python card-core/tools/run_conformance.py --impl-cmd "card-core/rust/target/release/cardcore protocol"
+
+      - name: Protocol UX/security pytest against the Rust binary
+        working-directory: .
+        env:
+          CARD_CORE_RUST_BIN: ${{ github.workspace }}/card-core/rust/target/release/cardcore
+        run: python -m pytest card-core/tests/test_protocol_ux_security_pr31.py -q

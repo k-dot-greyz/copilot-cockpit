@@ -1,0 +1,70 @@
+name: card-core-rust-mutants
+
+# Optional manual gate: rebuilds the Rust crate once per source mutant (~1h+).
+# Complements run_conformance.py --selftest for the Python reference.
+# rust_mutants.py builds --offline, so this job runs cargo fetch first.
+
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: Run mutants whose name contains this text (optional)
+        required: false
+        type: string
+      jobs:
+        description: Parallel conformance runners (builds stay serial)
+        required: false
+        default: "2"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  mutants:
+    name: Rust source mutants
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustc --version
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: card-core-rust-mutants-${{ runner.os }}-${{ hashFiles('card-core/rust/Cargo.lock') }}
+          restore-keys: card-core-rust-mutants-${{ runner.os }}-
+
+      - name: Fetch crate deps
+        run: cargo fetch --locked --manifest-path card-core/rust/Cargo.toml
+
+      - name: Setup Python (hosts the conformance harness)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: card-core/requirements.txt
+
+      - name: Install harness dependencies
+        run: pip install -r card-core/requirements.txt
+
+      - name: Run Rust mutants
+        env:
+          MUTANTS_JOBS: ${{ inputs.jobs }}
+          MUTANTS_ONLY: ${{ inputs.only }}
+        run: |
+          set -euo pipefail
+          args=(python card-core/tools/rust_mutants.py --jobs "$MUTANTS_JOBS")
+          if [ -n "${MUTANTS_ONLY:-}" ]; then
+            args+=(--only "$MUTANTS_ONLY")
+          fi
+          "${args[@]}"
